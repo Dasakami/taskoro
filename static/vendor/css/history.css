@@ -1,0 +1,327 @@
+
+/* History styles */
+
+.history-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Activity log */
+.activity-filters {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: rgba(18, 18, 42, 0.7);
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+}
+
+.filter-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.filter-select {
+    padding: 0.5rem;
+    background-color: rgba(10, 10, 19, 0.4);
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    color: var(--color-text-primary);
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    background-color: rgba(18, 18, 42, 0.7);
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.activity-header {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(102, 51, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.activity-info {
+    flex: 1;
+}
+
+.activity-type {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.activity-title {
+    font-weight: 600;
+}
+
+.activity-time {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+.activity-content {
+    padding: 1rem;
+}
+
+.activity-description {
+    margin-bottom: 1rem;
+}
+
+.activity-rewards {
+    display: flex;
+    gap: 1rem;
+}
+
+.reward-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: rgba(10, 10, 19, 0.4);
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+}
+
+/* Notes */
+.notes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.note-card {
+    background-color: rgba(18, 18, 42, 0.7);
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.note-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.note-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.note-title {
+    font-weight: 600;
+    margin: 0;
+}
+
+.note-category {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    background-color: rgba(102, 51, 255, 0.2);
+}
+
+.note-content {
+    padding: 1rem;
+    color: var(--color-text-secondary);
+}
+
+.note-footer {
+    padding: 0.75rem 1rem;
+    background-color: rgba(10, 10, 19, 0.5);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.note-date {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+.note-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Note form */
+.note-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: rgba(10, 10, 19, 0.4);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    color: var(--color-text-primary);
+}
+
+textarea.form-control {
+    min-height: 200px;
+    resize: vertical;
+}
+
+/* Achievements */
+.achievements-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.achievements-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: rgba(18, 18, 42, 0.7);
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+}
+
+.progress-text {
+    font-size: 1.1rem;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 10px;
+    background-color: rgba(10, 10, 19, 0.4);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--gradient-primary);
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.achievement-card {
+    background-color: rgba(18, 18, 42, 0.7);
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.achievement-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.achievement-card.acquired {
+    border-color: var(--color-success);
+    box-shadow: 0 0 15px rgba(51, 255, 153, 0.2);
+}
+
+.achievement-icon {
+    width: 60px;
+    height: 60px;
+    margin: 1.5rem auto;
+    background-color: rgba(102, 51, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.achievement-content {
+    padding: 1rem;
+    text-align: center;
+}
+
+.achievement-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.achievement-description {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+}
+
+.achievement-rewards {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background-color: rgba(10, 10, 19, 0.4);
+    border-radius: 0.5rem;
+}
+
+/* Responsive design */
+@media (max-width: 767px) {
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .activity-rewards {
+        flex-direction: column;
+    }
+    
+    .note-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .note-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+}

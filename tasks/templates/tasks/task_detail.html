@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}{{ task.title }} | Magic RPG Tracker{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/vendor/css/tasks.css">
+{% endblock %}
+
+{% block content %}
+<div class="task-detail-container">
+    <div class="task-detail-header reveal">
+        <div class="back-link">
+            <a href="{% url 'tasks:tasks' %}" class="btn-small">
+                <span class="back-icon">←</span>
+                <span class="back-text">К списку задач</span>
+            </a>
+        </div>
+        <h1 class="text-gradient">{{ task.title }}</h1>
+    </div>
+
+    <div class="task-detail-content">
+        <div class="task-detail-main card reveal">
+            <div class="card-header">
+                <div class="task-header-info">
+                    <div class="task-header-status">
+                        <span class="status-label">Статус:</span>
+                        <span class="status-value {% if task.is_completed %}completed{% elif task.is_overdue %}overdue{% endif %}">
+                            {% if task.is_completed %}✅
+                            {% elif task.is_overdue %}⚠️
+                            {% elif task.status == 'in_progress' %}⏳
+                            {% elif task.status == 'waiting' %}⏸️
+                            {% else %}🔄
+                            {% endif %}
+                            {{ task.get_status_display_custom }}
+                        </span>
+                    </div>
+                    {% if task.category %}
+                    <div class="task-header-category">
+                        <span class="category-badge">
+                            {{ task.category.name }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="task-header-actions">
+                    <a href="{% url 'tasks:task_edit' task.id %}" class="btn-small">
+                        <span class="action-icon">✏️</span>
+                        <span class="action-text">Редактировать</span>
+                    </a>
+                    <a href="{% url 'tasks:task_delete' task.id %}" class="btn-small btn-danger">
+                        <span class="action-icon">🗑️</span>
+                        <span class="action-text">Удалить</span>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="task-difficulty-badge" >
+                    {{ task.get_difficulty_display }}
+                </div>
+                
+                {% if task.description %}
+                <div class="task-description">
+                    {{ task.description|linebreaks }}
+                </div>
+                {% else %}
+                <div class="task-description empty">
+                    <p>Описание отсутствует</p>
+                </div>
+                {% endif %}
+                
+                <div class="task-metadata">
+                    <div class="metadata-item">
+                        <span class="metadata-label">Создано:</span>
+                        <span class="metadata-value">{{ task.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    
+                    {% if task.deadline %}
+                    <div class="metadata-item">
+                        <span class="metadata-label">Срок выполнения:</span>
+                        <span class="metadata-value {% if task.is_overdue %}overdue{% endif %}">
+                            {{ task.deadline|date:"d.m.Y H:i" }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="metadata-item">
+                        <span class="metadata-label">Примерное время:</span>
+                        <span class="metadata-value">{{ task.estimated_minutes }} мин.</span>
+                    </div>
+                    
+                    {% if task.is_completed and task.completed_at %}
+                    <div class="metadata-item">
+                        <span class="metadata-label">Выполнено:</span>
+                        <span class="metadata-value completed">{{ task.completed_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    
+                    {% if task.actual_minutes %}
+                    <div class="metadata-item">
+                        <span class="metadata-label">Фактическое время:</span>
+                        <span class="metadata-value">{{ task.actual_minutes }} мин.</span>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer">
+                {% if not task.is_completed %}
+                <a href="{% url 'tasks:task_complete' task.id %}?next={% url 'tasks:task_detail' task.id %}" class="btn pulse">
+                    <span class="btn-icon">✓</span>
+                    <span class="btn-text">Завершить задачу</span>
+                </a>
+                {% else %}
+                <button class="btn btn-secondary" disabled>
+                    <span class="btn-icon">✓</span>
+                    <span class="btn-text">Задача завершена</span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="task-detail-sidebar reveal">
+            <div class="sidebar-card card">
+                <div class="card-header">
+                    <h3>Вознаграждение</h3>
+                </div>
+                <div class="card-body">
+                    <div class="rewards-list">
+                        <div class="reward-item">
+                            <div class="reward-icon">⭐</div>
+                            <div class="reward-info">
+                                <div class="reward-title">Опыт</div>
+                                <div class="reward-value">
+                                    {% if task.difficulty == 'easy' %}20
+                                    {% elif task.difficulty == 'medium' %}40
+                                    {% elif task.difficulty == 'hard' %}80
+                                    {% elif task.difficulty == 'epic' %}150
+                                    {% else %}30
+                                    {% endif %} XP
+                                </div>
+                            </div>
+                        </div>
+                        <div class="reward-item">
+                            <div class="reward-icon">💰</div>
+                            <div class="reward-info">
+                                <div class="reward-title">Монеты</div>
+                                <div class="reward-value">
+                                    {% if task.difficulty == 'easy' %}5
+                                    {% elif task.difficulty == 'medium' %}10
+                                    {% elif task.difficulty == 'hard' %}20
+                                    {% elif task.difficulty == 'epic' %}40
+                                    {% else %}8
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% if task.deadline %}
+                        <div class="reward-item">
+                            <div class="reward-icon">⏱️</div>
+                            <div class="reward-info">
+                                <div class="reward-title">Бонус за своевременность</div>
+                                <div class="reward-value">+15 XP</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-card card">
+                <div class="card-header">
+                    <h3>Таймер</h3>
+                </div>
+                <div class="card-body">
+                    <div class="timer-display">
+                        <div class="timer-circle magic-circle">
+                            <div class="timer-value">00:00</div>
+                        </div>
+                        <div class="timer-controls">
+                            <button id="timer-start" class="btn-small">Старт</button>
+                            <button id="timer-pause" class="btn-small" disabled>Пауза</button>
+                            <button id="timer-reset" class="btn-small" disabled>Сброс</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Timer functionality
+        const timerDisplay = document.querySelector('.timer-value');
+        const startBtn = document.getElementById('timer-start');
+        const pauseBtn = document.getElementById('timer-pause');
+        const resetBtn = document.getElementById('timer-reset');
+        
+        let timerInterval;
+        let seconds = 0;
+        
+        function updateTimer() {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        startBtn.addEventListener('click', function() {
+            timerInterval = setInterval(updateTimer, 1000);
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            resetBtn.disabled = false;
+            
+            // Add pulsing effect to timer
+            document.querySelector('.timer-circle').classList.add('pulse');
+        });
+        
+        pauseBtn.addEventListener('click', function() {
+            clearInterval(timerInterval);
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            
+            // Remove pulsing effect
+            document.querySelector('.timer-circle').classList.remove('pulse');
+        });
+        
+        resetBtn.addEventListener('click', function() {
+            clearInterval(timerInterval);
+            seconds = 0;
+            timerDisplay.textContent = '00:00';
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            resetBtn.disabled = true;
+            
+            // Remove pulsing effect
+            document.querySelector('.timer-circle').classList.remove('pulse');
+        });
+    });
+</script>
+{% endblock %}

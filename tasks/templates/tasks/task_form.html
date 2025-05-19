@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_create %}Создание задачи{% else %}Редактирование задачи{% endif %} | Magic RPG Tracker{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/vendor/css/tasks.css">
+{% endblock %}
+
+{% block content %}
+<div class="task-form-container">
+    <div class="task-form-header reveal">
+        <div class="back-link">
+            <a href="{% if is_create %}{% url 'tasks:tasks' %}{% else %}{% url 'tasks:task_detail' task.id %}{% endif %}" class="btn-small">
+                <span class="back-icon">←</span>
+                <span class="back-text">{% if is_create %}К списку задач{% else %}К задаче{% endif %}</span>
+            </a>
+        </div>
+        <h1 class="text-gradient">{% if is_create %}Создание новой задачи{% else %}Редактирование задачи{% endif %}</h1>
+    </div>
+
+    <div class="task-form-content card reveal">
+        <div class="card-body">
+            <form method="post" class="magic-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_title" class="form-label">Название задачи</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="form-error">{{ form.title.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_description" class="form-label">Описание</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="form-error">{{ form.description.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_category" class="form-label">Категория</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="form-error">{{ form.category.errors }}</div>
+                        {% endif %}
+                        <small class="form-help">
+                            <a href="{% url 'tasks:category_create' %}" target="_blank" class="help-link">+ Создать новую категорию</a>
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_difficulty" class="form-label">Сложность</label>
+                        {{ form.difficulty }}
+                        {% if form.difficulty.errors %}
+                            <div class="form-error">{{ form.difficulty.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_deadline" class="form-label">Срок выполнения</label>
+                        {{ form.deadline }}
+                        {% if form.deadline.errors %}
+                            <div class="form-error">{{ form.deadline.errors }}</div>
+                        {% endif %}
+                        <small class="form-help">Получите бонус за выполнение в срок!</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_estimated_minutes" class="form-label">Примерное время (мин.)</label>
+                        {{ form.estimated_minutes }}
+                        {% if form.estimated_minutes.errors %}
+                            <div class="form-error">{{ form.estimated_minutes.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn">
+                        {% if is_create %}Создать задачу{% else %}Сохранить изменения{% endif %}
+                    </button>
+                    <a href="{% if is_create %}{% url 'tasks:tasks' %}{% else %}{% url 'tasks:task_detail' task.id %}{% endif %}" class="btn btn-secondary">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

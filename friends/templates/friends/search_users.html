@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Find Friends{% endblock %}
+{% block extra_css %} <link rel="stylesheet" href="{% static 'vendor/css/friends.css' %}"> {% endblock %}
+{% block content %}
+<div class="friends-container">
+    <div class="friends-header">
+        <h1><span class="icon-search"></span> Find Friends</h1>
+        <div class="header-actions">
+            <a href="{% url 'friends:friends' %}" class="btn">
+                <span class="icon-users"></span> My Friends
+            </a>
+            <a href="{% url 'friends:friend_requests' %}" class="btn btn-secondary">
+                <span class="icon-bell"></span> Friend Requests
+            </a>
+        </div>
+    </div>
+    
+    <div class="search-section card">
+        <div class="card-header">
+            <h2>Search Users</h2>
+        </div>
+        <div class="card-body">
+            <form method="get" action="{% url 'friends:search_users' %}" class="search-form">
+                <input type="text" name="q" value="{{ query }}" class="search-input" placeholder="Search by username or title...">
+                <button type="submit" class="btn">
+                    <span class="icon-search"></span> Search
+                </button>
+            </form>
+            
+            {% if query %}
+                <div class="search-results">
+                    {% if users %}
+                        {% for user in users %}
+                            <div class="user-card">
+                                <div class="user-header">
+                                    <div class="user-avatar">
+                                        {% if user.profile.avatar %}
+                                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}">
+                                        {% else %}
+                                            <img src="{% static 'images/default-avatar.png' %}" alt="{{ user.username }}">
+                                        {% endif %}
+                                    </div>
+                                    <div class="user-info">
+                                        <h3 class="user-name">{{ user.username }}</h3>
+                                        {% if user.profile.title %}
+                                            <div class="user-title">{{ user.profile.title }}</div>
+                                        {% endif %}
+                                        <div class="user-level">Level {{ user.profile.level|default:"1" }}</div>
+                                    </div>
+                                </div>
+                                <div class="user-actions">
+                                    <a href="{% url 'users:profile:view_other_profile' username=user.username %}" class="btn btn-accent">
+                                        <span class="icon-user"></span> Profile
+                                    </a>
+                                    
+                                    {% if user in request.user.friends.all %}
+                                        <span class="badge badge-success">
+                                            <span class="icon-check"></span> Friend
+                                        </span>
+                                    {% else %}
+                                            {% if user.id in sent %}
+                                                <span class="badge badge-info">
+                                                    <span class="icon-clock"></span> Request Sent
+                                                </span>
+                                            {% elif user.id in received %}
+                                                <a href="{% url 'friends:accept_friend_request' user.id %}" class="btn">
+                                                    <span class="icon-user-plus"></span> Accept
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'friends:send_friend_request' user.id %}" class="btn">
+                                                    <span class="icon-user-plus"></span> Add Friend
+                                                </a>
+                                            {% endif %}
+                                    
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state text-center">
+                            <div class="empty-icon">
+                                <span class="icon-search"></span>
+                            </div>
+                            <h3>No Users Found</h3>
+                            <p>Try a different search term.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="empty-state text-center">
+                    <div class="empty-icon">
+                        <span class="icon-search"></span>
+                    </div>
+                    <h3>Search for Friends</h3>
+                    <p>Enter a username or title to find new friends.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="magic-particles"></div>
+{% endblock %}

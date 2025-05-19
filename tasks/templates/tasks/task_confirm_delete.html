@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Удаление задачи | Magic RPG Tracker{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/vendor/css/tasks.css">
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="delete-header reveal">
+        <div class="back-link">
+            <a href="{% url 'tasks:task_detail' task.id %}" class="btn-small">
+                <span class="back-icon">←</span>
+                <span class="back-text">К задаче</span>
+            </a>
+        </div>
+        <h1 class="text-gradient">Удаление задачи</h1>
+    </div>
+
+    <div class="delete-content card reveal">
+        <div class="card-body">
+            <div class="delete-warning">
+                <div class="warning-icon">⚠️</div>
+                <p class="warning-text">Вы действительно хотите удалить задачу "{{ task.title }}"?</p>
+                <p class="warning-subtext">Это действие нельзя будет отменить.</p>
+            </div>
+            
+            <div class="task-preview">
+                <div class="preview-header">
+                    <h3>Информация о задаче:</h3>
+                </div>
+                <div class="preview-content">
+                    <div class="preview-item">
+                        <span class="preview-label">Название:</span>
+                        <span class="preview-value">{{ task.title }}</span>
+                    </div>
+                    {% if task.category %}
+                    <div class="preview-item">
+                        <span class="preview-label">Категория:</span>
+                        <span class="preview-value">{{ task.category.name }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="preview-item">
+                        <span class="preview-label">Сложность:</span>
+                        <span class="preview-value">{{ task.get_difficulty_display }}</span>
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-label">Статус:</span>
+                        <span class="preview-value">{{ task.get_status_display }}</span>
+                    </div>
+                    {% if task.is_completed %}
+                    <div class="preview-item">
+                        <span class="preview-label">Выполнено:</span>
+                        <span class="preview-value">Да</span>
+                    </div>
+                    {% endif %}
+                    {% if task.deadline %}
+                    <div class="preview-item">
+                        <span class="preview-label">Срок:</span>
+                        <span class="preview-value">{{ task.deadline|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="delete-actions">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Удалить задачу</button>
+                    <a href="{% url 'tasks:task_detail' task.id %}" class="btn btn-secondary">Отмена</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

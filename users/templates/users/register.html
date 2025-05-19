@@ -1,0 +1,76 @@
+{% extends "base_no_sidebar.html" %}
+
+{% block title %}Регистрация | Magic RPG Tracker{% endblock %}
+
+{% block extra_css %}
+
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-content">
+        <div class="login-header reveal">
+            <h1 class="text-gradient">Начало пути Охотника</h1>
+            <p class="subtitle">Зарегистрируйтесь, чтобы получить доступ к магическим способностям</p>
+        </div>
+        
+        <div class="login-form-container magic-circle reveal">
+            <form method="post" class="login-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_username" class="form-label">Имя пользователя</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="form-error">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_email" class="form-label">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="form-error">{{ form.email.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password1" class="form-label">Пароль</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <div class="form-error">{{ form.password1.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password2" class="form-label">Подтверждение пароля</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <div class="form-error">{{ form.password2.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-lg">Начать путь</button>
+                </div>
+                
+                {% if form.non_field_errors %}
+                    <div class="form-error">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </form>
+            
+            <div class="login-footer">
+                <p>Уже есть аккаунт? <a href="{% url 'users:login' %}" class="text-gradient">Войти в систему</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="login-background">
+        <div class="magic-runes"></div>
+        <div class="magic-portal"></div>
+    </div>
+</div>
+{% endblock %}

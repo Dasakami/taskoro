@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+  {% if is_create %}Создать категорию{% else %}Редактировать категорию{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'vendor/css/ta.css' %}">
+{% endblock %}
+
+{% block content %}
+  <h1>
+    {% if is_create %}Создать категорию{% else %}Редактировать категорию{% endif %}
+  </h1>
+
+  <form method="post" class="form-group">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <label class="form-label" for="{{ form.name.id_for_label }}">Название</label>
+    {{ form.name }}
+
+    <label class="form-label" for="{{ form.description.id_for_label }}">Описание</label>
+    {{ form.description }}
+
+    <label class="form-label" for="{{ form.color.id_for_label }}">Цвет</label>
+    {{ form.color }}
+
+    <button type="submit" class="btn btn-accent">
+      {% if is_create %}Создать{% else %}Обновить{% endif %}
+    </button>
+    <a href="{% url 'tasks:categories' %}" class="btn btn-secondary">Отмена</a>
+  </form>
+{% endblock %}

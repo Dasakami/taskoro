@@ -1,0 +1,122 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Taskoro — Игровая прокачка дисциплины и привычек{% endblock %}</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/vendor/css/reset.css">
+    <link rel="stylesheet" href="/static/vendor/css/b.css">
+    <link rel="stylesheet" href="/static/vendor/css/animations.css">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    {% block extra_css %}{% endblock %}
+    {% block seo %}
+<meta name="description" content="Taskoro — игровой трекер задач и привычек в стиле Solo Leveling. Развивай себя, соревнуйся, побеждай!">
+<meta name="keywords" content="дисциплина, трекер задач, саморазвитие, привычки, игра, мотивация, рейтинг, дуэли, Taskoro">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Dan Dasakami">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Taskoro — прокачай дисциплину и привычки">
+<meta property="og:description" content="Taskoro — игровой трекер задач и привычек в стиле Solo Leveling. Развивай себя, соревнуйся, побеждай!">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:image" content="">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Taskoro — прокачай дисциплину и привычки">
+<meta name="twitter:description" content="Taskoro — игровой трекер задач и привычек в стиле Solo Leveling. Развивай себя, соревнуйся, побеждай!">
+<meta name="twitter:image" content="">
+{% endblock %}
+
+</head>
+<body>
+    <div class="app-container">
+        {% if user.is_authenticated %}
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <a href="{% url 'users:profile:profile' %}" class="user-avatar">
+                    <div class="avatar-frame">
+                        {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="Avatar">
+                        {% else %}
+                        <img src="{{ '/static/images/default_avatar.png' }}" alt="Avatar">
+                        {% endif %}
+                    </div>
+                </a>
+                <div class="user-info">
+                    <h3 class="username">{{ user.username }}</h3>
+                    <div class="level">Уровень: {{ user.profile.level|default:"1" }}</div>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'main' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Главная</span>
+                </a></li>
+                <li><a href="{% url 'tasks:tasks' %}" class="nav-link {% if request.resolver_match.url_name == 'tasks' %}active{% endif %}">
+                    <span class="nav-icon">✅</span>
+                    <span class="nav-text">Задачи</span>
+                </a></li>
+                <li><a href="{% url 'tournaments:tournaments' %}" class="nav-link {% if request.resolver_match.url_name == 'tournaments' %}active{% endif %}">
+                    <span class="nav-icon">🏆</span>
+                    <span class="nav-text">Турнир</span>
+                </a></li>
+                <li><a href="{% url 'duels:duels' %}" class="nav-link {% if request.resolver_match.url_name == 'duels' %}active{% endif %}">
+                    <span class="nav-icon">⚔️</span>
+                    <span class="nav-text">Дуэль</span>
+                </a></li>
+                <li><a href="{% url 'friends:friends' %}" class="nav-link {% if request.resolver_match.url_name == 'friends' %}active{% endif %}">
+                    <span class="nav-icon">🧑‍🤝‍🧑</span>
+                    <span class="nav-text">Друзья</span>
+                </a></li>
+                <li><a href="{% url 'history:achievements' %}" class="nav-link {% if request.resolver_match.url_name == 'achievements' %}active{% endif %}">
+                    <span class="nav-icon">🏅</span>
+                    <span class="nav-text">Достижения</span>
+                </a></li>
+                <li><a href="{% url 'shop:shop' %}" class="nav-link {% if request.resolver_match.url_name == 'shop' %}active{% endif %}">
+                    <span class="nav-icon">🛒</span>
+                    <span class="nav-text">Магазин</span>
+                </a></li>
+                <li><a href="{% url 'history:history' %}" class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}">
+                    <span class="nav-icon">📜</span>
+                    <span class="nav-text">История</span>
+                </a></li>
+                <li><a href="{% url 'note:notes_list' %}" class="nav-link {% if request.resolver_match.url_name == 'notes' %}active{% endif %}">
+                    <span class="nav-icon">🧠</span>
+                    <span class="nav-text">Заметки</span>
+                </a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <form action="{% url 'users:logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">
+                        <span class="logout-icon">🚪</span>
+                    
+                    <span class="logout-text">Выйти</span>
+                        </button>
+                </form>
+            </div>
+        </nav>
+        {% endif %}
+        
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+    <!-- Magic particle effects overlay -->
+    <div class="magic-particles"></div>
+    
+    <!-- Scripts -->
+    <script src="/static/vendor/js/animations.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

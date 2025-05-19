@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ item.name }} - Magic Shop{% endblock %}
+{% block extra_css %} <link rel="stylesheet" href="{% static 'vendor/css/shop.css' %}"> {% endblock %}
+{% block content %}
+<div class="shop-container">
+    <div class="item-detail-container">
+        <div class="item-detail-header">
+            <h1>{{ item.name }}</h1>
+            <div class="header-actions">
+                <a href="{% url 'shop:shop_category' item.category %}" class="btn">
+                    <span class="icon-arrow-left"></span> Back to {{ item.get_category_display }}
+                </a>
+            </div>
+        </div>
+
+        <div class="item-detail-content">
+            <div class="item-detail-image">
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                {% else %}
+                    <img src="{% static 'images/default-item.png' %}" alt="{{ item.name }}">
+                {% endif %}
+            </div>
+
+            <div class="item-detail-info">
+                <div class="item-description">
+                    {{ item.description }}
+                </div>
+
+                <div class="item-stats">
+                    <div class="stat-group">
+                        <span class="stat-label">Category:</span>
+                        <span class="stat-value">{{ item.get_category_display }}</span>
+                    </div>
+                    <div class="stat-group">
+                        <span class="stat-label">Level Required:</span>
+                        <span class="stat-value">{{ item.level_required }}</span>
+                    </div>
+                    {% if item.attributes %}
+                        <div class="stat-group">
+                            <span class="stat-label">Attributes:</span>
+                            <div class="attribute-list">
+                                {% for attribute in item.attributes %}
+                                    <div class="attribute-item">
+                                        <span class="attribute-icon icon-{{ attribute.type }}"></span>
+                                        <span class="attribute-value">{{ attribute.value }}</span>
+                                        <span class="attribute-name">{{ attribute.name }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="purchase-section">
+                    <div class="price-display">
+                        <span class="price-icon">
+                            {% if item.currency == 'coins' %}
+                                <span class="icon-coin"></span>
+                            {% else %}
+                                <span class="icon-diamond"></span>
+                            {% endif %}
+                        </span>
+                        <span class="price-value">{{ item.price }}</span>
+                        <span class="price-currency">{{ item.get_currency_display }}</span>
+                    </div>
+
+                    <form method="post" action="{% url 'shop:purchase_item' item.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-accent">
+                            <span class="icon-shopping-cart"></span> Purchase
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="magic-particles"></div>
+{% endblock %}

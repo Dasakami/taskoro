@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Magic RPG Tracker{% endblock %}</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/vendor/css/reset.css">
+    <link rel="stylesheet" href="/static/vendor/css/b.css">
+    <link rel="stylesheet" href="/static/vendor/css/animations.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-container full-page">
+        <main class="content full-width">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+    <!-- Magic particle effects overlay -->
+    <div class="magic-particles"></div>
+    
+    <!-- Scripts -->
+    <script src="/static/vendor/js/animations.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

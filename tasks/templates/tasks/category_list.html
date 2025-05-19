@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Категории задач{% endblock %}
+
+{% block content %}
+<h1>Категории задач</h1>
+
+<a href="{% url 'tasks:category_create' %}" class="btn btn-primary mb-3">Создать категорию</a>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Название</th>
+      <th>Описание</th>
+      <th>Цвет</th>
+      <th>Задачи</th>
+      <th>Действия</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for category in categories %}
+      <tr>
+        <td>{{ category.name }}</td>
+        <td>{{ category.description }}</td>
+        <td>
+          <div style="width: 20px; height: 20px; background-color: {{ category.color }}; border: 1px solid #ccc; display: inline-block;"></div>
+        </td>
+        <td>{{ category.tasks_count }}</td>
+        <td>
+          <a href="{% url 'tasks:category_edit' category.id %}" class="btn btn-sm btn-warning">Редактировать</a>
+          <a href="{% url 'tasks:category_delete' category.id %}" class="btn btn-sm btn-danger">Удалить</a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="5">Категории не найдены.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

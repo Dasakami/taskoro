@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Дуэли | Magic RPG Tracker{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/vendor/css/duels.css">
+{% endblock %}
+
+{% block content %}
+<div class="duels-container">
+    <div class="duels-header reveal">
+        <h1 class="text-gradient">Дуэли</h1>
+        <p class="duels-description">Вызывайте друзей на дуэль, соревнуйтесь в выполнении задач и получайте награды!</p>
+    </div>
+    <div class="duels-actions">
+        <a href="{% url 'duels:choose_opponent' %}" class="btn">Создать дуэль</a>
+    </div>
+    
+
+    <div class="duels-sections">
+        <!-- Active Duels -->
+        <div class="active-duels card reveal">
+            <div class="card-header">
+                <h2>Активные дуэли</h2>
+            </div>
+            <div class="card-body">
+                {% if active_duels %}
+                    {% for duel in active_duels %}
+                    <div class="duel-card">
+                        <div class="duel-header">
+                            <h3 class="duel-title">Дуэль с {{ duel.opponent.username }}</h3>
+                            <span class="duel-status active">В процессе</span>
+                        </div>
+                        <div class="duel-content">
+                            <div class="duel-players">
+                                <div class="player-info">
+                                    <div class="player-avatar">
+                                        {% if duel.challenger.profile.avatar %}
+                                        <img src="{{ duel.challenger.profile.avatar.url|default:'/static/images/default_avatar.png' }}" alt="Avatar">
+                                        {% else %}
+                                        <img src="/static/images/default_avatar.png" alt="Avatar">
+                                        {% endif %}
+                                    </div>
+                                    <div class="player-name">{{ duel.challenger.username }}</div>
+                                </div>
+                                <div class="vs-badge">VS</div>
+                                <div class="player-info">
+                                    <div class="player-avatar">
+                                        {% if duel.opponent.profile.avatar %}
+                                        <img src="{{ duel.opponent.profile.avatar.url|default:'/static/images/default_avatar.png' }}" alt="Avatar">
+                                        {% else %}
+                                        <img src="/static/images/default_avatar.png" alt="Avatar">
+                                        {% endif %}
+                                    </div>
+                                    <div class="player-name">{{ duel.opponent.username }}</div>
+                                </div>
+                            </div>
+                            <div class="duel-task">
+                                <div class="task-name">{{ duel.task.title }}</div>
+                                <div class="task-description">{{ duel.task.description|truncatewords:30 }}</div>
+                            </div>
+                            {% if duel.coins_stake > 0 %}
+                            <div class="duel-stakes">
+                                <div class="stake-item">
+                                    <span class="stake-icon">💰</span>
+                                    <span class="stake-value">{{ duel.coins_stake|multiply:2 }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="duel-progress">
+                                <div class="progress-item">
+                                    <span class="progress-status {% if duel.progress.first.completed %}completed{% else %}pending{% endif %}">
+                                        {% if duel.progress.first.completed %}✓{% else %}⏳{% endif %}
+                                    </span>
+                                    <span>{{ duel.challenger.username }}</span>
+                                </div>
+                                <div class="progress-item">
+                                    <span class="progress-status {% if duel.progress.last.completed %}completed{% else %}pending{% endif %}">
+                                        {% if duel.progress.last.completed %}✓{% else %}⏳{% endif %}
+                                    </span>
+                                    <span>{{ duel.opponent.username }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="duel-actions">
+                            <a href="{% url 'duels:duel_detail' duel.id %}" class="btn">Подробнее</a>
+                            {% if not duel.progress.first.completed %}
+                            <a href="{% url 'duels:complete_duel_task' duel.id %}" class="btn btn-secondary">Завершить задачу</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <p>У вас нет активных дуэлей. Вызовите друга на дуэль!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pending Duels -->
+        <div class="pending-duels card reveal">
+            <div class="card-header">
+                <h2>Ожидают ответа</h2>
+            </div>
+            <div class="card-body">
+                {% if pending_duels %}
+                    {% for duel in pending_duels %}
+                    <div class="duel-card">
+                        <div class="duel-header">
+                            <h3 class="duel-title">Вызов от {{ duel.challenger.username }}</h3>
+                            <span class="duel-status pending">Ожидает</span>
+                        </div>
+                        <div class="duel-content">
+                            <div class="duel-task">
+                                <div class="task-name">{{ duel.task.title }}</div>
+                                <div class="task-description">{{ duel.task.description|truncatewords:30 }}</div>
+                            </div>
+                            {% if duel.coins_stake > 0 %}
+                            <div class="duel-stakes">
+                                <div class="stake-item">
+                                    <span class="stake-icon">💰</span>
+                                    <span class="stake-value">{{ duel.coins_stake|multiply:2 }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="duel-actions">
+                            <a href="{% url 'duels:accept_duel' duel.id %}" class="btn">Принять вызов</a>
+                            <a href="{% url 'duels:decline_duel' duel.id %}" class="btn btn-secondary">Отклонить</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <p>Нет ожидающих ответа дуэлей.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Completed Duels -->
+        <div class="completed-duels card reveal">
+            <div class="card-header">
+                <h2>Завершенные дуэли</h2>
+            </div>
+            <div class="card-body">
+                {% if completed_duels %}
+                    {% for duel in completed_duels %}
+                    <div class="duel-card">
+                        <div class="duel-header">
+                            <h3 class="duel-title">
+                                {{ duel.challenger.username }} vs {{ duel.opponent.username }}
+                            </h3>
+                            <span class="duel-status completed">Завершена</span>
+                        </div>
+                        <div class="duel-content">
+                            <div class="duel-result">
+                                <div class="result-text">
+                                    Победитель: <strong>{{ duel.winner.username }}</strong>
+                                </div>
+                                {% if duel.coins_stake > 0 %}
+                                <div class="stake-result">
+                                    Награда: <span class="stake-value">{{ duel.coins_stake|multiply:2 }} 💰</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="duel-actions">
+                            <a href="{% url 'duels:duel_detail' duel.id %}" class="btn btn-secondary">Подробнее</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <p>У вас пока нет завершенных дуэлей.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

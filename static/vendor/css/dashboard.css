@@ -1,0 +1,482 @@
+/* Dashboard styles */
+
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+    margin-bottom: 1.5rem;
+}
+
+.player-stats {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    background-color: rgba(18, 18, 42, 0.7);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+}
+
+.player-level {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.level-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+.level-number {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--color-text-primary);
+}
+
+.level-text {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    letter-spacing: 1px;
+}
+
+.player-exp {
+    flex: 1;
+}
+
+.exp-bar-container {
+    width: 100%;
+    margin-bottom: 0.25rem;
+}
+
+.exp-text {
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+.player-currencies {
+    display: flex;
+    gap: 1rem;
+}
+
+.currency-item {
+    background-color: rgba(10, 10, 19, 0.6);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--color-border);
+}
+
+.currency-icon {
+    font-size: 1.25rem;
+}
+
+.currency-amount {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Dashboard grid layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.dashboard-section {
+    margin-bottom: 0;
+}
+
+.daily-mission {
+    grid-column: 1 / 3;
+}
+
+.motivation-quote {
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
+}
+
+.progress-chart {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+}
+
+.recent-tasks {
+    grid-column: 2 / 4;
+    grid-row: 2 / 3;
+}
+
+.active-tournaments {
+    grid-column: 1 / 4;
+    grid-row: 3 / 4;
+}
+
+/* Daily mission section */
+.mission-content {
+    margin-bottom: 1.5rem;
+}
+
+.mission-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-accent-primary);
+}
+
+.mission-description {
+    margin-bottom: 1rem;
+    color: var(--color-text-secondary);
+}
+
+.mission-rewards {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.reward-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.reward-icon {
+    font-size: 1.25rem;
+}
+
+.reward-value {
+    font-weight: 700;
+}
+
+.mission-action {
+    text-align: center;
+}
+
+/* Motivation quote */
+.quote-container {
+    padding: 1.5rem;
+    background-color: rgba(10, 10, 19, 0.4);
+    border-radius: 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.quote-container::before {
+    content: '"';
+    position: absolute;
+    top: -20px;
+    left: 10px;
+    font-size: 6rem;
+    font-family: serif;
+    opacity: 0.1;
+    color: var(--color-accent-primary);
+}
+
+.quote-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+.quote-author {
+    text-align: right;
+    color: var(--color-accent-secondary);
+    font-size: 0.9rem;
+}
+
+/* Progress chart */
+.crystal-ball {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding: 1rem;
+}
+
+.crystal-ball::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(102, 51, 255, 0.1), transparent);
+    border-radius: 50%;
+    z-index: -1;
+}
+
+.daily-stats {
+    display: flex;
+    width: 100%;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    flex: 1;
+    background-color: rgba(10, 10, 19, 0.5);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid var(--color-border);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: var(--color-accent-primary);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+.progress-circle-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+.progress-circle {
+    height: 100%;
+    position: relative;
+}
+
+.circular-chart {
+    width: 100%;
+    height: 100%;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 2.8;
+}
+
+.circle {
+    fill: none;
+    stroke: var(--color-accent-primary);
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+}
+
+@keyframes progress {
+    0% {
+        stroke-dasharray: 0, 100;
+    }
+}
+
+.percentage {
+    fill: var(--color-text-primary);
+    font-size: 0.5rem;
+    text-anchor: middle;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* Task list */
+.task-list {
+    margin: 0;
+    padding: 0;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.task-item:last-child {
+    border-bottom: none;
+}
+
+.task-status {
+    margin-right: 1rem;
+}
+
+.status-icon {
+    font-size: 1.2rem;
+}
+
+.task-info {
+    flex: 1;
+}
+
+.task-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.task-date {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+.task-item.completed .task-title {
+    text-decoration: line-through;
+    color: var(--color-text-secondary);
+}
+
+.task-action {
+    margin-left: 1rem;
+}
+
+.btn-small {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: rgba(102, 51, 255, 0.2);
+    border-radius: 0.25rem;
+    color: var(--color-text-primary);
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.btn-small:hover {
+    background-color: rgba(102, 51, 255, 0.4);
+    box-shadow: 0 0 10px rgba(102, 51, 255, 0.4);
+}
+
+/* Tournament list */
+.tournament-list {
+    margin: 0;
+    padding: 0;
+}
+
+.tournament-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    background-color: rgba(10, 10, 19, 0.4);
+}
+
+.tournament-item:last-child {
+    margin-bottom: 0;
+}
+
+.tournament-info {
+    flex: 1;
+}
+
+.tournament-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+}
+
+.tournament-deadline {
+    font-size: 0.85rem;
+    color: var(--color-accent-secondary);
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-secondary);
+}
+
+.empty-state p {
+    margin-bottom: 1rem;
+}
+
+/* Responsive design */
+@media (max-width: 1199px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .daily-mission {
+        grid-column: 1 / 3;
+    }
+    
+    .motivation-quote {
+        grid-column: 1 / 2;
+        grid-row: 2 / 3;
+    }
+    
+    .progress-chart {
+        grid-column: 2 / 3;
+        grid-row: 2 / 3;
+    }
+    
+    .recent-tasks {
+        grid-column: 1 / 3;
+        grid-row: 3 / 4;
+    }
+    
+    .active-tournaments {
+        grid-column: 1 / 3;
+        grid-row: 4 / 5;
+    }
+}
+
+@media (max-width: 767px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .daily-mission, 
+    .motivation-quote, 
+    .progress-chart, 
+    .recent-tasks, 
+    .active-tournaments {
+        grid-column: 1;
+    }
+    
+    .daily-mission {
+        grid-row: 1;
+    }
+    
+    .motivation-quote {
+        grid-row: 2;
+    }
+    
+    .progress-chart {
+        grid-row: 3;
+    }
+    
+    .recent-tasks {
+        grid-row: 4;
+    }
+    
+    .active-tournaments {
+        grid-row: 5;
+    }
+    
+    .player-stats {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .player-currencies {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

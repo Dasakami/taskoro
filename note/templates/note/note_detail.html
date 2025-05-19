@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'vendor/css/notes.css' %}">
+{% endblock %}
+
+{% block title %}{{ note.title }} | Заметка{% endblock %}
+
+{% block content %}
+<article class="note-detail">
+  <header class="note-header">
+    <h1 class="note-title">{{ note.title }}</h1>
+    <div class="note-meta">
+      <p><strong>Категория:</strong> {{ note.category.title|default:"Без категории" }}</p>
+      
+      <p><strong>Прикреплено к задаче:</strong> 
+        {% if note.task %}
+          <a href="{% url 'tasks:task_detail' note.task.pk %}">{{ note.task.title }}</a>
+        {% else %}
+          Нет задачи
+        {% endif %}
+      </p>
+      <p><small>Создано: {{ note.created_at|date:"d.m.Y H:i" }}, обновлено: {{ note.updated_at|date:"d.m.Y H:i" }}</small></p>
+    </div>
+  </header>
+
+  <section class="note-content markdown-content">
+    {{ note.content|linebreaksbr }}
+  </section>
+
+  <footer class="note-footer">
+    <a class="btn btn-primary" href="{% url 'note:note_edit' note.pk %}">Редактировать заметку</a>
+    <a class="btn btn-secondary" href="{% url 'note:notes_list' %}">Вернуться к списку заметок</a>
+  </footer>
+</article>
+{% endblock %}

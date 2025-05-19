@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Профиль | Magic RPG Tracker{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/vendor/css/profil.css">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header reveal">
+        <div class="profile-bg"></div>
+        <div class="profile-avatar-container">
+            <div class="profile-frame magic-aura">
+                {% if profile.avatar %}
+                <img src="{{ profile.avatar.url|default:'/static/images/default_avatar.png' }}" alt="Avatar" class="profile-avatar">
+                {% else %}
+                <img src="/static/images/default_avatar.png" alt="Avatar" class="profile-avatar">
+                {% endif %}
+            </div>
+            <h3 class="profile-title">{{ profile.title|default:"Начинающий Охотник" }}</h3>
+        </div>
+        <div class="profile-info">
+            <h1 class="username text-gradient">{{ user.username }}</h1>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Уровень</div>
+                    <div class="stat-value">{{ profile.level }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Серия</div>
+                    <div class="stat-value">{{ profile.streak }} дней</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Монеты</div>
+                    <div class="stat-value">{{ profile.coins }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Кристаллы</div>
+                    <div class="stat-value">{{ profile.gems }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'users:profile:edit_profile' %}" class="btn">Редактировать профиль</a>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="profile-section card reveal">
+            <div class="card-header">
+                <h2>Опыт и прогресс</h2>
+            </div>
+            <div class="card-body">
+                <div class="exp-progress">
+                    <div class="progress progress-animated">
+                        <div class="progress-bar"  data-value="{{ profile.experience }}" data-max="{{ profile.experience_needed }}"></div>
+                    </div>
+                    <div class="exp-text">{{ profile.experience }} / {{ profile.experience_needed }} XP</div>
+                </div>
+                <div class="level-info">
+                    <p>Набирайте опыт, выполняя задачи, участвуя в турнирах и дуэлях!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section card reveal">
+            <div class="card-header">
+                <h2>Медали и достижения</h2>
+            </div>
+            <div class="card-body">
+                {% if medals %}
+                <div class="medals-grid">
+                    {% for medal in medals %}
+                    <div class="medal-item {{ medal.medal_type }}">
+                        <div class="medal-icon">🏅</div>
+                        <div class="medal-name">{{ medal.name }}</div>
+                        <div class="medal-desc">{{ medal.description }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <p>Пока нет полученных медалей. Завершите задачи и выиграйте турниры, чтобы получить их!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="profile-section card reveal">
+            <div class="card-header">
+                <h2>Настройки</h2>
+            </div>
+            <div class="card-body">
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <div class="setting-label">Тема интерфейса</div>
+                        <div class="setting-value">{{ profile.get_theme_preference_display }}</div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">Язык</div>
+                        <div class="setting-value">Русский</div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">Уведомления</div>
+                        <div class="setting-value">Включены</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section card reveal">
+            <div class="card-header">
+                <h2>О себе</h2>
+            </div>
+            <div class="card-body">
+                {% if profile.bio %}
+                <div class="bio-text">
+                    {{ profile.bio }}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <p>Расскажите о себе, добавив информацию при редактировании профиля.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

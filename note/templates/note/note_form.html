@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'vendor/css/notes.css' %}">
+{% endblock %}
+
+{% block title %}
+  {% if form.instance.pk %}Редактирование заметки{% else %}Создание заметки{% endif %} | Magic RPG Tracker
+{% endblock %}
+
+{% block content %}
+<section class="note-container">
+
+  <header class="note-header">
+    <h1 class="note-title">
+      {% if form.instance.pk %}
+        Редактирование заметки
+      {% else %}
+        Создание новой заметки
+      {% endif %}
+    </h1>
+    <p class="note-subtitle">
+      Здесь вы можете {% if form.instance.pk %}изменить существующую{% else %}создать новую{% endif %} заметку. Используйте поле ниже для ввода заголовка и содержимого заметки. Вы также можете выбрать категорию и связать заметку с задачей, если это необходимо.
+    </p>
+  </header>
+
+  <form method="post" class="note-form" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="form-errors">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label for="{{ form.title.id_for_label }}">Заголовок</label>
+      {{ form.title }}
+      {% if form.title.errors %}
+      <div class="field-error">{{ form.title.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.content.id_for_label }}">Содержимое (Markdown)</label>
+      {{ form.content }}
+      {% if form.content.errors %}
+      <div class="field-error">{{ form.content.errors }}</div>
+      {% endif %}
+      <small class="field-help">Поддерживается Markdown для форматирования текста.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.category.id_for_label }}">Категория</label>
+      {{ form.category }}
+      {% if form.category.errors %}
+      <div class="field-error">{{ form.category.errors }}</div>
+      {% endif %}
+      <small class="field-help">Выберите категорию для организации заметок или оставьте пустым.</small>
+      <a href="{% url 'note:category_list' %}">Список категорий/создать категорию</a>
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.task.id_for_label }}">Связать с задачей</label>
+      {{ form.task }}
+      {% if form.task.errors %}
+      <div class="field-error">{{ form.task.errors }}</div>
+      {% endif %}
+      <small class="field-help">Опционально: прикрепите заметку к задаче.</small>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Сохранить</button>
+      <a href="{% url 'note:notes_list' %}" class="btn btn-secondary">Отмена</a>
+    </div>
+  </form>
+  
+</section>
+{% endblock %}

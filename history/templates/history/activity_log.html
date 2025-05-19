@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}История активности{% endblock %}
+{% block seo %}
+<meta name="description" content="Следи за своими достижениями, анализируй прогресс и становись сильнее с каждым днём!">
+<meta name="keywords" content="прогресс, достижения, история, развитие, мотивация, Taskoro">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Dan Dasakami">
+
+<!-- Open Graph -->
+<meta property="og:title" content="История прогресса — Отслеживай свой рост в Taskoro">
+<meta property="og:description" content="Следи за своими достижениями, анализируй прогресс и становись сильнее с каждым днём!">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:image" content="">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="История прогресса — Отслеживай свой рост в Taskoro">
+<meta name="twitter:description" content="Следи за своими достижениями, анализируй прогресс и становись сильнее с каждым днём!">
+<meta name="twitter:image" content="">
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'vendor/css/history.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <div class="activity-filters">
+        <form method="get" class="filter-form">
+            <label for="type">Фильтр по типу:</label>
+            <select name="type" id="type" class="filter-select" onchange="this.form.submit()">
+                <option value="">Все</option>
+                {% for key, name in activity_types %}
+                    <option value="{{ key }}" {% if request.GET.type == key %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    <div class="activity-list">
+        {% for activity in activities %}
+            <div class="activity-item">
+                <div class="activity-header">
+                    <div class="activity-icon">📝</div>
+                    <div class="activity-info">
+                        <div class="activity-type">{{ activity.get_activity_type_display }}</div>
+                        <div class="activity-title">{{ activity.title }}</div>
+                    </div>
+                    <div class="activity-time">{{ activity.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-description">{{ activity.description }}</div>
+                    {% if activity.reward_points or activity.reward_coins %}
+                    <div class="activity-rewards">
+                        {% if activity.reward_points %}
+                            <div class="reward-item">⭐ {{ activity.reward_points }} очков</div>
+                        {% endif %}
+                        {% if activity.reward_coins %}
+                            <div class="reward-item">💰 {{ activity.reward_coins }} монет</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <p>История активности пуста.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Treasure Chests{% endblock %}
+{% block extra_css %} <link rel="stylesheet" href="{% static 'vendor/css/shop.css' %}"> {% endblock %}
+{% block content %}
+<div class="shop-container">
+    <div class="shop-header">
+        <h1><span class="icon-box"></span> Treasure Chests</h1>
+        <div class="header-actions">
+            <a href="{% url 'shop:shop' %}" class="btn">
+                <span class="icon-shopping-bag"></span> Shop
+            </a>
+        </div>
+    </div>
+
+    {% if chests %}
+        <div class="chest-grid">
+            {% for chest in chests %}
+                <div class="chest-card {{ chest.rarity|lower }}">
+                    <div class="chest-header">
+                        <h3 class="chest-title">{{ chest.name }}</h3>
+                        <span class="chest-rarity {{ chest.rarity|lower }}">{{ chest.get_rarity_display }}</span>
+                    </div>
+                    <div class="chest-content">
+                        <p class="chest-description">{{ chest.description }}</p>
+                        
+                        <div class="chest-rewards">
+                            <div class="reward-range">
+                                <div class="range-label">Coins</div>
+                                <div class="range-value">
+                                    {{ chest.min_coins_reward }} - {{ chest.max_coins_reward }}
+                                </div>
+                            </div>
+                            <div class="reward-range">
+                                <div class="range-label">Gems</div>
+                                <div class="range-value">
+                                    {{ chest.min_gems_reward }} - {{ chest.max_gems_reward }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chest-price">
+                            {% if chest.price_coins %}
+                                <div class="price-item">
+                                    <span class="icon-coin"></span>
+                                    {{ chest.price_coins }}
+                                </div>
+                            {% endif %}
+                            {% if chest.price_gems %}
+                                <div class="price-item">
+                                    <span class="icon-diamond"></span>
+                                    {{ chest.price_gems }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="chest-actions">
+                            <form method="post" action="{% url 'shop:open_chest' chest.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-accent">
+                                    <span class="icon-unlock"></span> Open Chest
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state card">
+            <div class="card-body text-center">
+                <div class="empty-icon">
+                    <span class="icon-box"></span>
+                </div>
+                <h3>No Chests Available</h3>
+                <p>Check back later for new treasure chests.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div class="magic-particles"></div>
+{% endblock %}

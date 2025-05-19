@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Magic Shop{% endblock %}
+{% block extra_css %} <link rel="stylesheet" href="{% static 'vendor/css/shop.css' %}"> {% endblock %}
+{% block content %}
+<div class="shop-container">
+    <div class="shop-header">
+        <h1><span class="icon-shop"></span> Magic Shop</h1>
+        <p class="shop-description">Discover rare items, powerful artifacts, and magical treasures to enhance your journey.</p>
+    </div>
+
+    <div class="shop-sections">
+        <div class="shop-section">
+            <div class="section-header">
+                <h2 class="section-title"><span class="icon-star"></span> Featured Items</h2>
+            </div>
+            <div class="section-content">
+                <div class="item-grid">
+                    {% for item in featured_items %}
+                        <div class="item-card">
+                            <div class="item-image">
+                                {% if item.image %}
+                                    <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                                {% else %}
+                                    <img src="{% static 'images/default-item.png' %}" alt="{{ item.name }}">
+                                {% endif %}
+                            </div>
+                            <div class="item-content">
+                                <h3 class="item-name">{{ item.name }}</h3>
+                                <p class="item-description">{{ item.description|truncatechars:50 }}</p>
+                                <div class="item-price">
+                                    <span class="price-icon">
+                                        {% if item.currency == 'coins' %}
+                                            <span class="icon-coin"></span>
+                                        {% else %}
+                                            <span class="icon-diamond"></span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="price-value">{{ item.price }}</span>
+                                </div>
+                            </div>
+                            <div class="item-actions">
+                                <a href="{% url 'shop:item_detail' item.id %}" class="btn">View Details</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="shop-section">
+            <div class="section-header">
+                <h2 class="section-title"><span class="icon-clock"></span> New Arrivals</h2>
+            </div>
+            <div class="section-content">
+                <div class="item-grid">
+                    {% for item in new_items %}
+                        <div class="item-card">
+                            <div class="item-image">
+                                {% if item.image %}
+                                    <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                                {% else %}
+                                    <img src="{% static 'images/default-item.png' %}" alt="{{ item.name }}">
+                                {% endif %}
+                            </div>
+                            <div class="item-content">
+                                <h3 class="item-name">{{ item.name }}</h3>
+                                <p class="item-description">{{ item.description|truncatechars:50 }}</p>
+                                <div class="item-price">
+                                    <span class="price-icon">
+                                        {% if item.currency == 'coins' %}
+                                            <span class="icon-coin"></span>
+                                        {% else %}
+                                            <span class="icon-diamond"></span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="price-value">{{ item.price }}</span>
+                                </div>
+                            </div>
+                            <div class="item-actions">
+                                <a href="{% url 'shop:item_detail' item.id %}" class="btn">View Details</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="shop-section">
+        <div class="section-header">
+            <h2 class="section-title"><span class="icon-grid"></span> Categories</h2>
+        </div>
+        <div class="section-content">
+            <div class="category-grid">
+                {% for category_id, category_name in categories %}
+                    <a href="{% url 'shop:shop_category' category_id %}" class="category-card">
+                        <span class="category-icon icon-{{ category_id }}"></span>
+                        <h3 class="category-name">{{ category_name }}</h3>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="magic-particles"></div>
+{% endblock %}

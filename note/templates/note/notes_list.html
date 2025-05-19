@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'vendor/css/notes.css' %}">
+{% endblock %}
+
+{% block title %}Заметки — Планируй и фиксируй идеи в Taskoro{% endblock %}
+{% block seo %}
+<meta name="description" content="Удобные заметки для фиксации мыслей, идей и планов в Taskoro. Все под контролем!">
+<meta name="keywords" content="заметки, планирование, идеи, продуктивность, саморазвитие, Taskoro">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Dan Dasakami">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Заметки — Планируй и фиксируй идеи в Taskoro">
+<meta property="og:description" content="Удобные заметки для фиксации мыслей, идей и планов в Taskoro. Все под контролем!">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:image" content="">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Заметки — Планируй и фиксируй идеи в Taskoro">
+<meta name="twitter:description" content="Удобные заметки для фиксации мыслей, идей и планов в Taskoro. Все под контролем!">
+<meta name="twitter:image" content="">
+{% endblock %}
+
+{% block content %}
+<section class="notes-section container">
+  <header class="notes-header">
+    <h1 class="notes-title">Мои заметки</h1>
+    <a href="{% url 'note:note_create' %}" class="btn btn-primary notes-create-btn">Создать заметку</a>
+  </header>
+
+  {% if notes %}
+    <ul class="notes-list">
+      {% for note in notes %}
+        <li class="note-item">
+          <a href="{% url 'note:note_detail' note.pk %}" class="note-title">{{ note.title }}</a>
+          <div class="note-meta">
+            <span class="note-category">
+  Категория: <strong>{{ note.category.title|default:"Без категории" }}</strong>
+</span>
+
+            <span class="note-date">
+              Обновлено: {{ note.updated_at|date:"d.m.Y H:i" }}
+            </span>
+          </div>
+          <p class="note-snippet">{{ note.content|truncatewords:20|linebreaksbr }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="notes-empty">Пока нет заметок. Создайте первую, нажав на кнопку выше.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

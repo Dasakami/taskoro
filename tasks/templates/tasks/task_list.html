@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Задачи и привычки Taskoro — Твой путь к победе {% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'vendor/css/ta.css' %}">
+{% endblock %}
+{% block seo %}
+<meta name="description" content="Создавай и выполняй задачи, прокачивай привычки и побеждай лень вместе с Taskoro!">
+<meta name="keywords" content="задачи, трекер привычек, продуктивность, мотивация, саморазвитие, Taskoro">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Dan Dasakami">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Задачи и привычки Taskoro — Твой путь к победе">
+<meta property="og:description" content="Создавай и выполняй задачи, прокачивай привычки и побеждай лень вместе с Taskoro!">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:image" content="">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Задачи и привычки Taskoro — Твой путь к победе">
+<meta name="twitter:description" content="Создавай и выполняй задачи, прокачивай привычки и побеждай лень вместе с Taskoro!">
+<meta name="twitter:image" content="">
+{% endblock %}
+
+
+{% block content %}
+<div class="tasks-container">
+    <div class="tasks-header reveal">
+        <h1 class="text-gradient">Твои задачи</h1>
+        <div class="tasks-actions">
+            <a href="{% url 'tasks:task_create' %}" class="btn">
+                <span class="btn-icon">+</span>
+                <span class="btn-text">Добавить задачу</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="tasks-filters card reveal">
+        <div class="card-body">
+            <form method="get" class="filters-form">
+                <div class="filter-group">
+                    <label for="category" class="filter-label">Категория</label>
+                    <select name="category" id="category" class="filter-select" onchange="this.form.submit()">
+                        <option value="">Все категории</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="difficulty" class="filter-label">Сложность</label>
+                    <select name="difficulty" id="difficulty" class="filter-select" onchange="this.form.submit()">
+                        <option value="">Все сложности</option>
+                        {% for value, text in difficulty_choices %}
+                        <option value="{{ value }}" {% if selected_difficulty == value %}selected{% endif %}>
+                            {{ text }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="status" class="filter-label">Статус</label>
+                    <select name="status" id="status" class="filter-select" onchange="this.form.submit()">
+                        <option value="">Все статусы</option>
+                        <option value="overdue" {% if selected_status == 'overdue' %}selected{% endif %}>Просроченные</option>
+                        {% for value, text in status_choices %}
+                        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>
+                            {{ text }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group filter-actions">
+                    <button type="submit" class="btn btn-secondary">Применить</button>
+                    <a href="{% url 'tasks:tasks' %}" class="btn-small">Сбросить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="tasks-list reveal">
+        {% if tasks %}
+            {% for task in tasks %}
+            <div class="task-card {% if task.is_completed %}completed{% elif task.is_overdue %}overdue{% endif %}">
+                <div class="task-difficulty" ></div>
+                <div class="task-content">
+                    <div class="task-header">
+                        <h3 class="task-title">{{ task.title }}</h3>
+                        {% if task.category %}
+                        <span class="task-category" >
+                            {{ task.category.name }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="task-info">
+                        <div class="task-status">
+                            <span class="status-icon">
+                                {% if task.is_completed %}✅
+                                {% elif task.is_overdue %}⚠️
+                                {% elif task.status == 'in_progress' %}⏳
+                                {% elif task.status == 'waiting' %}⏸️
+                                {% else %}🔄
+                                {% endif %}
+                            </span>
+                            <span class="status-text">{{ task.get_status_display_custom }}</span>
+                        </div>
+                        {% if task.deadline %}
+                        <div class="task-deadline {% if task.is_overdue %}overdue{% endif %}">
+                            <span class="deadline-icon">⏰</span>
+                            <span class="deadline-text">{{ task.deadline|date:"d.m.Y H:i" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if task.description %}
+                    <div class="task-description">
+                        {{ task.description|truncatewords:20 }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="task-actions">
+                    <a href="{% url 'tasks:task_detail' task.id %}" class="btn-small">Подробнее</a>
+                    {% if not task.is_completed %}
+                    <a href="{% url 'tasks:task_complete' task.id %}?next={{ request.path }}" class="btn-small btn-complete">Завершить</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <p>У вас пока нет задач. Создайте свою первую задачу!</p>
+                <a href="{% url 'tasks:task_create' %}" class="btn">Создать задачу</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

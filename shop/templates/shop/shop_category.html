@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category }} - Magic Shop{% endblock %}
+{% block extra_css %} <link rel="stylesheet" href="{% static 'vendor/css/shop.css' %}"> {% endblock %}
+{% block content %}
+<div class="shop-container">
+    <div class="shop-header">
+        <h1><span class="icon-{{ category|lower }}"></span> {{ category }}</h1>
+        <div class="header-actions">
+            <a href="{% url 'shop:shop' %}" class="btn">
+                <span class="icon-arrow-left"></span> Back to Shop
+            </a>
+        </div>
+    </div>
+
+    {% if items %}
+        <div class="item-grid">
+            {% for item in items %}
+                <div class="item-card">
+                    <div class="item-image">
+                        {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                        {% else %}
+                            <img src="{% static 'images/default-item.png' %}" alt="{{ item.name }}">
+                        {% endif %}
+                    </div>
+                    <div class="item-content">
+                        <h3 class="item-name">{{ item.name }}</h3>
+                        <p class="item-description">{{ item.description|truncatechars:100 }}</p>
+                        <div class="item-price">
+                            <span class="price-icon">
+                                {% if item.currency == 'coins' %}
+                                    <span class="icon-coin"></span>
+                                {% else %}
+                                    <span class="icon-diamond"></span>
+                                {% endif %}
+                            </span>
+                            <span class="price-value">{{ item.price }}</span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <a href="{% url 'shop:item_detail' item.id %}" class="btn">View Details</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state card">
+            <div class="card-body text-center">
+                <div class="empty-icon">
+                    <span class="icon-package"></span>
+                </div>
+                <h3>No Items Available</h3>
+                <p>Check back later for new items in this category.</p>
+                <a href="{% url 'shop:shop' %}" class="btn">
+                    <span class="icon-arrow-left"></span> Back to Shop
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div class="magic-particles"></div>
+{% endblock %}

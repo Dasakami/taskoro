@@ -1,0 +1,70 @@
+from django.db import models
+from django.contrib.auth.models import User
+
+class ShopItem(models.Model):
+    CURRENCY_CHOICES = [
+        ('coins', 'Монеты'),
+        ('gems', 'Кристаллы'),
+    ]
+    
+    CATEGORY_CHOICES = [
+        ('avatar_frame', 'Рамка аватара'),
+        ('title', 'Титул'),
+        ('background', 'Фон профиля'),
+        ('effect', 'Визуальный эффект'),
+        ('boost', 'Ускоритель'),
+        ('chest', 'Сундук'),
+    ]
+    
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    price = models.IntegerField()
+    currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    image = models.ImageField(upload_to='shop_items/', null=True, blank=True)
+    is_available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.name
+
+class Purchase(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='purchases')
+    item = models.ForeignKey(ShopItem, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    total_price = models.IntegerField()
+    purchased_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.item.name}"
+
+class Chest(models.Model):
+    RARITY_CHOICES = [
+        ('common', 'Обычный'),
+        ('rare', 'Редкий'),
+        ('epic', 'Эпический'),
+        ('legendary', 'Легендарный'),
+    ]
+    
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    rarity = models.CharField(max_length=20, choices=RARITY_CHOICES)
+    price_coins = models.IntegerField()
+    price_gems = models.IntegerField()
+    min_coins_reward = models.IntegerField()
+    max_coins_reward = models.IntegerField()
+    min_gems_reward = models.IntegerField()
+    max_gems_reward = models.IntegerField()
+    
+    def __str__(self):
+        return f"{self.get_rarity_display()} {self.name}"
+
+class ChestOpening(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chest_openings')
+    chest = models.ForeignKey(Chest, on_delete=models.CASCADE)
+    coins_reward = models.IntegerField()
+    gems_reward = models.IntegerField()
+    opened_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.username} opened {self.chest.name}"
