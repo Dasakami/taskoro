@@ -6,7 +6,7 @@ from django.db.models import Q
 from .models import ShopItem, Purchase, Chest, ChestOpening
 import random
 
-@login_required
+
 def shop_home(request):
     featured_items = ShopItem.objects.filter(is_available=True).order_by('?')[:4]
     new_items = ShopItem.objects.filter(is_available=True).order_by('-created_at')[:4]

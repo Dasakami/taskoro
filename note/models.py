@@ -18,6 +18,7 @@ class Note(models.Model):
     task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True)  # прикрепить к задаче опционально
     title = models.CharField(max_length=255)
     content = models.TextField()  # markdown контент
+    is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

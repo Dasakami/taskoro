@@ -9,30 +9,39 @@ from django.contrib.auth.models import User
 from tasks.models import Task
 from django.db import models
 
-@login_required
+
 def duel_list(request):
+    if not request.user.is_authenticated:
+        context = {
+            'active_duels': [],
+            'pending_duels': [],
+            'completed_duels': [],
+        }
+        return render(request, 'duels/duel_list.html', context)
+
     active_duels = Duel.objects.filter(
         models.Q(challenger=request.user) | models.Q(opponent=request.user),
         status='active'
     ).order_by('-created_at')
-    
+
     pending_duels = Duel.objects.filter(
         opponent=request.user,
         status='pending'
     ).order_by('-created_at')
-    
+
     completed_duels = Duel.objects.filter(
         models.Q(challenger=request.user) | models.Q(opponent=request.user),
         status='completed'
     ).order_by('-created_at')[:5]
-    
+
     context = {
         'active_duels': active_duels,
         'pending_duels': pending_duels,
         'completed_duels': completed_duels,
     }
-    
+
     return render(request, 'duels/duel_list.html', context)
+
 
 @login_required
 def create_duel(request, opponent_id):

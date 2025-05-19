@@ -6,77 +6,85 @@ from .models import DailyMission, DailyMotivation
 from tasks.models import Task
 from tournaments.models import Tournament
 import random
+from users.models import Profile
 
-@login_required
+
 def main(request):
-    # Get user profile
-    profile = request.user.profile
-    
-    # Get or create daily mission
     today = timezone.now().date()
-    daily_mission = DailyMission.objects.filter(
-        assigned_to=request.user,
-        date_created=today,
-        is_completed=False
-    ).first()
-    
-    if not daily_mission:
-        # Create a new daily mission (simplified)
-        mission_titles = [
-            "Покорите вершину знаний",
-            "Изучите древние руны",
-            "Пройдите испытание огнем",
-            "Раскройте тайны магии",
-            "Завершите ритуал посвящения"
-        ]
-        mission_descriptions = [
-            "Выполните 3 задачи сегодня",
-            "Создайте и выполните новую задачу",
-            "Сохраняйте фокус в течение 2 часов",
-            "Помогите другому Охотнику (добавьте в друзья)",
-            "Примите участие в турнире или дуэли"
-        ]
-        
-        # Randomly select mission details
-        title = random.choice(mission_titles)
-        description = random.choice(mission_descriptions)
-        exp_reward = random.randint(40, 100)
-        coins_reward = random.randint(5, 15)
-        
-        daily_mission = DailyMission.objects.create(
-            title=title,
-            description=description,
-            experience_reward=exp_reward,
-            coins_reward=coins_reward,
-            assigned_to=request.user
-        )
-    
-    # Get daily motivation
+
+    profile = None
+    daily_mission = None
+    recent_tasks = []
+    completed_tasks_today = 0
+
+    if request.user.is_authenticated:
+        # Получаем профиль
+        try:
+            profile = request.user.profile
+        except Profile.DoesNotExist:
+            profile = None
+
+        # Получаем или создаём миссию
+        daily_mission = DailyMission.objects.filter(
+            assigned_to=request.user,
+            date_created=today,
+            is_completed=False
+        ).first()
+
+        if not daily_mission:
+            mission_titles = [
+                "Покорите вершину знаний",
+                "Изучите древние руны",
+                "Пройдите испытание огнем",
+                "Раскройте тайны магии",
+                "Завершите ритуал посвящения"
+            ]
+            mission_descriptions = [
+                "Выполните 3 задачи сегодня",
+                "Создайте и выполните новую задачу",
+                "Сохраняйте фокус в течение 2 часов",
+                "Помогите другому Охотнику (добавьте в друзья)",
+                "Примите участие в турнире или дуэли"
+            ]
+
+            title = random.choice(mission_titles)
+            description = random.choice(mission_descriptions)
+            exp_reward = random.randint(40, 100)
+            coins_reward = random.randint(5, 15)
+
+            daily_mission = DailyMission.objects.create(
+                title=title,
+                description=description,
+                experience_reward=exp_reward,
+                coins_reward=coins_reward,
+                assigned_to=request.user
+            )
+
+        # Последние задачи
+        recent_tasks = Task.objects.filter(
+            user=request.user
+        ).order_by('-created_at')[:5]
+
+        # Статистика
+        completed_tasks_today = Task.objects.filter(
+            user=request.user,
+            completed_at__date=today,
+            is_completed=True
+        ).count()
+
+    # Мотивация
     daily_motivation = DailyMotivation.objects.filter(is_active=True).order_by('?').first()
     if not daily_motivation:
-        # Fallback motivation
         daily_motivation = {
             'text': "Магия внутри тебя сильнее, чем ты думаешь. Используй ее для достижения целей!",
             'author': "Древний манускрипт"
         }
-    
-    # Get recent tasks
-    recent_tasks = Task.objects.filter(
-        user=request.user
-    ).order_by('-created_at')[:5]
-    
-    # Get active tournaments
+
+    # Турниры доступны всем
     active_tournaments = Tournament.objects.filter(
         end_date__gte=today
     ).order_by('end_date')[:3]
-    
-    # Get daily statistics
-    completed_tasks_today = Task.objects.filter(
-        user=request.user,
-        completed_at__date=today,
-        is_completed=True
-    ).count()
-    
+
     context = {
         'profile': profile,
         'daily_mission': daily_mission,
@@ -84,9 +92,9 @@ def main(request):
         'recent_tasks': recent_tasks,
         'active_tournaments': active_tournaments,
         'completed_tasks_today': completed_tasks_today,
-        'total_tasks_today': recent_tasks.count(),
+        'total_tasks_today': len(recent_tasks),
     }
-    
+
     return render(request, 'main/main.html', context)
 
 
@@ -99,3 +107,17 @@ def complete_mission(request, mission_id):
         messages.info(request, 'Эта миссия уже была выполнена ранее.')
     
     return redirect('main')
+
+
+def page_not_found(request, exception):
+    return render(request, '404.html', status=404)
+
+def server_error(request):
+    return render(request, '500.html', status=500)
+
+def permission_denied(request, exception):
+    return render(request, '403.html', status=403)
+
+def bad_request(request, exception):
+    return render(request, '400.html', status=400)
+

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import Tournament, TournamentParticipant
 
-@login_required
+
 def tournament_list(request):
     # Get current date
     now = timezone.now()
@@ -42,26 +42,24 @@ def tournament_list(request):
     
     return render(request, 'tournaments/tournament_list.html', context)
 
-@login_required
+
 def tournament_detail(request, tournament_id):
     tournament = get_object_or_404(Tournament, id=tournament_id)
-    
-    # Check if user is participating
-    try:
-        participant = TournamentParticipant.objects.get(tournament=tournament, user=request.user)
-        is_participating = True
-    except TournamentParticipant.DoesNotExist:
-        participant = None
-        is_participating = False
-    
-    # Get leaderboard
-    leaderboard = tournament.get_leaderboard()
-    
-    # Get user rank if participating
+
+    is_participating = False
+    participant = None
     user_rank = None
-    if participant:
-        user_rank = participant.get_rank()
-    
+
+    if request.user.is_authenticated:
+        try:
+            participant = TournamentParticipant.objects.get(tournament=tournament, user=request.user)
+            is_participating = True
+            user_rank = participant.get_rank()
+        except TournamentParticipant.DoesNotExist:
+            pass
+
+    leaderboard = tournament.get_leaderboard()
+
     context = {
         'tournament': tournament,
         'is_participating': is_participating,
@@ -69,8 +67,9 @@ def tournament_detail(request, tournament_id):
         'leaderboard': leaderboard,
         'user_rank': user_rank,
     }
-    
+
     return render(request, 'tournaments/tournament_detail.html', context)
+
 
 @login_required
 def tournament_join(request, tournament_id):

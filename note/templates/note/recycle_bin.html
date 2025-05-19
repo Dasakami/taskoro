@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/note.css' %}">
+
+<div class="note-container">
+    <div class="note-header">
+        <h2>Корзина</h2>
+        <form method="post" action="{% url 'note:empty_trash' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger">Очистить корзину</button>
+        </form>
+    </div>
+
+    {% if deleted_notes %}
+        <div class="note-grid">
+            {% for note in deleted_notes %}
+                <div class="note-card trashed">
+                    <h4>{{ note.title }}</h4>
+                    <p>{{ note.content|truncatewords:20 }}</p>
+                    <div class="note-actions">
+                        <form method="post" action="{% url 'note:note_restore' note.pk %}">
+                            {% csrf_token %}
+                            <button class="btn-small">Восстановить</button>
+                        </form>
+                        <form method="post" action="">
+                            {% csrf_token %}
+                            <button class="btn-small btn-danger">Удалить навсегда</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-text">Корзина пуста.</p>
+    {% endif %}
+</div>
+{% endblock %}

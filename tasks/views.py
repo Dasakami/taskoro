@@ -14,8 +14,12 @@ def task_list(request):
     status = request.GET.get('status')
     
     # Start with all user's tasks
-    tasks = Task.objects.filter(user=request.user).order_by('-created_at')
-    
+    if request.user.is_authenticated:
+        tasks = Task.objects.filter(user=request.user).order_by('-created_at')
+        categories = TaskCategory.objects.filter(user=request.user)
+    else:
+        tasks = Task.objects.none()
+        categories = []
     # Apply filters if provided
     if category_id:
         tasks = tasks.filter(category_id=category_id)
@@ -33,7 +37,6 @@ def task_list(request):
             tasks = tasks.filter(status=status)
     
     # Get all categories for filter dropdown
-    categories = TaskCategory.objects.filter(user=request.user)
     
     context = {
         'tasks': tasks,
@@ -47,12 +50,13 @@ def task_list(request):
     
     return render(request, 'tasks/task_list.html', context)
 
-
+@login_required
 def task_detail(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
     
     return render(request, 'tasks/task_detail.html', {'task': task})
 
+@login_required
 def task_create(request):
     if request.method == 'POST':
         form = TaskForm(request.POST, user=request.user)

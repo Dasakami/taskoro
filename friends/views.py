@@ -5,20 +5,28 @@ from django.contrib import messages
 from django.db.models import Q
 from .models import FriendRequest, Friendship, FriendActivity
 
-@login_required
+
 def friend_list(request):
-    # Get all friendships
+    if not request.user.is_authenticated:
+        # Если не авторизован, можно показать пустой список или редиректить
+        context = {
+            'friends': [],
+            'activities': [],
+        }
+        return render(request, 'friends/friend_list.html', context)
+    
+    # Получаем все дружбы для текущего пользователя
     friendships = Friendship.objects.filter(
         Q(user1=request.user) | Q(user2=request.user)
     )
     
-    # Extract friend users
+    # Получаем список друзей
     friends = []
     for friendship in friendships:
         friend = friendship.user2 if friendship.user1 == request.user else friendship.user1
         friends.append(friend)
     
-    # Get friend activities
+    # Получаем активности друзей
     activities = FriendActivity.objects.filter(
         user__in=friends
     ).order_by('-created_at')[:10]

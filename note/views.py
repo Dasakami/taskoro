@@ -9,8 +9,36 @@ from django.db.models import Q
 
 @login_required
 def notes_list(request):
-    notes = Note.objects.filter(user=request.user)
+    notes = Note.objects.filter(user=request.user, is_deleted=False)
     return render(request, 'note/notes_list.html', {'notes': notes})
+
+@login_required
+def recycle_bin(request):
+    deleted_notes = Note.objects.filter(user=request.user, is_deleted=True)
+    return render(request, 'note/recycle_bin.html', {'deleted_notes': deleted_notes})
+
+@login_required
+def note_delete(request, pk):
+    note = get_object_or_404(Note, pk=pk, user=request.user, is_deleted=False)
+    note.is_deleted = True
+    note.save()
+    messages.info(request, 'Заметка перемещена в корзину.')
+    return redirect('note:notes_list')
+
+@login_required
+def note_restore(request, pk):
+    note = get_object_or_404(Note, pk=pk, user=request.user, is_deleted=True)
+    note.is_deleted = False
+    note.save()
+    messages.success(request, 'Заметка восстановлена.')
+    return redirect('note:recycle_bin')
+
+@login_required
+def empty_trash(request):
+    Note.objects.filter(user=request.user, is_deleted=True).delete()
+    messages.success(request, 'Корзина очищена.')
+    return redirect('note:recycle_bin')
+
 
 @login_required
 def note_detail(request, pk):
