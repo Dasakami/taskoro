@@ -1,13 +1,16 @@
 from django import forms
 from .models import Note, NoteCategory
+from django_ckeditor_5.widgets import CKEditor5Widget
 
 class NoteForm(forms.ModelForm):
     class Meta:
         model = Note
         fields = ['title', 'category', 'task', 'content']
         widgets = {
-            'content': forms.Textarea(attrs={'id': 'markdown-editor'}),
-        }
+              "content": CKEditor5Widget(
+                  attrs={"class": "django_ckeditor_5"}, config_name="content"
+              )
+          }
 
 class NoteCategoryForm(forms.ModelForm):
     class Meta:

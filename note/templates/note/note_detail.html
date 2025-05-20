@@ -26,7 +26,7 @@
   </header>
 
   <section class="note-content markdown-content">
-    {{ note.content|linebreaksbr }}
+    {{ note.content|safe|linebreaksbr }}
   </section>
 
   <footer class="note-footer">

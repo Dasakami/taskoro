@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from tasks.models import Task  # если у тебя есть модель Task
+from django_ckeditor_5.fields import CKEditor5Field
 
 class NoteCategory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='note_categories')
@@ -17,7 +18,7 @@ class Note(models.Model):
     category = models.ForeignKey(NoteCategory, on_delete=models.SET_NULL, null=True, blank=True)
     task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True)  # прикрепить к задаче опционально
     title = models.CharField(max_length=255)
-    content = models.TextField()  # markdown контент
+    content = CKEditor5Field(blank=True, null=True) # markdown контент
     is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

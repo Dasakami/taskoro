@@ -1,6 +1,6 @@
 from django.urls import include,path
 from django.views.generic import TemplateView
-from .views import main, complete_mission
+from .views import main, complete_mission, custom_upload_function
 urlpatterns  = [
     path('', main, name='main'),
     path('tasks/',include(('tasks.urls'), namespace='tasks')),
@@ -12,4 +12,6 @@ urlpatterns  = [
     path('notebook/',include(('note.urls'), namespace='note')),
     path('history/',include(('history.urls'), namespace='history')),
     path('complete_mission/<int:mission_id>/', complete_mission, name='complete_mission'),
+    path('ckeditor5/', include('django_ckeditor_5.urls')),
+    path('ckeditor/upload/', custom_upload_function , name='ckeditor_upload'),
 ]

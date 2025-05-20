@@ -115,7 +115,7 @@
                         </div>
                     </div>
                     <div class="tournament-actions">
-                        <a href="{% url 'tournament_detail' tournament.id %}" class="btn">Подробнее</a>
+                        <a href="{% url 'tournaments:tournament_detail' tournament.id %}" class="btn">Подробнее</a>
                         <span class="countdown-badge">Скоро</span>
                     </div>
                 </div>
@@ -145,7 +145,7 @@
                         </div>
                     </div>
                     <div class="past-tournament-actions">
-                        <a href="{% url 'tournament_detail' tournament.id %}" class="btn-small">Результаты</a>
+                        <a href="{% url 'tournaments:tournament_detail' tournament.id %}" class="btn-small">Результаты</a>
                     </div>
                 </div>
                 {% endfor %}

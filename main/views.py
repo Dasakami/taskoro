@@ -7,6 +7,9 @@ from tasks.models import Task
 from tournaments.models import Tournament
 import random
 from users.models import Profile
+from django.core.files.storage import FileSystemStorage
+from django.http import JsonResponse
+from django.conf import settings
 
 
 def main(request):
@@ -121,3 +124,17 @@ def permission_denied(request, exception):
 def bad_request(request, exception):
     return render(request, '400.html', status=400)
 
+
+@login_required
+def custom_upload_function(request):
+    if request.method == 'POST' and request.FILES.get('upload'):
+        file = request.FILES['upload']
+        fs = FileSystemStorage()
+        filename = fs.save(file.name, file)  # Сохраняем файл в заданном месте
+        file_url = fs.url(filename)  # Получаем URL для доступа к файлу
+        return JsonResponse({
+            'uploaded': 1,
+            'fileName': filename,
+            'url': file_url
+        })
+    return JsonResponse({'uploaded': 0})

@@ -27,33 +27,166 @@
 {% endblock %}
 
 {% block content %}
-<div class="note-container">
-    <div class="note-header">
-        <h2>Мои заметки</h2>
-        <a href="{% url 'note:note_create' %}" class="btn btn-primary">+ Новая заметка</a>
-    </div>
-
-    {% if notes %}
-        <div class="note-grid">
-            {% for note in notes %}
-                <div class="note-card">
-                    <h4>{{ note.title }}</h4>
-                    <p>{{ note.content|truncatewords:20 }}</p>
-                    <div class="note-actions">
-                        <a href="{% url 'note:note_detail' note.pk %}" class="btn-small">Открыть</a>
-                        <a href="{% url 'note:note_edit' note.pk %}" class="btn-small">Редактировать</a>
-                        <a href="{% url 'note:note_delete' note.pk %}" class="btn-small btn-danger">Удалить</a>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p class="empty-text">У вас нет заметок. Создайте первую!</p>
-    {% endif %}
-
-    <div class="note-footer">
-        <a href="{% url 'note:recycle_bin' %}" class="btn-secondary">🗑 Перейти в корзину</a>
-    </div>
+<div class="note-header">
+    <a href="{% url 'note:note_create' %}" class="btn-neon-green">+ Новая заметка</a>
+    <a href="{% url 'note:recycle_bin' %}" class="btn-neon-red">🗑 Корзина</a>
 </div>
+
+{% if notes %}
+    <div class="note-grid">
+        {% for note in notes %}
+            <div class="neon-card">
+                <div class="neon-card-header">
+                    <h3>{{ note.title }}</h3>
+                    <p class="note-date">🕒 {{ note.created_at|date:"d.m.Y H:i" }}</p>
+                    <p class="note-preview">{{ note.content|truncatewords:20|safe }}</p>
+                </div>
+                <div class="neon-card-actions">
+                    <a href="{% url 'note:note_detail' note.pk %}" class="btn-neon-purple">Подробнее</a>
+                    <a href="{% url 'note:note_edit' note.pk %}" class="btn-neon-blue">✎</a>
+                    <a href="{% url 'note:note_delete' note.pk %}" class="btn-neon-red">✘</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="empty-text">У вас нет заметок. Создайте первую!</p>
+{% endif %}
+
+
+
+<style>
+    .btn-neon-purple {
+    background: #a64bff;
+    color: #fff;
+    box-shadow: 0 0 8px #a64bff88;
+}
+
+.btn-neon-purple:hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+}
+
+
+    .note-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.neon-card {
+    background: linear-gradient(145deg, #0f0f23, #1a1a3a);
+    border-radius: 16px;
+    padding: 1.2rem;
+    box-shadow: 0 0 12px rgba(138, 43, 226, 0.3),
+                inset 0 0 5px rgba(255, 255, 255, 0.05);
+    color: #e6e6fa;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(4px);
+}
+
+.neon-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(173, 75, 255, 0.6);
+}
+
+.neon-card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    text-shadow: 0 0 5px #aa00ff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.note-preview {
+    font-size: 0.9rem;
+    color: #bfbfff;
+    margin: 0.7rem 0;
+    height: 3.5em;
+    overflow: hidden;
+    line-height: 1.2em;
+    text-overflow: ellipsis;
+}
+
+.neon-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+}
+
+.neon-card-actions a {
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: 0.2s ease;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-neon-green {
+    background: #00ffcc;
+    color: #000;
+    box-shadow: 0 0 8px #00ffcc88;
+}
+
+.btn-neon-blue {
+    background: #66ccff;
+    color: #000;
+    box-shadow: 0 0 8px #66ccff88;
+}
+
+.btn-neon-red {
+    background: #ff4c91;
+    color: #000;
+    box-shadow: 0 0 8px #ff4c9188;
+}
+
+.btn-neon-green:hover,
+.btn-neon-blue:hover,
+.btn-neon-red:hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+}
+
+.empty-text {
+    text-align: center;
+    color: #6666aa;
+    font-size: 1.1rem;
+    margin-top: 3rem;
+    text-shadow: 0 0 3px #222244;
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.note-header a {
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    box-shadow: 0 0 10px rgba(0, 255, 204, 0.4);
+}
+
+@media (max-width: 600px) {
+    .note-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
 
 {% endblock %}

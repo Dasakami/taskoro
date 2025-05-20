@@ -44,6 +44,7 @@
 
     <div class="form-group">
       <label for="{{ form.content.id_for_label }}">Содержимое (Markdown)</label>
+      {{ form.media }}
       {{ form.content }}
       {% if form.content.errors %}
       <div class="field-error">{{ form.content.errors }}</div>
@@ -77,4 +78,10 @@
   </form>
   
 </section>
+
+<style>
+  .form-group p {
+    color: black;
+  }
+</style>
 {% endblock %}
