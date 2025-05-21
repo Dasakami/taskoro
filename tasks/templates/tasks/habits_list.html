@@ -1,0 +1,449 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Привычки | Taskoro{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <div class="page-header">
+        <h1 class="main-title">Мои привычки</h1>
+        <div class="header-actions">
+            <a href="{% url 'tasks:habit_create' %}" class="btn btn-primary">
+                Создать привычку
+            </a>
+        </div>
+    </div>
+    
+    <div class="habits-stats">
+        <div class="stat-card">
+            <div class="stat-value">{{ habits|length }}</div>
+            <div class="stat-label">Всего привычек</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value">{{ active_streaks }}</div>
+            <div class="stat-label">Активных серий</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value">{{ longest_streak }}</div>
+            <div class="stat-label">Лучшая серия</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value">{{ completion_rate }}%</div>
+            <div class="stat-label">Завершений сегодня</div>
+        </div>
+    </div>
+    
+    {% if habits %}
+    <div class="habits-container">
+        {% for habit in habits %}
+        <div class="habit-card {% if habit.is_completed %}completed{% endif %}">
+            <div class="habit-header" style="background-color: {% if habit.character_class %}{{ habit.character_class.color }}{% elif habit.category %}{{ habit.category.color }}{% else %}#6633ff{% endif %}">
+                <h3 class="habit-title">{{ habit.title }}</h3>
+                <div class="streak-badge">
+                    <span class="streak-count">{{ habit.streak }}</span>
+                    <i class="streak-icon">🔥</i>
+                </div>
+            </div>
+            
+            <div class="habit-body">
+                {% if habit.description %}
+                <p class="habit-description">{{ habit.description|truncatechars:100 }}</p>
+                {% endif %}
+                
+                <div class="habit-info">
+                    {% if habit.character_class %}
+                    <span class="habit-character-class">{{ habit.character_class.name }}</span>
+                    {% endif %}
+                    
+                    {% if habit.category %}
+                    <span class="habit-category" style="background-color: {{ habit.category.color }}">
+                        {{ habit.category.name }}
+                    </span>
+                    {% endif %}
+                    
+                    <span class="habit-frequency">
+                        {{ habit.get_frequency_display }}
+                    </span>
+                </div>
+                
+                <div class="habit-stats">
+                    <div class="habit-stat">
+                        <div class="stat-label">Последнее выполнение</div>
+                        <div class="stat-value">
+                            {% if habit.last_completed %}
+                            {{ habit.last_completed|date:"d.m.Y" }}
+                            {% else %}
+                            Никогда
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="habit-stat">
+                        <div class="stat-label">Сложность</div>
+                        <div class="stat-value" style="color: {{ habit.get_difficulty_color }}">
+                            {{ habit.get_difficulty_display }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="streak-calendar">
+                    {% for day in habit.get_streak_calendar %}
+                    <div class="calendar-day {% if day.completed %}completed{% endif %} {% if day.today %}today{% endif %}">
+                        <div class="day-label">{{ day.date|date:"d" }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="habit-actions">
+                    <a href="{% url 'tasks:habit_detail' habit.id %}" class="btn btn-small btn-secondary">
+                        Подробнее
+                    </a>
+                    {% if not habit.is_completed %}
+                    <a href="{% url 'tasks:task_complete' habit.id %}?next={{ request.get_full_path|urlencode }}" 
+                        class="btn btn-success btn-small">
+                        Выполнить сегодня
+                    </a>
+                    {% else %}
+                    <span class="completed-label">Выполнено сегодня</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>У вас пока нет отслеживаемых привычек</p>
+        <a href="{% url 'tasks:task_create' %}?type=habit" class="btn btn-primary">Создать первую привычку</a>
+    </div>
+    {% endif %}
+    
+    <div class="habits-tips">
+        <h3 class="tips-title">Советы по формированию привычек</h3>
+        <ul class="tips-list">
+            <li class="tip-item">Начинайте с малого - привычки должны быть настолько простыми, чтобы их невозможно было не выполнить</li>
+            <li class="tip-item">Привязывайте новые привычки к уже существующим действиям</li>
+            <li class="tip-item">Отмечайте выполнение каждый день для поддержания серии</li>
+            <li class="tip-item">Создавайте окружение, которое способствует формированию привычки</li>
+            <li class="tip-item">Нужно около 66 дней для полного формирования привычки</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .habits-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .stat-card {
+        background-color: rgba(30, 30, 50, 0.8);
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        border: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .stat-value {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2rem;
+        color: white;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #aaaaaa;
+    }
+    
+    .habits-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .habit-card {
+        background-color: rgba(30, 30, 50, 0.8);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .habit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    }
+    
+    .habit-card.completed {
+        border-left: 4px solid #33ff99;
+    }
+    
+    .habit-header {
+        padding: 12px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .habit-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: white;
+        margin: 0;
+    }
+    
+    .streak-badge {
+        background-color: rgba(255, 153, 51, 0.3);
+        padding: 5px 10px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .streak-count {
+        font-weight: 600;
+        color: white;
+    }
+    
+    .habit-body {
+        padding: 15px;
+    }
+    
+    .habit-description {
+        font-size: 0.95rem;
+        color: #cccccc;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+    
+    .habit-info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .habit-character-class,
+    .habit-category,
+    .habit-frequency {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .habit-character-class {
+        background-color: rgba(102, 51, 255, 0.3);
+        color: #b299ff;
+    }
+    
+    .habit-category {
+        color: white;
+    }
+    
+    .habit-frequency {
+        background-color: rgba(0, 0, 0, 0.2);
+        color: #cccccc;
+    }
+    
+    .habit-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+    
+    .habit-stat {
+        text-align: center;
+    }
+    
+    .habit-stat .stat-label {
+        font-size: 0.8rem;
+        color: #888888;
+        margin-bottom: 2px;
+    }
+    
+    .habit-stat .stat-value {
+        font-size: 1rem;
+        color: white;
+    }
+    
+    .streak-calendar {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 15px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+    
+    .calendar-day {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        background-color: rgba(40, 40, 60, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .calendar-day.completed {
+        background-color: rgba(51, 255, 153, 0.3);
+    }
+    
+    .calendar-day.today {
+        border: 2px solid #6633ff;
+    }
+    
+    .day-label {
+        font-size: 0.8rem;
+        color: #cccccc;
+    }
+    
+    .calendar-day.completed .day-label {
+        color: white;
+    }
+    
+    .habit-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .completed-label {
+        font-size: 0.9rem;
+        color: #33ff99;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .completed-label::before {
+        content: "✅";
+    }
+    
+    .habits-tips {
+        background-color: rgba(30, 30, 50, 0.8);
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 30px;
+    }
+    
+    .tips-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: white;
+        margin-bottom: 15px;
+    }
+    
+    .tips-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .tip-item {
+        position: relative;
+        padding-left: 20px;
+        margin-bottom: 10px;
+        color: #cccccc;
+        line-height: 1.4;
+    }
+    
+    .tip-item::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #6633ff;
+        font-weight: bold;
+    }
+    
+    .empty-state {
+        background-color: rgba(30, 30, 50, 0.6);
+        border-radius: 8px;
+        padding: 30px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .empty-state p {
+        margin-bottom: 15px;
+        color: #aaaaaa;
+    }
+    
+    @media (max-width: 768px) {
+        .habits-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .habits-stats {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Code to generate streak calendars for each habit
+        const habits = document.querySelectorAll('.habit-card');
+        const today = new Date();
+        
+        habits.forEach(habit => {
+            const streakCalendar = habit.querySelector('.streak-calendar');
+            const lastCompletedText = habit.querySelector('.habit-stat .stat-value').textContent.trim();
+            let lastCompleted = null;
+            
+            if (lastCompletedText !== 'Никогда') {
+                const [day, month, year] = lastCompletedText.split('.');
+                lastCompleted = new Date(`${year}-${month}-${day}`);
+            }
+            
+            // Clear existing calendar
+            streakCalendar.innerHTML = '';
+            
+            // Create last 14 days
+            for (let i = 13; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                
+                if (date.getDate() === today.getDate() && 
+                    date.getMonth() === today.getMonth() && 
+                    date.getFullYear() === today.getFullYear()) {
+                    dayEl.classList.add('today');
+                }
+                
+                // Check if this day was completed
+                if (lastCompleted && 
+                    date.getDate() === lastCompleted.getDate() && 
+                    date.getMonth() === lastCompleted.getMonth() && 
+                    date.getFullYear() === lastCompleted.getFullYear()) {
+                    dayEl.classList.add('completed');
+                }
+                
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'day-label';
+                dayLabel.textContent = date.getDate();
+                
+                dayEl.appendChild(dayLabel);
+                streakCalendar.appendChild(dayEl);
+            }
+        });
+    });
+</script>
+{% endblock %}

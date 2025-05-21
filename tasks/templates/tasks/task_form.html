@@ -1,91 +1,44 @@
-{% extends "base.html" %}
-
-{% block title %}{% if is_create %}Создание задачи{% else %}Редактирование задачи{% endif %} | Magic RPG Tracker{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="/static/vendor/css/tasks.css">
-{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
-<div class="task-form-container">
-    <div class="task-form-header reveal">
-        <div class="back-link">
-            <a href="{% if is_create %}{% url 'tasks:tasks' %}{% else %}{% url 'tasks:task_detail' task.id %}{% endif %}" class="btn-small">
-                <span class="back-icon">←</span>
-                <span class="back-text">{% if is_create %}К списку задач{% else %}К задаче{% endif %}</span>
-            </a>
-        </div>
-        <h1 class="text-gradient">{% if is_create %}Создание новой задачи{% else %}Редактирование задачи{% endif %}</h1>
-    </div>
+<div class="container mx-auto max-w-lg p-6 bg-white rounded shadow-md mt-8">
+    <h2 class="text-2xl font-semibold mb-4">
+        {% if is_create %}Создать задачу{% else %}Редактировать задачу{% endif %}
+    </h2>
 
-    <div class="task-form-content card reveal">
-        <div class="card-body">
-            <form method="post" class="magic-form">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="id_title" class="form-label">Название задачи</label>
-                    {{ form.title }}
-                    {% if form.title.errors %}
-                        <div class="form-error">{{ form.title.errors }}</div>
-                    {% endif %}
-                </div>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div class="mb-4">
+                <label for="{{ field.id_for_label }}" class="block text-gray-700 font-medium mb-1">
+                    {{ field.label }}{% if field.field.required %} <span class="text-red-600">*</span>{% endif %}
+                </label>
                 
-                <div class="form-group">
-                    <label for="id_description" class="form-label">Описание</label>
-                    {{ form.description }}
-                    {% if form.description.errors %}
-                        <div class="form-error">{{ form.description.errors }}</div>
-                    {% endif %}
-                </div>
+                {{ field }}
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_category" class="form-label">Категория</label>
-                        {{ form.category }}
-                        {% if form.category.errors %}
-                            <div class="form-error">{{ form.category.errors }}</div>
-                        {% endif %}
-                        <small class="form-help">
-                            <a href="{% url 'tasks:category_create' %}" target="_blank" class="help-link">+ Создать новую категорию</a>
-                        </small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="id_difficulty" class="form-label">Сложность</label>
-                        {{ form.difficulty }}
-                        {% if form.difficulty.errors %}
-                            <div class="form-error">{{ form.difficulty.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
+                {% if field.help_text %}
+                    <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                {% endif %}
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_deadline" class="form-label">Срок выполнения</label>
-                        {{ form.deadline }}
-                        {% if form.deadline.errors %}
-                            <div class="form-error">{{ form.deadline.errors }}</div>
-                        {% endif %}
-                        <small class="form-help">Получите бонус за выполнение в срок!</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="id_estimated_minutes" class="form-label">Примерное время (мин.)</label>
-                        {{ form.estimated_minutes }}
-                        {% if form.estimated_minutes.errors %}
-                            <div class="form-error">{{ form.estimated_minutes.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn">
-                        {% if is_create %}Создать задачу{% else %}Сохранить изменения{% endif %}
-                    </button>
-                    <a href="{% if is_create %}{% url 'tasks:tasks' %}{% else %}{% url 'tasks:task_detail' task.id %}{% endif %}" class="btn btn-secondary">Отмена</a>
-                </div>
-            </form>
-        </div>
-    </div>
+                {% for error in field.errors %}
+                    <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        {% if form.non_field_errors %}
+            <div class="mb-4 text-red-600">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+            {% if is_create %}Создать{% else %}Сохранить{% endif %}
+        </button>
+        <a href="{% url 'tasks:tasks' %}" class="ml-4 text-gray-600 hover:underline">Отмена</a>
+    </form>
 </div>
 {% endblock %}

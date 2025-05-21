@@ -7,6 +7,8 @@ from .forms import CustomUserCreationForm, CustomAuthenticationForm, ProfileUpda
 from .models import Profile, Medal
 from django.http import Http404
 from django.contrib.auth.models import User
+from django.db.models import Count, Max
+from django.db import models
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -94,3 +96,26 @@ def view_other_profile(request, username):
     }
 
     return render(request, 'users/profile.html', context)
+
+@login_required
+def leaderboard(request):
+    # Get top users by level
+    top_by_level = Profile.objects.select_related('user').order_by('-level', '-experience')[:10]
+    
+    # Get top users by completed tasks
+    top_by_tasks = Profile.objects.select_related('user').annotate(
+        completed_tasks=Count('user__tasks', filter=models.Q(user__tasks__is_completed=True))
+    ).order_by('-completed_tasks')[:10]
+    
+    # Get top users by habit streaks
+    top_by_streaks = Profile.objects.select_related('user').annotate(
+        max_streak=Max('user__tasks__streak', filter=models.Q(user__tasks__task_type='habit'))
+    ).order_by('-max_streak')[:10]
+    
+    context = {
+        'top_by_level': top_by_level,
+        'top_by_tasks': top_by_tasks,
+        'top_by_streaks': top_by_streaks,
+    }
+    
+    return render(request, 'users/leaderboard.html', context)
