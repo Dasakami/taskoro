@@ -4,11 +4,13 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import CustomUserCreationForm, CustomAuthenticationForm, ProfileUpdateForm
-from .models import Profile, Medal
+from .models import Profile
 from django.http import Http404
 from django.contrib.auth.models import User
 from django.db.models import Count, Max
 from django.db import models
+from .models import Medal
+
 
 def login_view(request):
     if request.user.is_authenticated:

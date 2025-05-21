@@ -1,109 +1,123 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Magic Shop{% endblock %}
-{% block extra_css %} <link rel="stylesheet" href="{% static 'vendor/css/shop.css' %}"> {% endblock %}
+{% block title %}Магазин | Taskoro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'vendor/css/shops.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="shop-container">
     <div class="shop-header">
-        <h1><span class="icon-shop"></span> Magic Shop</h1>
-        <p class="shop-description">Discover rare items, powerful artifacts, and magical treasures to enhance your journey.</p>
+        <h1 class="shop-title">Магазин</h1>
+        <div class="user-currency">
+            <div class="currency coins">
+                <span class="currency-icon">💰</span>
+                <span class="currency-amount">{{ request.user.profile.coins }}</span>
+            </div>
+            <div class="currency gems">
+                <span class="currency-icon">💎</span>
+                <span class="currency-amount">{{ request.user.profile.gems }}</span>
+            </div>
+        </div>
     </div>
 
-    <div class="shop-sections">
-        <div class="shop-section">
-            <div class="section-header">
-                <h2 class="section-title"><span class="icon-star"></span> Featured Items</h2>
-            </div>
-            <div class="section-content">
-                <div class="item-grid">
-                    {% for item in featured_items %}
-                        <div class="item-card">
-                            <div class="item-image">
-                                {% if item.image %}
-                                    <img src="{{ item.image.url }}" alt="{{ item.name }}">
-                                {% else %}
-                                    <img src="{% static 'images/default-item.png' %}" alt="{{ item.name }}">
-                                {% endif %}
-                            </div>
-                            <div class="item-content">
-                                <h3 class="item-name">{{ item.name }}</h3>
-                                <p class="item-description">{{ item.description|truncatechars:50 }}</p>
-                                <div class="item-price">
-                                    <span class="price-icon">
-                                        {% if item.currency == 'coins' %}
-                                            <span class="icon-coin"></span>
-                                        {% else %}
-                                            <span class="icon-diamond"></span>
-                                        {% endif %}
-                                    </span>
-                                    <span class="price-value">{{ item.price }}</span>
-                                </div>
-                            </div>
-                            <div class="item-actions">
-                                <a href="{% url 'shop:item_detail' item.id %}" class="btn">View Details</a>
-                            </div>
-                        </div>
-                    {% endfor %}
+    <div class="shop-navigation">
+        <ul class="shop-categories">
+            <li><a href="{% url 'shop:shop' %}" class="active">Главная</a></li>
+            {% for category_value, category_name in categories %}
+            <li><a href="{% url 'shop:shop_category' category=category_value %}">{{ category_name }}</a></li>
+            {% endfor %}
+            <li><a href="{% url 'shop:chest_list' %}">Сундуки</a></li>
+            <li><a href="{% url 'shop:user_inventory' %}">Инвентарь</a></li>
+        </ul>
+    </div>
+
+    <section class="featured-items">
+        <h2 class="section-title">Рекомендуемые товары</h2>
+        <div class="items-grid">
+            {% for item in featured_items %}
+            <div class="shop-item" data-category="{{ item.category }}">
+                <div class="item-image">
+                    {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                    {% else %}
+                    <div class="placeholder-image">{{ item.name|first }}</div>
+                    {% endif %}
                 </div>
-            </div>
-        </div>
-
-        <div class="shop-section">
-            <div class="section-header">
-                <h2 class="section-title"><span class="icon-clock"></span> New Arrivals</h2>
-            </div>
-            <div class="section-content">
-                <div class="item-grid">
-                    {% for item in new_items %}
-                        <div class="item-card">
-                            <div class="item-image">
-                                {% if item.image %}
-                                    <img src="{{ item.image.url }}" alt="{{ item.name }}">
-                                {% else %}
-                                    <img src="{% static 'images/default-item.png' %}" alt="{{ item.name }}">
-                                {% endif %}
-                            </div>
-                            <div class="item-content">
-                                <h3 class="item-name">{{ item.name }}</h3>
-                                <p class="item-description">{{ item.description|truncatechars:50 }}</p>
-                                <div class="item-price">
-                                    <span class="price-icon">
-                                        {% if item.currency == 'coins' %}
-                                            <span class="icon-coin"></span>
-                                        {% else %}
-                                            <span class="icon-diamond"></span>
-                                        {% endif %}
-                                    </span>
-                                    <span class="price-value">{{ item.price }}</span>
-                                </div>
-                            </div>
-                            <div class="item-actions">
-                                <a href="{% url 'shop:item_detail' item.id %}" class="btn">View Details</a>
-                            </div>
-                        </div>
-                    {% endfor %}
+                <div class="item-details">
+                    <h3 class="item-name">{{ item.name }}</h3>
+                    <p class="item-price">
+                        {% if item.currency == 'coins' %}
+                        <span class="price-icon">💰</span>
+                        {% else %}
+                        <span class="price-icon">💎</span>
+                        {% endif %}
+                        <span class="price-amount">{{ item.price }}</span>
+                    </p>
                 </div>
+                <a href="{% url 'shop:item_detail' item_id=item.id %}" class="item-link">Подробнее</a>
             </div>
+            {% empty %}
+            <p class="empty-message">Нет доступных товаров</p>
+            {% endfor %}
         </div>
-    </div>
+    </section>
 
-    <div class="shop-section">
-        <div class="section-header">
-            <h2 class="section-title"><span class="icon-grid"></span> Categories</h2>
-        </div>
-        <div class="section-content">
-            <div class="category-grid">
-                {% for category_id, category_name in categories %}
-                    <a href="{% url 'shop:shop_category' category_id %}" class="category-card">
-                        <span class="category-icon icon-{{ category_id }}"></span>
-                        <h3 class="category-name">{{ category_name }}</h3>
-                    </a>
-                {% endfor %}
+    <section class="new-items">
+        <h2 class="section-title">Новые поступления</h2>
+        <div class="items-grid">
+            {% for item in new_items %}
+            <div class="shop-item" data-category="{{ item.category }}">
+                <div class="item-image">
+                    {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                    {% else %}
+                    <div class="placeholder-image">{{ item.name|first }}</div>
+                    {% endif %}
+                </div>
+                <div class="item-details">
+                    <h3 class="item-name">{{ item.name }}</h3>
+                    <p class="item-price">
+                        {% if item.currency == 'coins' %}
+                        <span class="price-icon">💰</span>
+                        {% else %}
+                        <span class="price-icon">💎</span>
+                        {% endif %}
+                        <span class="price-amount">{{ item.price }}</span>
+                    </p>
+                </div>
+                <a href="{% url 'shop:item_detail' item_id=item.id %}" class="item-link">Подробнее</a>
             </div>
+            {% empty %}
+            <p class="empty-message">Нет доступных товаров</p>
+            {% endfor %}
         </div>
-    </div>
+    </section>
+
+    <section class="shop-categories-grid">
+        <h2 class="section-title">Категории</h2>
+        <div class="categories-grid">
+            {% for category_value, category_name in categories %}
+            <a href="{% url 'shop:shop_category' category=category_value %}" class="category-card" data-category="{{ category_value }}">
+                <div class="category-icon">
+                    {% if category_value == 'avatar_frame' %}🖼️
+                    {% elif category_value == 'title' %}✨
+                    {% elif category_value == 'background' %}🏞️
+                    {% elif category_value == 'effect' %}💫
+                    {% elif category_value == 'boost' %}🚀
+                    {% elif category_value == 'chest' %}📦
+                    {% endif %}
+                </div>
+                <h3 class="category-name">{{ category_name }}</h3>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
 </div>
+{% endblock %}
 
-<div class="magic-particles"></div>
+{% block extra_js %}
+<script src="{% static 'vendor/js/shop.js' %}"></script>
 {% endblock %}

@@ -25,8 +25,18 @@ class ShopItem(models.Model):
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
+    # Special fields for different item types
+    title_text = models.CharField(max_length=100, blank=True, null=True, help_text="For title items")
+    title_color = models.CharField(max_length=7, blank=True, null=True, help_text="Hex color for title")
+    frame_style = models.CharField(max_length=100, blank=True, null=True, help_text="For avatar frames")
+    boost_multiplier = models.FloatField(default=1.0, help_text="For boost items")
+    boost_duration = models.IntegerField(default=0, help_text="Duration in hours for boosts")
+    
     def __str__(self):
         return self.name
+    
+    def get_category_display(self):
+        return dict(self.CATEGORY_CHOICES)[self.category]
 
 class Purchase(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='purchases')
@@ -34,9 +44,25 @@ class Purchase(models.Model):
     quantity = models.IntegerField(default=1)
     total_price = models.IntegerField()
     purchased_at = models.DateTimeField(auto_now_add=True)
+    is_equipped = models.BooleanField(default=False, help_text="Whether this item is currently equipped")
     
     def __str__(self):
         return f"{self.user.username} - {self.item.name}"
+
+class ActiveBoost(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='active_boosts')
+    boost_item = models.ForeignKey(ShopItem, on_delete=models.CASCADE, limit_choices_to={'category': 'boost'})
+    multiplier = models.FloatField()
+    activated_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.boost_item.name}"
+    
+    @property
+    def is_active(self):
+        from django.utils import timezone
+        return timezone.now() < self.expires_at
 
 class Chest(models.Model):
     RARITY_CHOICES = [
@@ -58,6 +84,9 @@ class Chest(models.Model):
     
     def __str__(self):
         return f"{self.get_rarity_display()} {self.name}"
+        
+    def get_rarity_display(self):
+        return dict(self.RARITY_CHOICES)[self.rarity]
 
 class ChestOpening(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chest_openings')

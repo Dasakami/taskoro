@@ -16,8 +16,6 @@ class TaskCategory(models.Model):
     class Meta:
         verbose_name_plural = "Task Categories"
 
-
-
 class BaseTask(models.Model):
     """Pre-defined tasks based on character classes"""
     DIFFICULTY_CHOICES = [
@@ -44,6 +42,19 @@ class BaseTask(models.Model):
     def __str__(self):
         return f"{self.title} ({self.get_task_type_display()}, {self.character_class.name})"
 
+class BaseTaskCompletion(models.Model):
+    """Records when a user completes a base task"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='completed_base_tasks')
+    base_task = models.ForeignKey(BaseTask, on_delete=models.CASCADE, related_name='completions')
+    completed_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['user', 'base_task', 'completed_at']
+        ordering = ['-completed_at']
+    
+    def __str__(self):
+        return f"{self.user.username} completed {self.base_task.title} at {self.completed_at}"
+
 class Task(models.Model):
     DIFFICULTY_CHOICES = [
         ('easy', 'Легкая'),
@@ -69,8 +80,6 @@ class Task(models.Model):
     description = models.TextField(blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
     category = models.ForeignKey(TaskCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
-    base_task = models.ForeignKey(BaseTask, on_delete=models.SET_NULL, null=True, blank=True, 
-                                 help_text="If this task was created from a base task")
     character_class = models.ForeignKey(CharacterClass, on_delete=models.SET_NULL, null=True, blank=True)
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='medium')
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='not_started')
@@ -171,10 +180,3 @@ class Task(models.Model):
             return 'Просрочена'
         else:
             return dict(self.STATUS_CHOICES).get(self.status)
-        
-class TaskCompletion(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='completions')
-    completed_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"{self.task.title} — {self.completed_at.strftime('%Y-%m-%d')}"

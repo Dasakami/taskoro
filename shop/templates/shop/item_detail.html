@@ -1,83 +1,113 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ item.name }} - Magic Shop{% endblock %}
-{% block extra_css %} <link rel="stylesheet" href="{% static 'vendor/css/shop.css' %}"> {% endblock %}
+{% block title %}{{ item.name }} | Магазин | Taskoro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'vendor/css/shops.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="shop-container">
-    <div class="item-detail-container">
-        <div class="item-detail-header">
-            <h1>{{ item.name }}</h1>
-            <div class="header-actions">
-                <a href="{% url 'shop:shop_category' item.category %}" class="btn">
-                    <span class="icon-arrow-left"></span> Back to {{ item.get_category_display }}
-                </a>
+    <div class="shop-header">
+        <h1 class="shop-title">Детали товара</h1>
+        <div class="user-currency">
+            <div class="currency coins">
+                <span class="currency-icon">💰</span>
+                <span class="currency-amount">{{ request.user.profile.coins }}</span>
+            </div>
+            <div class="currency gems">
+                <span class="currency-icon">💎</span>
+                <span class="currency-amount">{{ request.user.profile.gems }}</span>
             </div>
         </div>
+    </div>
 
-        <div class="item-detail-content">
-            <div class="item-detail-image">
+    <div class="shop-navigation">
+        <ul class="breadcrumbs">
+            <li><a href="{% url 'shop:shop' %}">Магазин</a></li>
+            <li><a href="{% url 'shop:shop_category' category=item.category %}">{{ item.get_category_display }}</a></li>
+            <li class="current">{{ item.name }}</li>
+        </ul>
+    </div>
+
+    <div class="item-detail-container">
+        <div class="item-detail-card">
+            <div class="item-image-large">
                 {% if item.image %}
-                    <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                <img src="{{ item.image.url }}" alt="{{ item.name }}">
                 {% else %}
-                    <img src="{% static 'images/default-item.png' %}" alt="{{ item.name }}">
+                <div class="placeholder-image-large">{{ item.name|first }}</div>
                 {% endif %}
             </div>
-
-            <div class="item-detail-info">
+            
+            <div class="item-info">
+                <h2 class="item-name">{{ item.name }}</h2>
+                
+                <div class="item-category">
+                    <span class="category-label">Категория:</span>
+                    <span class="category-value">{{ item.get_category_display }}</span>
+                </div>
+                
                 <div class="item-description">
-                    {{ item.description }}
+                    <p>{{ item.description }}</p>
                 </div>
-
-                <div class="item-stats">
-                    <div class="stat-group">
-                        <span class="stat-label">Category:</span>
-                        <span class="stat-value">{{ item.get_category_display }}</span>
-                    </div>
-                    <div class="stat-group">
-                        <span class="stat-label">Level Required:</span>
-                        <span class="stat-value">{{ item.level_required }}</span>
-                    </div>
-                    {% if item.attributes %}
-                        <div class="stat-group">
-                            <span class="stat-label">Attributes:</span>
-                            <div class="attribute-list">
-                                {% for attribute in item.attributes %}
-                                    <div class="attribute-item">
-                                        <span class="attribute-icon icon-{{ attribute.type }}"></span>
-                                        <span class="attribute-value">{{ attribute.value }}</span>
-                                        <span class="attribute-name">{{ attribute.name }}</span>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
+                
+                <div class="item-price-large">
+                    {% if item.currency == 'coins' %}
+                    <span class="price-icon">💰</span>
+                    {% else %}
+                    <span class="price-icon">💎</span>
                     {% endif %}
+                    <span class="price-amount">{{ item.price }}</span>
                 </div>
-
-                <div class="purchase-section">
-                    <div class="price-display">
-                        <span class="price-icon">
-                            {% if item.currency == 'coins' %}
-                                <span class="icon-coin"></span>
-                            {% else %}
-                                <span class="icon-diamond"></span>
-                            {% endif %}
-                        </span>
-                        <span class="price-value">{{ item.price }}</span>
-                        <span class="price-currency">{{ item.get_currency_display }}</span>
-                    </div>
-
-                    <form method="post" action="{% url 'shop:purchase_item' item.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-accent">
-                            <span class="icon-shopping-cart"></span> Purchase
-                        </button>
-                    </form>
+                
+                {% if already_purchased %}
+                <div class="already-purchased">
+                    <span class="purchased-icon">✓</span> Уже приобретено
                 </div>
+                
+                {% if is_equipped %}
+                <div class="item-status equipped">
+                    <span class="status-icon">👤</span> В данный момент используется
+                </div>
+                <form action="{% url 'shop:unequip_item' item_id=item.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="unequip-button">Снять</button>
+                </form>
+                {% else %}
+                <form action="{% url 'shop:equip_item' item_id=item.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="equip-button">Использовать</button>
+                </form>
+                {% endif %}
+                
+                {% else %}
+                <form action="{% url 'shop:purchase_item' item_id=item.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="purchase-button">Купить</button>
+                </form>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<div class="magic-particles"></div>
+<!-- Purchase Confirmation Modal -->
+<div id="purchase-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Подтверждение покупки</h2>
+        <p>Вы уверены, что хотите купить <span id="item-name-modal">{{ item.name }}</span> за <span id="item-price-modal">{{ item.price }}</span> 
+            {% if item.currency == 'coins' %}монет{% else %}кристаллов{% endif %}?</p>
+        <div class="modal-buttons">
+            <button id="confirm-purchase" class="confirm-button">Подтвердить</button>
+            <button id="cancel-purchase" class="cancel-button">Отмена</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'vendor/js/shop_detail.js' %}"></script>
 {% endblock %}

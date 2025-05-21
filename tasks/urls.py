@@ -7,11 +7,13 @@ urlpatterns = [
     # Task routes
     path('', views.task_list, name='tasks'),
     path('create/', views.task_create, name='task_create'),
-    path('create/base/<int:base_task_id>/', views.create_from_base_task, name='create_from_base_task'),
     path('<int:task_id>/', views.task_detail, name='task_detail'),
     path('<int:task_id>/edit/', views.task_edit, name='task_edit'),
     path('<int:task_id>/delete/', views.task_delete, name='task_delete'),
     path('<int:task_id>/complete/', views.task_complete, name='task_complete'),
+
+    path('class-tasks/', views.class_tasks_list, name='class_tasks'),
+    path('class-tasks/<int:task_id>/complete/', views.complete_class_task, name='complete_class_task'),
 
     # Habit routes
     path('habits/', views.habits_list, name='habits_list'),
