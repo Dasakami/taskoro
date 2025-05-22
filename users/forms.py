@@ -1,6 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import Profile
 
 class CustomUserCreationForm(UserCreationForm):
@@ -8,31 +8,27 @@ class CustomUserCreationForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2')
-        
+        fields = ['username', 'email', 'password1', 'password2']
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Add magic-themed classes to the form fields
-        for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control magic-input'
-            
+        # Customize form labels and help text
+        self.fields['username'].label = 'Имя охотника'
+        self.fields['username'].help_text = 'Имя, которое будут видеть другие игроки.'
+        self.fields['email'].label = 'Email'
+        self.fields['password1'].label = 'Пароль'
+        self.fields['password2'].label = 'Подтверждение пароля'
+
 class CustomAuthenticationForm(AuthenticationForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Add magic-themed classes to the form fields
-        for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control magic-input'
+    username = forms.CharField(label='Имя охотника')
+    password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['avatar', 'bio', 'title', 'theme_preference']
-        widgets = {
-            'bio': forms.Textarea(attrs={'rows': 4}),
+        fields = ['avatar', 'bio', 'theme_preference']
+        labels = {
+            'avatar': 'Аватар',
+            'bio': 'О себе',
+            'theme_preference': 'Тема интерфейса'
         }
-        
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Add magic-themed classes to the form fields
-        for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control magic-input'

@@ -138,3 +138,6 @@ def custom_upload_function(request):
             'url': file_url
         })
     return JsonResponse({'uploaded': 0})
+
+def admin_rofl(request):
+    return render(request, 'main/admin_rofl.html')

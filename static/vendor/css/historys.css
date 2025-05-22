@@ -325,3 +325,9 @@ textarea.form-control {
         text-align: center;
     }
 }
+
+@media (max-width: 400px) {
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+}

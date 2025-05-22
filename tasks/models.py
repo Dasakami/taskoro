@@ -54,6 +54,8 @@ class BaseTaskCompletion(models.Model):
     
     def __str__(self):
         return f"{self.user.username} completed {self.base_task.title} at {self.completed_at}"
+    
+
 
 class Task(models.Model):
     DIFFICULTY_CHOICES = [

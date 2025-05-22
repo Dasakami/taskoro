@@ -1,25 +1,34 @@
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django import forms
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import Profile
 
-class ProfileInline(admin.StackedInline):
-    model = Profile
-    can_delete = False
-    verbose_name_plural = 'profile'
+class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Customize form labels and help text
+        self.fields['username'].label = 'Имя охотника'
+        self.fields['username'].help_text = 'Имя, которое будут видеть другие игроки.'
+        self.fields['email'].label = 'Email'
+        self.fields['password1'].label = 'Пароль'
+        self.fields['password2'].label = 'Подтверждение пароля'
 
-class UserAdmin(BaseUserAdmin):
-    inlines = (ProfileInline,)
+class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(label='Имя охотника')
+    password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
 
-# Re-register UserAdmin
-admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
-
-from django.contrib import admin
-from .models import Medal
-
-@admin.register(Medal)
-class MedalAdmin(admin.ModelAdmin):
-    list_display = ('name', 'profile', 'medal_type', 'acquired_date')
-    search_fields = ('name', 'profile__user__username')
-
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['avatar', 'bio', 'theme_preference']
+        labels = {
+            'avatar': 'Аватар',
+            'bio': 'О себе',
+            'theme_preference': 'Тема интерфейса'
+        }

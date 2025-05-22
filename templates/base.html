@@ -12,7 +12,7 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="/static/vendor/css/reset.css">
-    <link rel="stylesheet" href="/static/vendor/css/b.css">
+    <link rel="stylesheet" href="/static/vendor/css/basess.css">
     <link rel="stylesheet" href="/static/vendor/css/animations.css">
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
     {% block extra_css %}{% endblock %}
@@ -39,6 +39,9 @@
 </head>
 <body>
     <div class="app-container">
+        <button class="burger-btn" aria-label="Toggle sidebar">
+        ☰
+    </button>
         <nav class="sidebar">
             <div class="sidebar-header">
                 {% if user.is_authenticated %}
@@ -115,11 +118,34 @@
             </div>
         </nav>
         
+        
+
+        
+        
         <main class="content">
             {% block content %}{% endblock %}
         </main>
+        
     </div>
     
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const burgerBtn = document.querySelector('.burger-btn');
+        const sidebar = document.querySelector('.sidebar');
+
+        burgerBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-active');
+        });
+
+        // Можно добавить закрытие сайдбара при клике вне него (опционально)
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !burgerBtn.contains(e.target)) {
+                sidebar.classList.remove('sidebar-active');
+            }
+        });
+    });
+</script>
+
     <!-- Magic particle effects overlay -->
     <div class="magic-particles"></div>
     

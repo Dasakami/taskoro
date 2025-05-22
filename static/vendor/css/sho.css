@@ -880,3 +880,63 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 576px) {
+    .shop-title {
+        font-size: 1.8rem;
+    }
+    
+    .item-name {
+        font-size: 1.2rem;
+    }
+    
+    .item-price {
+        font-size: 1rem;
+    }
+    
+    .item-description {
+        font-size: 0.9rem;
+    }
+    
+    .item-actions button {
+        font-size: 0.9rem;
+    }
+
+    .item-image-large {
+        padding: 20px;
+        min-height: 100px;
+        width: 200px;
+    }
+
+    .placeholder-image-large {
+        width: 100px;
+        height: 100px;
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .shop-title {
+        font-size: 1.5rem;
+    }
+    
+    .item-name {
+        font-size: 1rem;
+    }
+    
+    .item-price {
+        font-size: 0.9rem;
+    }
+    
+    .item-description {
+        font-size: 0.8rem;
+    }
+    
+    .item-actions button {
+        font-size: 0.8rem;
+    }
+
+    .user-currency {
+        display: block;
+    }
+}

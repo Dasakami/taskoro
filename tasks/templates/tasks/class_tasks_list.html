@@ -5,69 +5,393 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Задачи по классам</h2>
+    <div class="page-header">
+        <h1 class="page-title">Задачи по классам</h1>
+        <a href="{% url 'tasks:class_task_completed' %}" class="btn btn-outline-primary">
+            История выполнения
+        </a>
+    </div>
 
     <!-- Форма фильтрации -->
-    <form method="get" class="mb-4 row g-3">
-        <div class="col-md-3">
-            <select name="type" class="form-select">
-                <option value="all">Все типы</option>
-                {% for value, label in task_type_choices %}
-                    <option value="{{ value }}" {% if value == selected_type %}selected{% endif %}>
-                        {{ label }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select name="difficulty" class="form-select">
-                <option value="">Любая сложность</option>
-                {% for value, label in difficulty_choices %}
-                    <option value="{{ value }}" {% if value == selected_difficulty %}selected{% endif %}>
-                        {{ label }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select name="class" class="form-select">
-                <option value="">Все классы</option>
-                {% for cls in character_classes %}
-                    <option value="{{ cls.id }}" {% if cls.id|stringformat:"s" == selected_class %}selected{% endif %}>
-                        {{ cls.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-primary w-100">Применить</button>
-        </div>
-    </form>
+    <div class="filter-section">
+        <form method="get" class="filter-form">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="type" class="filter-label">Тип задачи</label>
+                    <select name="type" id="type" class="filter-select">
+                        <option value="all">Все типы</option>
+                        {% for value, label in task_type_choices %}
+                            <option value="{{ value }}" {% if value == selected_type %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="difficulty" class="filter-label">Сложность</label>
+                    <select name="difficulty" id="difficulty" class="filter-select">
+                        <option value="">Любая сложность</option>
+                        {% for value, label in difficulty_choices %}
+                            <option value="{{ value }}" {% if value == selected_difficulty %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="class" class="filter-label">Класс</label>
+                    <select name="class" id="class" class="filter-select">
+                        <option value="">Все классы</option>
+                        {% for cls in character_classes %}
+                            <option value="{{ cls.id }}" {% if cls.id|stringformat:"s" == selected_class %}selected{% endif %}>
+                                {{ cls.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group filter-actions">
+                    <button type="submit" class="btn btn-primary">Применить</button>
+                    <a href="{% url 'tasks:class_tasks' %}" class="btn btn-outline-secondary">Сбросить</a>
+                </div>
+            </div>
+        </form>
+    </div>
 
     <!-- Список задач -->
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="tasks-grid">
         {% for task in base_tasks %}
-            <div class="col">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ task.title }}</h5>
-                        <p class="card-text text-muted">{{ task.get_task_type_display }} | {{ task.get_difficulty_display }}</p>
-                        <p class="card-text">{{ task.description|default:"Нет описания." }}</p>
-                        <p class="mb-1"><strong>Класс:</strong> {{ task.character_class.name }}</p>
-                        <p><strong>Награда:</strong> {{ task.xp_reward }} XP</p>
+            <div class="task-card" data-difficulty="{{ task.difficulty }}">
+                <div class="task-card-header">
+                    <h3 class="task-title">{{ task.title }}</h3>
+                    <div class="task-badges">
+                        <span class="task-badge task-type">{{ task.get_task_type_display }}</span>
+                        <span class="task-badge task-difficulty">{{ task.get_difficulty_display }}</span>
                     </div>
-                    <div class="card-footer bg-transparent border-top-0">
-                        {% if task.id in completed_tasks %}
-                            <span class="badge bg-success">Выполнено сегодня</span>
-                        {% else %}
-                            <button class="btn btn-outline-success w-100">Выполнить</button>
-                        {% endif %}
+                </div>
+                
+                <div class="task-card-body">
+                    <div class="task-class">
+                        <span class="task-label">Класс:</span>
+                        <span class="task-value">{{ task.character_class.name }}</span>
                     </div>
+                    
+                    <div class="task-description">
+                        {{ task.description|default:"Нет описания."|truncatechars:100 }}
+                    </div>
+                    
+                    <div class="task-reward">
+                        <span class="task-label">Награда:</span>
+                        <span class="task-value">{{ task.xp_reward }} XP</span>
+                    </div>
+                </div>
+                
+                <div class="task-card-footer">
+                    {% if task.id in completed_tasks %}
+                        <div class="completed-badge">
+                            <i class="completed-icon">✓</i> Выполнено сегодня
+                        </div>
+                    {% else %}
+                        <div class="task-actions">
+                            <a href="{% url 'tasks:class_task_detail' task.id %}" class="btn btn-outline-secondary">
+                                Подробнее
+                            </a>
+                            <a href="{% url 'tasks:complete_class_task' task.id %}" class="btn btn-primary">
+                                Выполнить
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         {% empty %}
-            <p>Нет задач, соответствующих фильтру.</p>
+            <div class="empty-tasks">
+                <div class="empty-icon">📋</div>
+                <h3 class="empty-title">Нет доступных задач</h3>
+                <p class="empty-message">Нет задач, соответствующих выбранным фильтрам.</p>
+            </div>
         {% endfor %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    
+    .page-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.8rem;
+        color: white;
+        margin: 0;
+        text-shadow: 0 0 10px rgba(102, 51, 255, 0.3);
+    }
+    
+    /* Filter section styles */
+    .filter-section {
+        background-color: rgba(30, 30, 50, 0.8);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .filter-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .filter-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #b3b3cc;
+        font-weight: 500;
+    }
+    
+    .filter-select {
+        width: 100%;
+        background-color: rgba(40, 40, 60, 0.8);
+        border: 1px solid rgba(102, 51, 255, 0.3);
+        border-radius: 5px;
+        padding: 10px;
+        color: white;
+        font-family: 'Rajdhani', sans-serif;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: #6633ff;
+        box-shadow: 0 0 0 2px rgba(102, 51, 255, 0.25);
+    }
+    
+    .filter-actions {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+    }
+    
+    /* Task card grid */
+    .tasks-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+    }
+    
+    .task-card {
+        background-color: rgba(30, 30, 50, 0.8);
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(102, 51, 255, 0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .task-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    .task-card[data-difficulty="easy"] {
+        border-top: 3px solid #33ff99;
+    }
+    
+    .task-card[data-difficulty="medium"] {
+        border-top: 3px solid #ffcc33;
+    }
+    
+    .task-card[data-difficulty="hard"] {
+        border-top: 3px solid #ff3366;
+    }
+    
+    .task-card[data-difficulty="epic"] {
+        border-top: 3px solid #6633ff;
+    }
+    
+    .task-card-header {
+        background-color: rgba(40, 40, 60, 0.8);
+        padding: 15px;
+        border-bottom: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .task-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: white;
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+    
+    .task-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .task-badge {
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+    
+    .task-type {
+        background-color: rgba(102, 51, 255, 0.3);
+        color: #b299ff;
+    }
+    
+    .task-difficulty {
+        background-color: rgba(0, 0, 0, 0.2);
+        color: white;
+    }
+    
+    .task-card[data-difficulty="easy"] .task-difficulty {
+        background-color: rgba(51, 255, 153, 0.2);
+        color: #80ffbb;
+    }
+    
+    .task-card[data-difficulty="medium"] .task-difficulty {
+        background-color: rgba(255, 204, 51, 0.2);
+        color: #ffdb80;
+    }
+    
+    .task-card[data-difficulty="hard"] .task-difficulty {
+        background-color: rgba(255, 51, 102, 0.2);
+        color: #ff809f;
+    }
+    
+    .task-card[data-difficulty="epic"] .task-difficulty {
+        background-color: rgba(102, 51, 255, 0.2);
+        color: #b299ff;
+    }
+    
+    .task-card-body {
+        padding: 15px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .task-class {
+        margin-bottom: 5px;
+    }
+    
+    .task-label {
+        color: #b3b3cc;
+        margin-right: 5px;
+    }
+    
+    .task-value {
+        color: white;
+        font-weight: 500;
+    }
+    
+    .task-description {
+        color: #cccccc;
+        font-size: 0.9rem;
+        flex-grow: 1;
+        margin-bottom: 10px;
+    }
+    
+    .task-reward {
+        margin-top: auto;
+    }
+    
+    .task-card-footer {
+        padding: 15px;
+        background-color: rgba(40, 40, 60, 0.8);
+        border-top: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .task-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    
+    .completed-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(51, 204, 102, 0.2);
+        color: #66ffaa;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-weight: 500;
+    }
+    
+    .completed-icon {
+        margin-right: 8px;
+    }
+    
+    .empty-tasks {
+        grid-column: 1 / -1;
+        background-color: rgba(30, 30, 50, 0.8);
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        border: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.7;
+    }
+    
+    .empty-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 15px;
+    }
+    
+    .empty-message {
+        color: #b3b3cc;
+    }
+    
+    @media (max-width: 768px) {
+        .filter-row {
+            flex-direction: column;
+        }
+        
+        .filter-group {
+            width: 100%;
+        }
+        
+        .tasks-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .task-actions {
+            flex-direction: column;
+        }
+        
+        .task-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
 {% endblock %}

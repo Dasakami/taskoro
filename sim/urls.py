@@ -31,6 +31,6 @@ handler400 = 'main.views.bad_request'
 urlpatterns = [
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # Заменили url на re_path
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}), 
-    path('admin/', admin.site.urls),
+    path('disko/', admin.site.urls),
     path('', include('main.urls'))
 ]

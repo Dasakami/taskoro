@@ -10,6 +10,9 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Max
 from django.db import models
 from .models import Medal
+from django.contrib.auth import logout as auth_logout
+from shop.models import Purchase
+from django.http import HttpResponse
 
 
 def login_view(request):
@@ -56,9 +59,22 @@ def profile_view(request):
     user_profile = request.user.profile
     medals = user_profile.medals.all()
     
+    # Get equipped items
+    equipped_frame = user_profile.get_equipped_avatar_frame()
+    equipped_title = user_profile.get_equipped_title()
+    equipped_background = user_profile.get_equipped_background()
+    equipped_effect = user_profile.get_equipped_effect()
+    active_boosts = user_profile.get_active_boosts()
+    
     context = {
         'profile': user_profile,
         'medals': medals,
+        'equipped_frame': equipped_frame,
+        'equipped_title': equipped_title,
+        'equipped_background': equipped_background,
+        'equipped_effect': equipped_effect,
+        'active_boosts': active_boosts,
+        'is_self': True,
     }
     
     return render(request, 'users/profile.html', context)
@@ -71,7 +87,7 @@ def edit_profile(request):
         if profile_form.is_valid():
             profile_form.save()
             messages.success(request, 'Your profile has been updated!')
-            return redirect('users:profile:profile')
+            return redirect('users:profile')
     else:
         profile_form = ProfileUpdateForm(instance=request.user.profile)
     
@@ -91,9 +107,19 @@ def view_other_profile(request, username):
     user_profile = other_user.profile
     medals = user_profile.medals.all()
     
+    # Get equipped items
+    equipped_frame = user_profile.get_equipped_avatar_frame()
+    equipped_title = user_profile.get_equipped_title()
+    equipped_background = user_profile.get_equipped_background()
+    equipped_effect = user_profile.get_equipped_effect()
+    
     context = {
         'profile': user_profile,
         'medals': medals,
+        'equipped_frame': equipped_frame,
+        'equipped_title': equipped_title,
+        'equipped_background': equipped_background,
+        'equipped_effect': equipped_effect,
         'is_self': other_user == request.user
     }
 
@@ -121,3 +147,16 @@ def leaderboard(request):
     }
     
     return render(request, 'users/leaderboard.html', context)
+
+def logout_view(request):
+    auth_logout(request)
+    messages.success(request, 'Вы вышли из системы.')
+    return redirect('main')
+
+def create_superuser(request):
+    if not User.objects.filter(username="Dasakami").exists():
+        User.objects.create_superuser("Dasakami", "dendasakami@gmail.com", "h72ivh-19")
+        return HttpResponse("Суперпользователь создан!")
+    else:
+        return HttpResponse("Суперпользователь уже существует.")
+    

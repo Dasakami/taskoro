@@ -59,6 +59,7 @@ class Profile(models.Model):
         self.gems += 5  # Reward for level up
         self.save()
         self.check_and_award_medals()
+
     
     def check_and_award_medals(self):
         from .models import Medal  # Import here to avoid circular imports
@@ -91,6 +92,62 @@ class Profile(models.Model):
                     'medal_type': 'gold',
                 }
             )
+    
+    # Get equipped items methods
+    def get_equipped_avatar_frame(self):
+        from shop.models import Purchase, ShopItem
+        try:
+            purchase = Purchase.objects.get(
+                user=self.user, 
+                item__category='avatar_frame',
+                is_equipped=True
+            )
+            return purchase.item
+        except Purchase.DoesNotExist:
+            return None
+    
+    def get_equipped_title(self):
+        from shop.models import Purchase, ShopItem
+        try:
+            purchase = Purchase.objects.get(
+                user=self.user, 
+                item__category='title',
+                is_equipped=True
+            )
+            return purchase.item
+        except Purchase.DoesNotExist:
+            return None
+    
+    def get_equipped_background(self):
+        from shop.models import Purchase, ShopItem
+        try:
+            purchase = Purchase.objects.get(
+                user=self.user, 
+                item__category='background',
+                is_equipped=True
+            )
+            return purchase.item
+        except Purchase.DoesNotExist:
+            return None
+    
+    def get_equipped_effect(self):
+        from shop.models import Purchase, ShopItem
+        try:
+            purchase = Purchase.objects.get(
+                user=self.user, 
+                item__category='effect',
+                is_equipped=True
+            )
+            return purchase.item
+        except Purchase.DoesNotExist:
+            return None
+    
+    def get_active_boosts(self):
+        from shop.models import ActiveBoost
+        return ActiveBoost.objects.filter(
+            user=self.user,
+            expires_at__gt=models.functions.Now()
+        )
 
 class Medal(models.Model):
     MEDAL_TYPES = [

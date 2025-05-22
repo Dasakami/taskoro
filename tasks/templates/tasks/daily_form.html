@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Создать дневную цель</h2>
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Сохранить</button>
-  </form>
+  <div class="max-w-xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
+    <h2 class="text-2xl font-bold mb-6 text-center">Создать дневную цель</h2>
+    <form method="post" novalidate class="space-y-4">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">
+        Сохранить
+      </button>
+    </form>
+  </div>
 {% endblock %}

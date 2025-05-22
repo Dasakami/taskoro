@@ -4,7 +4,7 @@
 {% block title %} Taskoro — Игровая прокачка дисциплины и привычек {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/vendor/css/dashboard.css">
+<link rel="stylesheet" href="/static/vendor/css/dashboards.css">
 {% endblock %}
 {% block seo %}
 <meta name="description" content="Погрузись в мир Taskoro — создавай задачи, соревнуйся в дуэлях и турнирах, управляй привычками и развивайся как герой!">
@@ -37,14 +37,6 @@
                         Гость!
                         {% endif %}
         </h1>
-            <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-<model-viewer src="{% static 'vendor/models/igris_solo_leveling.glb' %}" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral"  shadow-intensity="1" camera-orbit="8.049deg 89.27deg 6.964m" field-of-view="30deg">
-    <div class="progress-bar hide" slot="progress-bar">
-        <div class="update-bar"></div>
-    </div>
-    <button slot="ar-button" id="ar-button">
-    </button>
-</model-viewer>
         </div>
         <div class="player-stats">
             <div class="player-level">
@@ -246,35 +238,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Calculate progress percentage
-        const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-        
-        // Update circular progress
-        const circle = document.querySelector('.circle');
-        if (circle) {
-            circle.setAttribute('stroke-dasharray', `${progressPercentage}, 100`);
-        }
-        
-        const percentageText = document.querySelector('.percentage');
-        if (percentageText) {
-            percentageText.textContent = `${progressPercentage}%`;
-        }
-    });
-</script>
-
-<style>
-    model-viewer {
-  width: 100%;
-  max-width: 400px;
-  height: 400px;
-  margin: 0 auto;
-  display: block;
-}
-
-</style>
 {% endblock %}

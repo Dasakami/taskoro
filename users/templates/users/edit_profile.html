@@ -1,63 +1,44 @@
 {% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
 
 {% block title %}Редактирование профиля | Magic RPG Tracker{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/vendor/css/profile.css">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="profile-container">
-    <div class="page-header reveal">
-        <h1 class="text-gradient">Редактирование профиля</h1>
-        <p>Измените свой профиль Охотника</p>
-    </div>
-
-    <div class="profile-content">
-        <div class="profile-section card reveal">
-            <div class="card-header">
-                <h2>Ваши данные</h2>
-            </div>
-            <div class="card-body">
-                <form method="post" enctype="multipart/form-data" class="profile-form">
-                    {% csrf_token %}
-                    
-                    <div class="form-group">
-                        <label for="id_avatar" class="form-label">Аватар</label>
-                        <div class="avatar-preview">
-                            {% if user.profile.avatar %}
-                            <img src="{{ user.profile.avatar.url|default:'/static/images/default_avatar.png' }}" alt="Current avatar" id="avatar-preview-img">
-                            {% else %}
-                            <img src="/static/images/default_avatar.png" alt="Default avatar" id="avatar-preview-img">
-                            {% endif %}
-                        </div>
-                        {{ profile_form.avatar }}
-                        <small class="form-hint">Рекомендуемый размер: 200x200 пикселей</small>
+<div class="container">
+    <div class="card profile-edit-card">
+        <div class="card-header">
+            <h1>Редактирование профиля</h1>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-preview">
+                    <div class="current-avatar">
+                        {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="Current Avatar">
+                        {% else %}
+                        <div class="avatar-placeholder">{{ user.username|first|upper }}</div>
+                        {% endif %}
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="id_title" class="form-label">Титул</label>
-                        {{ profile_form.title }}
-                        <small class="form-hint">Ваш титул будет отображаться под именем</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="id_bio" class="form-label">О себе</label>
-                        {{ profile_form.bio }}
-                        <small class="form-hint">Расскажите о себе другим Охотникам</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="id_theme_preference" class="form-label">Предпочитаемая тема</label>
-                        {{ profile_form.theme_preference }}
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="btn">Сохранить изменения</button>
-                        <a href="{% url 'users:profile:profile' %}" class="btn btn-secondary">Отмена</a>
-                    </div>
-                </form>
-            </div>
+                </div>
+                
+                {{ profile_form|crispy }}
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Сохранить изменения
+                    </button>
+                    <a href="{% url 'users:profile' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Отмена
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -65,30 +46,29 @@
 
 {% block extra_js %}
 <script>
-    // Preview uploaded avatar
-    document.addEventListener('DOMContentLoaded', function() {
-        const avatarInput = document.getElementById('id_avatar');
-        const avatarPreview = document.getElementById('avatar-preview-img');
-        
-        if (avatarInput) {
-            avatarInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
-                        avatarPreview.src = e.target.result;
-                        avatarPreview.parentElement.classList.add('glow');
-                        
-                        // Remove glow effect after 2 seconds
-                        setTimeout(() => {
-                            avatarPreview.parentElement.classList.remove('glow');
-                        }, 2000);
-                    }
-                    
-                    reader.readAsDataURL(this.files[0]);
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview avatar image when selected
+    const avatarInput = document.getElementById('id_avatar');
+    const currentAvatar = document.querySelector('.current-avatar img, .avatar-placeholder');
+    
+    avatarInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // If there's a placeholder, replace it with an image
+                if (currentAvatar.tagName === 'DIV') {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = "Avatar Preview";
+                    currentAvatar.parentNode.replaceChild(img, currentAvatar);
+                } else {
+                    currentAvatar.src = e.target.result;
                 }
-            });
+            }
+            reader.readAsDataURL(file);
         }
     });
+});
 </script>
 {% endblock %}

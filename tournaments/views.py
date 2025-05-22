@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from .models import Tournament, TournamentParticipant
+from history.models import ActivityLog
 
 
 def tournament_list(request):
@@ -90,5 +91,16 @@ def tournament_join(request, tournament_id):
             user=request.user
         )
         messages.success(request, f'Вы присоединились к турниру "{tournament.title}"!')
+
+        ActivityLog.objects.create(
+            user=request.user,
+            activity_type='tournament_join',
+            description=f'Вы участвуете в турнире: {tournament.title}',
+            tournament=tournament,
+            experience_gained=tournament.experience_reward,
+            coins_gained=tournament.coins_reward,
+            gems_gained=tournament.gems_reward
+
+        )
     
     return redirect('tournaments:tournament_detail', tournament_id=tournament.id)

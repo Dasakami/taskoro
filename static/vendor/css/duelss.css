@@ -277,4 +277,44 @@
     .duel-actions .btn {
         width: 100%;
     }
+
+    .player-info {
+        display: block;
+    }
+}
+
+@media (max-width: 575px) {
+    .duels-sections {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .duel-card {
+        margin-bottom: 2rem;
+    }
+    
+    .duel-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .duel-title {
+        font-size: 1.5rem;
+    }
+
+}
+
+@media (max-width: 400px) {
+    .duels-sections {
+        grid-template-columns: 1fr;
+    }
+
+    .duel-title {
+        font-size: 1.1rem;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+
 }

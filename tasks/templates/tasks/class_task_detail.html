@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ task.title }} | Задача класса{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="task-detail-container">
+        <!-- Header section with back button and task title -->
+        <div class="task-header">
+            <a href="{% url 'tasks:class_tasks' %}" class="back-btn">
+                <i class="back-icon">←</i> К списку задач класса
+            </a>
+            <h1 class="task-title">{{ task.title }}</h1>
+        </div>
+        
+        <!-- Task information card -->
+        <div class="task-card">
+            <div class="task-card-header">
+                <span class="task-card-label">Задача класса</span>
+                
+                <!-- Task type and difficulty badges -->
+                <div class="task-badges">
+                    <span class="task-type-badge">{{ task.get_task_type_display }}</span>
+                    <span class="task-difficulty-badge" data-difficulty="{{ task.difficulty }}">
+                        {{ task.get_difficulty_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="task-card-body">
+                <!-- Class info -->
+                <div class="task-info-section">
+                    <h3 class="section-title">Класс</h3>
+                    <div class="class-info">
+                        <span class="class-name">{{ task.character_class.name }}</span>
+                        <p class="class-description">{{ task.character_class.description }}</p>
+                    </div>
+                </div>
+                
+                <!-- Task description -->
+                <div class="task-info-section">
+                    <h3 class="section-title">Описание</h3>
+                    <div class="task-description">
+                        {{ task.description|linebreaks|default:"Описание отсутствует." }}
+                    </div>
+                </div>
+                
+                <!-- Task rewards -->
+                <div class="task-info-section">
+                    <h3 class="section-title">Награда</h3>
+                    <div class="rewards-container">
+                        <div class="reward-item">
+                            <span class="reward-value">{{ task.xp_reward }}</span>
+                            <span class="reward-label">XP</span>
+                        </div>
+                        <div class="reward-item">
+                            <span class="reward-value">{{ task.xp_reward|divisibleby:4 }}</span>
+                            <span class="reward-label">Монет</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Task completion stats -->
+                <div class="task-info-section">
+                    <h3 class="section-title">Статистика</h3>
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <span class="stat-value">{{ streak }}</span>
+                            <span class="stat-label">Серия дней</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ completions_last_30_days }}</span>
+                            <span class="stat-label">Выполнено за 30 дней</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="completion-rate-circle" data-percentage="{{ completion_rate|floatformat:0 }}">
+                                <span class="completion-rate-text">{{ completion_rate|floatformat:0 }}%</span>
+                            </div>
+                            <span class="stat-label">Частота выполнения</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="task-card-footer">
+                {% if task.id in completed_tasks %}
+                    <div class="completed-badge">
+                        <i class="completed-icon">✓</i> Выполнено сегодня
+                    </div>
+                {% else %}
+                    <a href="{% url 'tasks:complete_class_task' task.id %}" class="complete-btn">
+                        {% csrf_token %}
+                        Выполнить задачу
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Task completion history -->
+        <div class="history-card">
+            <h3 class="history-title">История выполнения</h3>
+            
+            {% if completion_history %}
+                <div class="history-list">
+                    {% for completion in completion_history %}
+                        <div class="history-item">
+                            <div class="history-date">
+                                {{ completion.completed_at|date:"d.m.Y" }}
+                            </div>
+                            <div class="history-time">
+                                {{ completion.completed_at|time:"H:i" }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="view-all-link">
+                    <a href="{% url 'tasks:class_task_completed' %}?class={{ task.character_class.id }}">
+                        Посмотреть полную историю
+                    </a>
+                </div>
+            {% else %}
+                <div class="empty-history">
+                    <p>Эта задача еще не была выполнена.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-detail-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .task-header {
+        margin-bottom: 20px;
+    }
+    
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        color: #b3b3cc;
+        text-decoration: none;
+        margin-bottom: 15px;
+        transition: color 0.2s;
+    }
+    
+    .back-btn:hover {
+        color: #6633ff;
+    }
+    
+    .back-icon {
+        margin-right: 8px;
+        font-size: 1.2rem;
+    }
+    
+    .task-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.8rem;
+        color: white;
+        margin-bottom: 15px;
+        text-shadow: 0 0 10px rgba(102, 51, 255, 0.3);
+    }
+    
+    .task-card {
+        background-color: rgba(20, 20, 40, 0.8);
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        margin-bottom: 25px;
+        border: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .task-card-header {
+        background-color: rgba(40, 40, 60, 0.8);
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .task-card-label {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        color: #b3b3cc;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+    
+    .task-badges {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .task-type-badge,
+    .task-difficulty-badge {
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .task-type-badge {
+        background-color: rgba(102, 51, 255, 0.3);
+        color: #b299ff;
+    }
+    
+    .task-difficulty-badge[data-difficulty="easy"] {
+        background-color: rgba(51, 255, 153, 0.2);
+        color: #80ffbb;
+    }
+    
+    .task-difficulty-badge[data-difficulty="medium"] {
+        background-color: rgba(255, 204, 51, 0.2);
+        color: #ffdb80;
+    }
+    
+    .task-difficulty-badge[data-difficulty="hard"] {
+        background-color: rgba(255, 51, 102, 0.2);
+        color: #ff809f;
+    }
+    
+    .task-difficulty-badge[data-difficulty="epic"] {
+        background-color: rgba(102, 51, 255, 0.2);
+        color: #b299ff;
+    }
+    
+    .task-card-body {
+        padding: 20px;
+    }
+    
+    .task-info-section {
+        margin-bottom: 25px;
+    }
+    
+    .section-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #b3b3cc;
+        margin-bottom: 12px;
+        border-bottom: 1px solid rgba(102, 51, 255, 0.3);
+        padding-bottom: 8px;
+    }
+    
+    .class-name {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.2rem;
+        color: white;
+        display: block;
+        margin-bottom: 8px;
+    }
+    
+    .class-description,
+    .task-description {
+        color: #cccccc;
+        line-height: 1.5;
+    }
+    
+    .rewards-container,
+    .stats-container {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .reward-item,
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 100px;
+        padding: 12px;
+        background-color: rgba(40, 40, 60, 0.8);
+        border-radius: 8px;
+        border: 1px solid rgba(102, 51, 255, 0.2);
+    }
+    
+    .reward-value,
+    .stat-value {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 5px;
+    }
+    
+    .reward-label,
+    .stat-label {
+        font-size: 0.85rem;
+        color: #b3b3cc;
+    }
+    
+    .completion-rate-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: conic-gradient(#6633ff 0% var(--percentage), rgba(40, 40, 60, 0.8) var(--percentage) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 5px;
+        position: relative;
+    }
+    
+    .completion-rate-circle::before {
+        content: "";
+        position: absolute;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: rgba(20, 20, 40, 0.8);
+    }
+    
+    .completion-rate-text {
+        position: relative;
+        z-index: 1;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.9rem;
+        color: white;
+    }
+    
+    .task-card-footer {
+        padding: 15px 20px;
+        background-color: rgba(40, 40, 60, 0.8);
+        border-top: 1px solid rgba(102, 51, 255, 0.3);
+        display: flex;
+        justify-content: center;
+    }
+    
+    .complete-btn {
+        display: inline-block;
+        background: linear-gradient(to right, #6633ff, #9966ff);
+        color: white;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(102, 51, 255, 0.5);
+    }
+    
+    .complete-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(102, 51, 255, 0.7);
+    }
+    
+    .completed-badge {
+        display: inline-flex;
+        align-items: center;
+        background-color: rgba(51, 204, 102, 0.2);
+        color: #66ffaa;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-weight: 500;
+    }
+    
+    .completed-icon {
+        margin-right: 8px;
+    }
+    
+    .history-card {
+        background-color: rgba(20, 20, 40, 0.8);
+        border-radius: 10px;
+        border: 1px solid rgba(102, 51, 255, 0.3);
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .history-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: white;
+        margin-bottom: 15px;
+        border-bottom: 1px solid rgba(102, 51, 255, 0.3);
+        padding-bottom: 8px;
+    }
+    
+    .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .history-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 15px;
+        background-color: rgba(40, 40, 60, 0.8);
+        border-radius: 6px;
+        border-left: 3px solid #6633ff;
+    }
+    
+    .history-date {
+        font-weight: 500;
+        color: white;
+    }
+    
+    .history-time {
+        color: #b3b3cc;
+    }
+    
+    .view-all-link {
+        text-align: center;
+        margin-top: 15px;
+    }
+    
+    .view-all-link a {
+        color: #6633ff;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+    
+    .view-all-link a:hover {
+        color: #9966ff;
+        text-decoration: underline;
+    }
+    
+    .empty-history {
+        text-align: center;
+        padding: 20px;
+        color: #b3b3cc;
+    }
+    
+    @media (max-width: 768px) {
+        .rewards-container,
+        .stats-container {
+            justify-content: center;
+        }
+        
+        .task-badges {
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set completion rate circle percentage
+        const circleElement = document.querySelector('.completion-rate-circle');
+        if (circleElement) {
+            const percentage = circleElement.dataset.percentage;
+            circleElement.style.setProperty('--percentage', `${percentage}%`);
+        }
+    });
+</script>
+{% endblock %}

@@ -9,6 +9,7 @@ from .forms import TaskForm, TaskCategoryForm, DailyForm, HabitForm
 from django.db.models import Count
 from history.models import ActivityLog
 from tournaments.models import TournamentParticipant
+from django.views.decorators.http import require_POST
 
 
 
@@ -105,6 +106,119 @@ def class_tasks_list(request):
     return render(request, 'tasks/class_tasks_list.html', context)
 
 @login_required
+def class_task_detail(request, task_id):
+    # Get the base task
+    base_task = get_object_or_404(BaseTask, id=task_id)
+    
+    # Check if user has the required character class
+    if not request.user.profile.character_classes.filter(id=base_task.character_class.id).exists():
+        messages.error(request, f'У вас нет доступа к заданиям класса "{base_task.character_class.name}"')
+        return redirect('tasks:class_tasks')
+    
+    # Get completion history for this task by current user
+    completion_history = BaseTaskCompletion.objects.filter(
+        user=request.user,
+        base_task=base_task
+    ).order_by('-completed_at')
+    
+    # Check if task was completed today
+    today = timezone.now().date()
+    completed_today = completion_history.filter(completed_at__date=today).exists()
+    
+    # Calculate streak (consecutive days completed)
+    streak = 0
+    last_date = None
+    
+    for completion in completion_history:
+        completion_date = completion.completed_at.date()
+        
+        if last_date is None:
+            streak = 1
+        elif (last_date - completion_date).days == 1:
+            streak += 1
+        else:
+            break
+            
+        last_date = completion_date
+    
+    # Calculate completion rate for the last 30 days
+    thirty_days_ago = timezone.now().date() - timezone.timedelta(days=30)
+    completions_last_30_days = completion_history.filter(
+        completed_at__date__gte=thirty_days_ago
+    ).values_list('completed_at__date', flat=True).distinct().count()
+    
+    completion_rate = (completions_last_30_days / 30) * 100 if completions_last_30_days > 0 else 0
+    
+    context = {
+        'task': base_task,
+        'completion_history': completion_history[:10],  # Show only last 10 completions
+        'completed_today': completed_today,
+        'streak': streak,
+        'completion_rate': completion_rate,
+        'completions_last_30_days': completions_last_30_days
+    }
+    
+    return render(request, 'tasks/class_task_detail.html', context)
+
+@login_required
+def class_task_completed(request):
+    # Get filter parameters
+    character_class = request.GET.get('class')
+    difficulty = request.GET.get('difficulty')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    
+    # Get user's character classes
+    user_classes = request.user.profile.character_classes.all()
+    
+    # Base query
+    completions = BaseTaskCompletion.objects.filter(
+        user=request.user
+    ).select_related('base_task', 'base_task__character_class').order_by('-completed_at')
+    
+    # Apply filters
+    if character_class:
+        completions = completions.filter(base_task__character_class_id=character_class)
+    
+    if difficulty:
+        completions = completions.filter(base_task__difficulty=difficulty)
+    
+    if date_from:
+        try:
+            date_from = timezone.datetime.strptime(date_from, '%Y-%m-%d').date()
+            completions = completions.filter(completed_at__date__gte=date_from)
+        except ValueError:
+            pass
+    
+    if date_to:
+        try:
+            date_to = timezone.datetime.strptime(date_to, '%Y-%m-%d').date()
+            completions = completions.filter(completed_at__date__lte=date_to)
+        except ValueError:
+            pass
+    
+    # Group completions by date
+    completion_dates = {}
+    for completion in completions:
+        date = completion.completed_at.date()
+        if date not in completion_dates:
+            completion_dates[date] = []
+        
+        completion_dates[date].append(completion)
+    
+    context = {
+        'completion_dates': completion_dates,
+        'character_classes': user_classes,
+        'difficulty_choices': BaseTask.DIFFICULTY_CHOICES,
+        'selected_class': character_class,
+        'selected_difficulty': difficulty,
+        'date_from': date_from if date_from else '',
+        'date_to': date_to if date_to else '',
+    }
+    
+    return render(request, 'tasks/class_task_completed.html', context)
+
+@login_required
 def complete_class_task(request, task_id):
     base_task = get_object_or_404(BaseTask, id=task_id)
     
@@ -115,7 +229,7 @@ def complete_class_task(request, task_id):
     
     # Check if task was already completed today
     today = timezone.now().date()
-    if request.user.profile.completed_base_tasks.filter(
+    if request.user.completed_base_tasks.filter(
         base_task=base_task,
         completed_at__date=today
     ).exists():
@@ -136,10 +250,25 @@ def complete_class_task(request, task_id):
     profile.coins += int(experience / 4)
     profile.save()
     
+    # Create activity log
+    ActivityLog.objects.create(
+        user=request.user,
+        activity_type='class_task_complete',
+        description=f'Выполнил задачу класса: {base_task.title}',
+        experience_gained=experience,
+        coins_gained=int(experience / 4),
+        gems_gained=0
+    )
+    
     messages.success(
         request,
         f'Задача "{base_task.title}" выполнена! Получено {experience} XP и {int(experience/4)} монет.'
     )
+    
+    # Check for next URL parameter
+    next_url = request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
     
     return redirect('tasks:class_tasks')
 

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+from datetime import timedelta
 
 class ShopItem(models.Model):
     CURRENCY_CHOICES = [
@@ -29,6 +31,8 @@ class ShopItem(models.Model):
     title_text = models.CharField(max_length=100, blank=True, null=True, help_text="For title items")
     title_color = models.CharField(max_length=7, blank=True, null=True, help_text="Hex color for title")
     frame_style = models.CharField(max_length=100, blank=True, null=True, help_text="For avatar frames")
+    background_url = models.CharField(max_length=255, blank=True, null=True, help_text="For background items")
+    effect_class = models.CharField(max_length=100, blank=True, null=True, help_text="CSS class for visual effect")
     boost_multiplier = models.FloatField(default=1.0, help_text="For boost items")
     boost_duration = models.IntegerField(default=0, help_text="Duration in hours for boosts")
     
@@ -61,8 +65,25 @@ class ActiveBoost(models.Model):
     
     @property
     def is_active(self):
-        from django.utils import timezone
         return timezone.now() < self.expires_at
+    
+    @property
+    def remaining_time(self):
+        if not self.is_active:
+            return "Истёк"
+        
+        now = timezone.now()
+        remaining = self.expires_at - now
+        days = remaining.days
+        hours, remainder = divmod(remaining.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        
+        if days > 0:
+            return f"{days}д {hours}ч"
+        elif hours > 0:
+            return f"{hours}ч {minutes}м"
+        else:
+            return f"{minutes}м {seconds}с"
 
 class Chest(models.Model):
     RARITY_CHOICES = [
@@ -81,6 +102,7 @@ class Chest(models.Model):
     max_coins_reward = models.IntegerField()
     min_gems_reward = models.IntegerField()
     max_gems_reward = models.IntegerField()
+    image = models.ImageField(upload_to='chest_images/', null=True, blank=True)
     
     def __str__(self):
         return f"{self.get_rarity_display()} {self.name}"

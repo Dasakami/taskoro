@@ -175,5 +175,19 @@
     text-shadow: 0 0 5px #440022;
 }
 
+@media (max-width: 768px) {
+    .note-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .note-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .btn-clear {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
 </style>
 {% endblock %}

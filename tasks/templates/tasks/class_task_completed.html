@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}История выполнения задач класса{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="page-header">
+        <h1 class="page-title">История выполнения задач класса</h1>
+        <a href="{% url 'tasks:class_tasks' %}" class="btn btn-outline-primary">
+            К списку задач класса
+        </a>
+    </div>
+    
+    <!-- Filter section -->
+    <div class="filter-section">
+        <form method="get" class="filter-form">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="class" class="filter-label">Класс</label>
+                    <select name="class" id="class" class="filter-select">
+                        <option value="">Все классы</option>
+                        {% for cls in character_classes %}
+                            <option value="{{ cls.id }}" {% if cls.id|stringformat:"s" == selected_class %}selected{% endif %}>
+                                {{ cls.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="difficulty" class="filter-label">Сложность</label>
+                    <select name="difficulty" id="difficulty" class="filter-select">
+                        <option value="">Любая сложность</option>
+                        {% for value, label in difficulty_choices %}
+                            <option value="{{ value }}" {% if value == selected_difficulty %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="date_from" class="filter-label">С даты</label>
+                    <input type="date" name="date_from" id="date_from" class="filter-date" value="{{ date_from|date:'Y-m-d' }}">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="date_to" class="filter-label">По дату</label>
+                    <input type="date" name="date_to" id="date_to" class="filter-date" value="{{ date_to|date:'Y-m-d' }}">
+                </div>
+                
+                <div class="filter-group filter-actions">
+                    <button type="submit" class="btn btn-primary">Применить</button>
+                    <a href="{% url 'tasks:class_task_completed' %}" class="btn btn-outline-secondary">Сбросить</a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Completion history timeline -->
+    <div class="history-timeline">
+        {% if completion_dates %}
+            {% for date, completions in completion_dates.items %}
+                <div class="timeline-date">
+                    <div class="date-marker"></div>
+                    <div class="date-label">{{ date|date:"d.m.Y" }}</div>
+                </div>
+                
+                <div class="timeline-items">
+                    {% for completion in completions %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">{{ completion.completed_at|time:"H:i" }}</div>
+                            <div class="timeline-card">
+                                <div class="timeline-card-header">
+                                    <h3 class="timeline-task-title">{{ completion.base_task.title }}</h3>
+                                    <div class="timeline-badges">
+                                        <span class="timeline-badge timeline-badge-type">
+                                            {{ completion.base_task.get_task_type_display }}
+                                        </span>
+                                        <span class="timeline-badge timeline-badge-difficulty" data-difficulty="{{ completion.base_task.difficulty }}">
+                                            {{ completion.base_task.get_difficulty_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-card-content">
+                                    <div class="timeline-class">
+                                        <span class="timeline-label">Класс:</span>
+                                        <span class="timeline-value">{{ completion.base_task.character_class.name }}</span>
+                                    </div>
+                                    
+                                    <div class="timeline-reward">
+                                        <span class="timeline-label">Награда:</span>
+                                        <span class="timeline-value">{{ completion.base_task.xp_reward }} XP</span>
+                                    </div>
+                                    
+                                    {% if completion.base_task.description %}
+                                        <div class="timeline-description">
+                                            <p>{{ completion.base_task.description|truncatechars:150 }}</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="timeline-card-footer">
+                                    <a href="{% url 'tasks:class_task_detail' completion.base_task.id %}" class="btn btn-outline-primary btn-sm">
+                                        Подробнее
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-history">
+                <div class="empty-icon">📝</div>
+                <h3 class="empty-title">История пуста</h3>
+                <p class="empty-message">Нет выполненных задач класса, соответствующих выбранным фильтрам.</p>
+                <a href="{% url 'tasks:class_tasks' %}" class="btn btn-primary">Перейти к задачам класса</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    
+    .page-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.8rem;
+        color: white;
+        margin: 0;
+        text-shadow: 0 0 10px rgba(102, 51, 255, 0.3);
+    }
+    
+    /* Filter section styles */
+    .filter-section {
+        background-color: rgba(30, 30, 50, 0.8);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .filter-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .filter-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #b3b3cc;
+        font-weight: 500;
+    }
+    
+    .filter-select,
+    .filter-date {
+        width: 100%;
+        background-color: rgba(40, 40, 60, 0.8);
+        border: 1px solid rgba(102, 51, 255, 0.3);
+        border-radius: 5px;
+        padding: 10px;
+        color: white;
+        font-family: 'Rajdhani', sans-serif;
+    }
+    
+    .filter-select:focus,
+    .filter-date:focus {
+        outline: none;
+        border-color: #6633ff;
+        box-shadow: 0 0 0 2px rgba(102, 51, 255, 0.25);
+    }
+    
+    .filter-actions {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+    }
+    
+    /* Timeline styles */
+    .history-timeline {
+        position: relative;
+        padding-left: 30px;
+        margin-top: 40px;
+    }
+    
+    .history-timeline::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, #6633ff, rgba(102, 51, 255, 0.3));
+    }
+    
+    .timeline-date {
+        position: relative;
+        margin-bottom: 20px;
+        padding-left: 15px;
+    }
+    
+    .date-marker {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: #6633ff;
+        left: -37px;
+        top: 50%;
+        transform: translateY(-50%);
+        box-shadow: 0 0 0 4px rgba(102, 51, 255, 0.2);
+    }
+    
+    .date-label {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.2rem;
+        color: white;
+        background-color: rgba(30, 30, 50, 0.8);
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        border: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .timeline-items {
+        margin-bottom: 40px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 15px;
+        padding-left: 15px;
+        display: flex;
+    }
+    
+    .timeline-item::before {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #9966ff;
+        left: -34px;
+        top: 15px;
+    }
+    
+    .timeline-time {
+        min-width: 50px;
+        padding-right: 15px;
+        color: #b3b3cc;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        padding-top: 10px;
+    }
+    
+    .timeline-card {
+        flex-grow: 1;
+        background-color: rgba(30, 30, 50, 0.8);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid rgba(102, 51, 255, 0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .timeline-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .timeline-card-header {
+        background-color: rgba(40, 40, 60, 0.8);
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        border-bottom: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .timeline-task-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: white;
+        margin: 0;
+    }
+    
+    .timeline-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .timeline-badge {
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+    
+    .timeline-badge-type {
+        background-color: rgba(102, 51, 255, 0.3);
+        color: #b299ff;
+    }
+    
+    .timeline-badge-difficulty[data-difficulty="easy"] {
+        background-color: rgba(51, 255, 153, 0.2);
+        color: #80ffbb;
+    }
+    
+    .timeline-badge-difficulty[data-difficulty="medium"] {
+        background-color: rgba(255, 204, 51, 0.2);
+        color: #ffdb80;
+    }
+    
+    .timeline-badge-difficulty[data-difficulty="hard"] {
+        background-color: rgba(255, 51, 102, 0.2);
+        color: #ff809f;
+    }
+    
+    .timeline-badge-difficulty[data-difficulty="epic"] {
+        background-color: rgba(102, 51, 255, 0.2);
+        color: #b299ff;
+    }
+    
+    .timeline-card-content {
+        padding: 15px;
+    }
+    
+    .timeline-class,
+    .timeline-reward {
+        margin-bottom: 10px;
+    }
+    
+    .timeline-label {
+        color: #b3b3cc;
+        margin-right: 5px;
+    }
+    
+    .timeline-value {
+        color: white;
+        font-weight: 500;
+    }
+    
+    .timeline-description p {
+        color: #cccccc;
+        margin-top: 10px;
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+    
+    .timeline-card-footer {
+        padding: 10px 15px;
+        background-color: rgba(40, 40, 60, 0.8);
+        border-top: 1px solid rgba(102, 51, 255, 0.3);
+        text-align: right;
+    }
+    
+    .empty-history {
+        background-color: rgba(30, 30, 50, 0.8);
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        border: 1px solid rgba(102, 51, 255, 0.3);
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.7;
+    }
+    
+    .empty-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 15px;
+    }
+    
+    .empty-message {
+        color: #b3b3cc;
+        margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        .filter-row {
+            flex-direction: column;
+        }
+        
+        .filter-group {
+            width: 100%;
+        }
+        
+        .history-timeline {
+            padding-left: 20px;
+        }
+        
+        .timeline-item {
+            flex-direction: column;
+        }
+        
+        .timeline-time {
+            padding-bottom: 5px;
+        }
+        
+        .date-marker {
+            left: -27px;
+        }
+        
+        .timeline-item::before {
+            left: -24px;
+        }
+    }
+</style>
+{% endblock %}

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'vendor/css/duels.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/css/duelss.css' %}">
 {% endblock %}
 
 {% block title %}Выбор противника | Magic RPG Tracker{% endblock %}
@@ -135,6 +135,12 @@
   text-decoration: none;
   color: var(--color-text-primary);
   margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .friends-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+  }
 }
 
 </style>

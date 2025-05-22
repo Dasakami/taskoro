@@ -6,6 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import ShopItem, Purchase, Chest, ChestOpening, ActiveBoost
 import random
+from history.models import ActivityLog
 
 
 def shop_home(request):
@@ -32,6 +33,7 @@ def shop_category(request, category):
     context = {
         'items': items,
         'category': dict(ShopItem.CATEGORY_CHOICES)[category],
+        'category_slug': category,
         'shop_item_categories': ShopItem.CATEGORY_CHOICES,
     }
     
@@ -89,9 +91,9 @@ def purchase_item(request, item_id):
         total_price=item.price
     )
     
-    # Automatically equip the item if it's a title or frame
+    # Automatically equip the item if it's a title or frame or background
     if item.category in ['title', 'avatar_frame', 'background']:
-        equip_item(request, item_id)
+        equip_item(request, item.id)
     
     messages.success(request, f'Вы приобрели {item.name}!')
     return redirect('shop:user_inventory')
@@ -203,6 +205,14 @@ def open_chest(request, chest_id):
         coins_reward=coins_reward,
         gems_reward=gems_reward
     )
+
+    ActivityLog.objects.create(
+            user=request.user,
+            activity_type='chest_open',
+            description=f'Вы открыли сундук: {chest.name}',
+            
+            
+        )
     
     messages.success(
         request,
@@ -215,8 +225,25 @@ def user_inventory(request):
     # Get all user purchases
     purchases = Purchase.objects.filter(user=request.user).order_by('-purchased_at')
     
+    # Get equipped items
+    equipped_items = Purchase.objects.filter(
+        user=request.user,
+        is_equipped=True
+    ).select_related('item')
+    
+    # Create a dictionary to easily check if an item is equipped
+    equipped_by_category = {purchase.item.category: purchase.item.id for purchase in equipped_items}
+    
+    # Get active boosts
+    active_boosts = ActiveBoost.objects.filter(
+        user=request.user,
+        expires_at__gt=timezone.now()
+    ).select_related('boost_item')
+    
     context = {
         'purchases': purchases,
+        'equipped_by_category': equipped_by_category,
+        'active_boosts': active_boosts,
         'shop_item_categories': ShopItem.CATEGORY_CHOICES,
     }
     

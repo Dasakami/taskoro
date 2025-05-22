@@ -13,7 +13,9 @@ urlpatterns = [
     path('<int:task_id>/complete/', views.task_complete, name='task_complete'),
 
     path('class-tasks/', views.class_tasks_list, name='class_tasks'),
+    path('class-tasks/<int:task_id>/', views.class_task_detail, name='class_task_detail'),
     path('class-tasks/<int:task_id>/complete/', views.complete_class_task, name='complete_class_task'),
+    path('class-tasks/completed/', views.class_task_completed, name='class_task_completed'),
 
     # Habit routes
     path('habits/', views.habits_list, name='habits_list'),

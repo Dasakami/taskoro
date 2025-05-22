@@ -4,25 +4,48 @@
 {% block title %}Профиль | Magic RPG Tracker{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/vendor/css/profil.css">
+<link rel="stylesheet" href="{% static 'vendor/css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="profile-container">
+<div class="profile-container"> 
     <div class="profile-header reveal">
+        {% if equipped_background %}
+        <div class="profile-bg" style="background-image: url('{{ equipped_background.background_url|default:'/static/images/default_bg.jpg' }}')"></div>
+        {% else %}
         <div class="profile-bg"></div>
+        {% endif %}
+        
         <div class="profile-avatar-container">
-            <div class="profile-frame magic-aura">
+            {% if equipped_frame %}
+            <div class="profile-frame {{ equipped_frame.frame_style }}">
+            {% else %}
+            <div class="profile-frame">
+            {% endif %}
                 {% if profile.avatar %}
-                <img src="{{ profile.avatar.url|default:'/static/images/default_avatar.png' }}" alt="Avatar" class="profile-avatar">
+                <img src="{{ profile.avatar.url }}" alt="Avatar" class="profile-avatar">
                 {% else %}
-                <img src="/static/images/default_avatar.png" alt="Avatar" class="profile-avatar">
+                <img src="{% static 'images/default_avatar.png' %}" alt="Avatar" class="profile-avatar">
                 {% endif %}
             </div>
-            <h3 class="profile-title">{{ profile.title|default:"Начинающий Охотник" }}</h3>
+            
+            {% if equipped_title %}
+            <h3 class="profile-title" style="color: {{ equipped_title.title_color|default:'#ffffff' }}">
+                {{ equipped_title.title_text }}
+            </h3>
+            {% else %}
+            <h3 class="profile-title">Начинающий Охотник</h3>
+            {% endif %}
         </div>
+        
         <div class="profile-info">
-            <h1 class="username text-gradient">{{ user.username }}</h1>
+            <h1 class="username text-gradient">{{ profile.user.username }}</h1>
+            {% if equipped_effect %}
+            <div class="profile-effects">
+                <div class="effect {{ equipped_effect.effect_class }}"></div>
+            </div>
+            {% endif %}
+            
             <div class="profile-stats">
                 <div class="stat-item">
                     <div class="stat-label">Уровень</div>
@@ -42,9 +65,17 @@
                 </div>
             </div>
         </div>
+        
+        {% if is_self %}
         <div class="profile-actions">
-            <a href="{% url 'users:profile:edit_profile' %}" class="btn">Редактировать профиль</a>
+            <a href="{% url 'users:profile:edit_profile' %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Редактировать
+            </a>
+            <a href="{% url 'shop:user_inventory' %}" class="btn btn-secondary">
+                <i class="fas fa-shopping-bag"></i> Инвентарь
+            </a>
         </div>
+        {% endif %}
     </div>
 
     <div class="profile-content">
@@ -55,15 +86,43 @@
             <div class="card-body">
                 <div class="exp-progress">
                     <div class="progress progress-animated">
-                        <div class="progress-bar"  data-value="{{ profile.experience }}" data-max="{{ profile.experience_needed }}"></div>
+                        <div class="progress-bar" style="width: {{ profile.get_experience_percentage }}%"></div>
                     </div>
                     <div class="exp-text">{{ profile.experience }} / {{ profile.experience_needed }} XP</div>
                 </div>
                 <div class="level-info">
-                    <p>Набирайте опыт, выполняя задачи, участвуя в турнирах и дуэлях!</p>
+                    <p>Набирайте опыт, выполняя задачи и участвуя в турнирах!</p>
                 </div>
             </div>
         </div>
+
+        {% if active_boosts %}
+        <div class="profile-section card reveal">
+            <div class="card-header">
+                <h2>Активные усилители</h2>
+            </div>
+            <div class="card-body">
+                <div class="boosts-grid">
+                    {% for boost in active_boosts %}
+                    <div class="boost-item">
+                        <div class="boost-icon">
+                            {% if boost.boost_item.image %}
+                            <img src="{{ boost.boost_item.image.url }}" alt="{{ boost.boost_item.name }}">
+                            {% else %}
+                            <i class="fas fa-bolt"></i>
+                            {% endif %}
+                        </div>
+                        <div class="boost-info">
+                            <div class="boost-name">{{ boost.boost_item.name }}</div>
+                            <div class="boost-desc">x{{ boost.multiplier }} бонус</div>
+                            <div class="boost-time">{{ boost.remaining_time }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <div class="profile-section card reveal">
             <div class="card-header">
@@ -90,28 +149,6 @@
 
         <div class="profile-section card reveal">
             <div class="card-header">
-                <h2>Настройки</h2>
-            </div>
-            <div class="card-body">
-                <div class="settings-grid">
-                    <div class="setting-item">
-                        <div class="setting-label">Тема интерфейса</div>
-                        <div class="setting-value">{{ profile.get_theme_preference_display }}</div>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-label">Язык</div>
-                        <div class="setting-value">Русский</div>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-label">Уведомления</div>
-                        <div class="setting-value">Включены</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="profile-section card reveal">
-            <div class="card-header">
                 <h2>О себе</h2>
             </div>
             <div class="card-body">
@@ -129,6 +166,30 @@
     </div>
 </div>
 
+{% endblock %}
 
-
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation for profile elements when they come into view
+    const revealElements = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+            }
+        });
+    });
+    
+    revealElements.forEach((el) => {
+        observer.observe(el);
+    });
+    
+    {% if equipped_effect %}
+    // Apply additional effects based on equipped items
+    const effectContainer = document.querySelector('.profile-effects');
+    // Add animation or special effects based on the equipped effect
+    {% endif %}
+});
+</script>
 {% endblock %}
