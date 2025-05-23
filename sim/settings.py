@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ro!p)+_6l32i%=4s3a+=!k6a&(k35bwu$0m6erwbjeod(maky8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*', 'https://taskoro.onrender.com']
 
@@ -94,27 +94,27 @@ WSGI_APPLICATION = 'sim.wsgi.application'
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'simulator',  # Имя базы данных (Render)
-#         'USER': 'postgres',  # Имя пользователя (Render)
-#         'PASSWORD': '1908',  # Пароль (Render)
-#         'HOST': 'localhost',  # Хост (Render)
-#         'PORT': '5432',  # Порт (Render)
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'taskoro',  # Имя базы данных (Render)
-        'USER': 'dasakami',  # Имя пользователя (Render)
-        'PASSWORD': 'ONgAG1OpNwB88Z9HKhN2YMc2oIPyFunq',  # Пароль (Render)
-        'HOST': 'dpg-d0l9fmd6ubrc73bsu520-a',  # Хост (Render)
+        'NAME': 'simulator',  # Имя базы данных (Render)
+        'USER': 'postgres',  # Имя пользователя (Render)
+        'PASSWORD': '1908',  # Пароль (Render)
+        'HOST': 'localhost',  # Хост (Render)
         'PORT': '5432',  # Порт (Render)
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'taskoro',  # Имя базы данных (Render)
+#         'USER': 'dasakami',  # Имя пользователя (Render)
+#         'PASSWORD': 'ONgAG1OpNwB88Z9HKhN2YMc2oIPyFunq',  # Пароль (Render)
+#         'HOST': 'dpg-d0l9fmd6ubrc73bsu520-a',  # Хост (Render)
+#         'PORT': '5432',  # Порт (Render)
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

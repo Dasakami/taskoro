@@ -5,7 +5,7 @@
 {% block title %}Дуэль | Magic RPG Tracker{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/vendor/css/duels.css">
+<link rel="stylesheet" href="/static/vendor/css/duel.css">
 {% endblock %}
 
 {% block content %}
@@ -33,7 +33,11 @@
             <div class="duel-players">
                 <div class="player-info">
                     <div class="player-avatar">
+                        {% if duel.challenger.profile.avatar %}
                         <img src="{{ duel.challenger.profile.avatar.url|default:'/static/images/default_avatar.png' }}" alt="Avatar">
+                        {% else %}
+                        <img src="/static/images/default-avatar.png" alt="Avatar">
+                        {% endif %}
                     </div>
                     <div class="player-details">
                         <div class="player-name">{{ duel.challenger.username }}</div>

@@ -12,7 +12,7 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="/static/vendor/css/reset.css">
-    <link rel="stylesheet" href="/static/vendor/css/basess.css">
+    <link rel="stylesheet" href="/static/vendor/css/base.css">
     <link rel="stylesheet" href="/static/vendor/css/animations.css">
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
     {% block extra_css %}{% endblock %}
@@ -39,7 +39,7 @@
 </head>
 <body>
     <div class="app-container">
-        <button class="burger-btn" aria-label="Toggle sidebar">
+    <button class="burger-btn" aria-label="Toggle sidebar">
         ☰
     </button>
         <nav class="sidebar">
@@ -107,6 +107,7 @@
                 </a></li>
             </ul>
             <div class="sidebar-footer">
+                {% if user.is_authenticated %}
                 <form action="{% url 'users:logout' %}" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="logout-btn">
@@ -115,12 +116,10 @@
                     <span class="logout-text">Выйти</span>
                         </button>
                 </form>
+                {% endif %}
+
             </div>
         </nav>
-        
-        
-
-        
         
         <main class="content">
             {% block content %}{% endblock %}
@@ -152,5 +151,91 @@
     <!-- Scripts -->
     <script src="/static/vendor/js/animations.js"></script>
     {% block extra_js %}{% endblock %}
+
+    <div id="toast-container" class="toast-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="toast toast-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<style>
+    .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 15px;
+}
+
+.toast {
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.4s ease, fadeOut 0.5s ease 3.5s forwards;
+    opacity: 0.95;
+    min-width: 220px;
+    max-width: 90vw;
+    word-break: break-word;
+}
+
+/* Типы уведомлений */
+.toast-success {
+    background-color: #d1ffd6;
+    color: #156b3e;
+}
+.toast-info {
+    background-color: #dceeff;
+    color: #0c4e78;
+}
+.toast-warning {
+    background-color: #fff3cd;
+    color: #8a6d1f;
+}
+.toast-error {
+    background-color: #ffd6d6;
+    color: #8f1e1e;
+}
+
+/* Анимации */
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 0.95; }
+}
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Адаптив */
+@media (max-width: 600px) {
+    .toast-container {
+        top: auto;
+        bottom: 20px;
+        right: 50%;
+        transform: translateX(50%);
+        align-items: center;
+    }
+}
+
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toasts = document.querySelectorAll('.toast');
+        setTimeout(() => {
+            toasts.forEach(toast => toast.remove());
+        }, 4000); // 4 секунды
+    });
+</script>
+
+
 </body>
 </html>

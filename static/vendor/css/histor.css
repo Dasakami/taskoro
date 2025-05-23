@@ -330,4 +330,8 @@ textarea.form-control {
     .achievements-grid {
         grid-template-columns: 1fr;
     }
+
+    .activity-header {
+        display: block;
+    }
 }

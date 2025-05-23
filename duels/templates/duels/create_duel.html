@@ -3,7 +3,7 @@
 {% block title %}Создание дуэли | Magic RPG Tracker{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/vendor/css/duelss.css">
+<link rel="stylesheet" href="/static/vendor/css/duel.css">
 {% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
             <div class="opponent-preview">
                 <div class="player-avatar">
                     {% if opponent.profile.avatar %}
-                    <img src="{{ opponent.profile.avatar.url|default:'/static/images/default_avatar.png' }}" alt="Avatar">
+                    <img src="{{ opponent.profile.avatar.url|default:'/static/images/default-avatar.png' }}" alt="Avatar">
                     {% else %}
                     <img src="/static/images/default_avatar.png" alt="Avatar">
                     {% endif %}
