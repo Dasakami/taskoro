@@ -32,5 +32,6 @@ urlpatterns = [
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # Заменили url на re_path
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}), 
     path('disko/', admin.site.urls),
+    path('api/notes/', include('note.api_urls')),
     path('', include('main.urls'))
 ]

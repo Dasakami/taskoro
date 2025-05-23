@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'friends',
     'shop',
     'history',
-    'note'
+    'note',
+    'rest_framework',
 
 ]
 
