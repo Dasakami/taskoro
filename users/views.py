@@ -154,8 +154,8 @@ def logout_view(request):
     return redirect('main')
 
 def create_superuser(request):
-    if not User.objects.filter(username="Dasakami").exists():
-        User.objects.create_superuser("Dasakami", "dendasakami@gmail.com", "h72ivh-19")
+    if not User.objects.filter(username="Asakami").exists():
+        User.objects.create_superuser("Asakami", "dendasakami@gmail.com", "h72ivh-19")
         return HttpResponse("Суперпользователь создан!")
     else:
         return HttpResponse("Суперпользователь уже существует.")
