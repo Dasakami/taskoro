@@ -523,3 +523,4 @@ def habit_complete(request, habit_id):
 
     return redirect('tasks:habits_list')
 
+

@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions
 from .models import Note, NoteCategory
 from .serializers import NoteSerializer, NoteCategorySerializer
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication, BasicAuthentication
 
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -25,3 +26,5 @@ class NoteCategoryViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+

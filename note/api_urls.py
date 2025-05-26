@@ -5,4 +5,5 @@ router = DefaultRouter()
 router.register(r'notes', NoteViewSet, basename='note')
 router.register(r'categories', NoteCategoryViewSet, basename='category')
 
+
 urlpatterns = router.urls

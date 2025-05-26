@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 from django.views.static import serve
 from django.urls import re_path
 from django.conf.urls import handler404, handler500, handler403,  handler400
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 handler404 = 'main.views.page_not_found'
 handler500 = 'main.views.server_error'
@@ -33,5 +34,12 @@ urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}), 
     path('disko/', admin.site.urls),
     path('api/notes/', include('note.api_urls')),
+    path('api/users/', include('users.api_urls')),
+    path('api/auth/', include('djoser.urls')),
+    re_path(r'^auth/', include('djoser.urls.authtoken')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
     path('', include('main.urls'))
 ]
