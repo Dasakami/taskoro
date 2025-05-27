@@ -27,13 +27,13 @@
                     </div>
                 </div>
                 
-                {{ profile_form|crispy }}
+                {{ profile_form}}
                 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Сохранить изменения
                     </button>
-                    <a href="{% url 'users:profile' %}" class="btn btn-secondary">
+                    <a href="{% url 'users:profile:profile' %}" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Отмена
                     </a>
                 </div>

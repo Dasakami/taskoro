@@ -35,6 +35,8 @@ urlpatterns = [
     path('disko/', admin.site.urls),
     path('api/notes/', include('note.api_urls')),
     path('api/users/', include('users.api_urls')),
+    path('api/history/', include('history.api_urls')),
+    path('api/friends/', include('friends.api_urls')),
     path('api/auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
