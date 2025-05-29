@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'djoser',
     'corsheaders',
+    'widget_tweaks',
 
 ]
 
@@ -103,27 +104,27 @@ WSGI_APPLICATION = 'sim.wsgi.application'
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'simulator',  # Имя базы данных (Render)
-#         'USER': 'postgres',  # Имя пользователя (Render)
-#         'PASSWORD': '1908',  # Пароль (Render)
-#         'HOST': 'localhost',  # Хост (Render)
-#         'PORT': '5432',  # Порт (Render)
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'taskoro',  # Имя базы данных (Render)
-        'USER': 'dasakami',  # Имя пользователя (Render)
-        'PASSWORD': 'ONgAG1OpNwB88Z9HKhN2YMc2oIPyFunq',  # Пароль (Render)
-        'HOST': 'dpg-d0l9fmd6ubrc73bsu520-a',  # Хост (Render)
+        'NAME': 'simulator',  # Имя базы данных (Render)
+        'USER': 'postgres',  # Имя пользователя (Render)
+        'PASSWORD': '1908',  # Пароль (Render)
+        'HOST': 'localhost',  # Хост (Render)
         'PORT': '5432',  # Порт (Render)
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'taskoro',  # Имя базы данных (Render)
+#         'USER': 'dasakami',  # Имя пользователя (Render)
+#         'PASSWORD': 'ONgAG1OpNwB88Z9HKhN2YMc2oIPyFunq',  # Пароль (Render)
+#         'HOST': 'dpg-d0l9fmd6ubrc73bsu520-a',  # Хост (Render)
+#         'PORT': '5432',  # Порт (Render)
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

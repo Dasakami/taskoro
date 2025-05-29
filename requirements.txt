@@ -44,3 +44,4 @@ django-webpush
 rest_framework_simplejwt
 django-cors-headers
 djoser
+django-widget-tweaks

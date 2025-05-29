@@ -1,5 +1,8 @@
 /* Login page styles */
-
+.content {
+    margin-left: 0;
+    padding: 0;
+}
 .login-container {
     display: flex;
     flex-direction: column;
@@ -14,6 +17,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
+    position: relative;
     z-index: 2;
     min-height: 100vh;
 }
@@ -151,8 +155,9 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    z-index: 0;
     overflow: hidden;
+    pointer-events: none;
 }
 
 .magic-runes {
@@ -166,6 +171,8 @@
         radial-gradient(circle at 80% 20%, rgba(51, 204, 255, 0.05) 0%, transparent 20%),
         radial-gradient(circle at 50% 60%, rgba(255, 51, 102, 0.05) 0%, transparent 25%);
     opacity: 0.7;
+    z-index: -1;
+    pointer-events: none;
 }
 
 .magic-portal {
@@ -183,6 +190,7 @@
         rgba(10, 10, 19, 0.9) 100%
     );
     z-index: -1;
+    pointer-events: none;
 }
 
 /* Responsive adjustments */

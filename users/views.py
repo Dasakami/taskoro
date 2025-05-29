@@ -33,6 +33,7 @@ def login_view(request):
     
     return render(request, 'users/login.html', {'form': form})
 
+from .models import CharacterClass
 
 def register(request):
     if request.user.is_authenticated:
@@ -42,17 +43,32 @@ def register(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Automatically log in after registration
+
+            # Получаем выбранный класс по ID из POST
+            selected_class_id = request.POST.get('selected_class')
+            try:
+                selected_class = CharacterClass.objects.get(id=selected_class_id)
+                profile = user.profile
+                profile.character_classes.add(selected_class)
+                profile.save()
+            except CharacterClass.DoesNotExist:
+                messages.error(request, "Неверный выбор класса.")
+                return redirect('register')
+
+            # Авторизация после регистрации
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            messages.success(request, f'Welcome, Охотник {username}! Your account has been created.')
+            messages.success(request, f'Добро пожаловать, Охотник {username}!')
             return redirect('main')
     else:
         form = CustomUserCreationForm()
-    
-    return render(request, 'users/register.html', {'form': form})
+
+    # Передаём классы в шаблон
+    classes = CharacterClass.objects.all()
+    return render(request, 'users/register.html', {'form': form, 'classes': classes})
+
 
 @login_required
 def profile_view(request):

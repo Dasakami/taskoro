@@ -3,7 +3,7 @@
 {% block title %}Регистрация | Magic RPG Tracker{% endblock %}
 
 {% block extra_css %}
-
+<link rel="stylesheet" href="/static/vendor/css/logins.css">
 {% endblock %}
 
 {% block content %}
@@ -48,6 +48,16 @@
                         <div class="form-error">{{ form.password2.errors }}</div>
                     {% endif %}
                 </div>
+
+                <div class="form-group">
+    <label for="selected_class" class="form-label">Выбери свой класс</label>
+    <select name="selected_class" id="selected_class" class="form-select">
+        {% for class in classes %}
+            <option value="{{ class.id }}">{{ class.icon }} {{ class.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+
                 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-lg">Начать путь</button>

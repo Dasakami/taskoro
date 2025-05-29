@@ -103,6 +103,7 @@
     border: 2px solid rgba(102, 51, 255, 0.3);
     border-radius: 50%;
     animation: magic-circle 10s linear infinite;
+    pointer-events: none;
 }
 
 .magic-circle::after {
@@ -115,6 +116,7 @@
     border: 1px solid rgba(255, 51, 102, 0.3);
     border-radius: 50%;
     animation: magic-circle 7s linear infinite reverse;
+    pointer-events: none;
 }
 
 .border-glow {
@@ -174,6 +176,7 @@
     opacity: 0.7;
     animation: bg-pulse 3s ease infinite;
     filter: blur(8px);
+    pointer-events: none;
 }
 
 /* Checklist item completion animation */
@@ -213,16 +216,19 @@
     height: 100%;
     border-radius: 50%;
     border: 3px solid transparent;
+    pointer-events: none;
 }
 
 .magic-spinner::before {
     border-top-color: #6633ff;
+    pointer-events: none;
     animation: magic-circle 1s linear infinite;
 }
 
 .magic-spinner::after {
     border-left-color: #ff3366;
     animation: magic-circle 1.5s linear infinite;
+    pointer-events: none;
 }
 
 /* Button hover effects */
