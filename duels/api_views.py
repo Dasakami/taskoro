@@ -62,6 +62,24 @@ class DuelViewSet(viewsets.ModelViewSet):
         duel = get_object_or_404(Duel, pk=pk, opponent=request.user, status='pending')
         duel.decline_duel()
         return Response({'status': 'Дуэль отклонена'})
+    
+    def get_queryset(self):
+        user = self.request.user
+        status_filter = self.request.query_params.get('status')
+
+        qs = Duel.objects.filter(Q(challenger=user) | Q(opponent=user))
+
+        if status_filter:
+            if status_filter == 'active':
+                qs = qs.filter(status='active')
+            elif status_filter == 'pending':
+                qs = qs.filter(status='pending')
+            elif status_filter == 'declined':
+                qs = qs.filter(status='declined')
+            elif status_filter == 'completed':
+                qs = qs.filter(status='completed')
+
+        return qs.order_by('-created_at')
 
 class DuelProgressViewSet(viewsets.ModelViewSet):
     queryset = DuelProgress.objects.all()

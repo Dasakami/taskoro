@@ -12,10 +12,11 @@ class NoteViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwner]
 
     def get_queryset(self):
-        return Note.objects.filter(user=self.request.user, is_deleted=False)
+        return Note.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class NoteCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = NoteCategorySerializer

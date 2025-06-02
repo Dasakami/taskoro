@@ -41,6 +41,7 @@ urlpatterns = [
     path('api/shop/', include('shop.api_urls')),
     path('api/main/', include('main.api_urls')),
     path('api/tasks/', include('tasks.api_urls')),
+    path('api/tournaments/', include('tournaments.api_urls')),
     path('api/auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
