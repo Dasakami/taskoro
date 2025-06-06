@@ -1,78 +1,133 @@
+# models.py
 from django.db import models
 from django.contrib.auth.models import User
 from tasks.models import Task
 from django.utils import timezone
+from datetime import timedelta
+
 
 class Duel(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Ожидает принятия'),
-        ('active', 'В процессе'),
+        ('pending',   'Ожидает'),
+        ('active',    'В процессе'),
         ('completed', 'Завершена'),
-        ('declined', 'Отклонена'),
+        ('declined',  'Отклонена'),
     ]
-    
-    challenger = models.ForeignKey(User, on_delete=models.CASCADE, related_name='duels_as_challenger')
-    opponent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='duels_as_opponent')
-    task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True)
-    coins_stake = models.IntegerField(default=0)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-    start_time = models.DateTimeField(null=True, blank=True)
-    end_time = models.DateTimeField(null=True, blank=True)
-    winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='duels_won')
-    
+
+    challenger   = models.ForeignKey(User, related_name='duels_sent', on_delete=models.CASCADE)
+    opponent     = models.ForeignKey(User, related_name='duels_received', on_delete=models.CASCADE)
+    task         = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True)
+    coins_stake  = models.PositiveIntegerField(default=0)
+    status       = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at   = models.DateTimeField(auto_now_add=True)
+    start_time   = models.DateTimeField(null=True, blank=True)
+    end_time     = models.DateTimeField(null=True, blank=True)
+    winner       = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='duels_won')
+    duration     = models.DurationField(default=timedelta(hours=24))  # время на выполнение
+
     def __str__(self):
-        return f"{self.challenger.username} vs {self.opponent.username}"
-    
-    def start_duel(self):
-        if self.status == 'pending':
-            self.status = 'active'
-            self.start_time = timezone.now()
-            self.save()
-    
-    def complete_duel(self, winner):
-        if self.status == 'active':
-            self.status = 'completed'
-            self.end_time = timezone.now()
-            self.winner = winner
-            
-            # Transfer stakes
-            if self.coins_stake > 0:
-                loser = self.opponent if winner == self.challenger else self.challenger
-                winner.profile.coins += self.coins_stake * 2
-                winner.profile.save()
-            
-            # Award experience
-            winner.profile.add_experience(50)  # Base experience for winning
-            self.save()
-    
-    def decline_duel(self):
-        if self.status == 'pending':
-            self.status = 'declined'
-            self.save()
-            
-            # Return stakes to challenger
-            if self.coins_stake > 0:
-                self.challenger.profile.coins += self.coins_stake
-                self.challenger.profile.save()
+        return f"{self.challenger} vs {self.opponent} [{self.status}]"
+
+    def accept_duel(self, user: User):
+        """
+        Вызывается оппонентом по /duels/{id}/accept/
+        1) Проверить, что это действительно opponent и статус == pending
+        2) Списать ставку у opponent
+        3) Перевести в active, выставить start/end
+        4) Создать две записи DuelProgress
+        """
+        if user != self.opponent:
+            raise ValueError("Не ваш дуэль")
+        if self.status != 'pending':
+            raise ValueError("Дуэль уже не в состоянии pending")
+
+        profile = user.profile
+        if profile.coins < self.coins_stake:
+            raise ValueError("Недостаточно монет для принятия")
+        # списываем у оппонента
+        profile.coins -= self.coins_stake
+        profile.save()
+
+        # переводим дуэль в active
+        now = timezone.now()
+        self.status     = 'active'
+        self.start_time = now
+        self.end_time   = now + self.duration
+        self.save()
+
+        # создаём прогресс для обоих
+        DuelProgress.objects.bulk_create([
+            DuelProgress(duel=self, user=self.challenger),
+            DuelProgress(duel=self, user=self.opponent),
+        ])
+
+    def decline_duel(self, user: User):
+        """
+        Вызывается оппонентом по /duels/{id}/decline/
+        1) Проверить, что это opponent и статус == pending
+        2) Перевести статус в declined
+        3) Вернуть стейк challenger-у
+        """
+        if user != self.opponent:
+            raise ValueError("Не ваш дуэль")
+        if self.status != 'pending':
+            raise ValueError("Нельзя отклонить не-pending дуэль")
+
+        self.status = 'declined'
+        self.save()
+
+        # возвращаем монеты инициатору
+        if self.coins_stake > 0:
+            init_profile = self.challenger.profile
+            init_profile.coins += self.coins_stake
+            init_profile.save()
+
+    def complete_duel(self, winner: User):
+        """
+        Завершить дуэль вручную, например, при двух completed
+        или таймауте.
+        """
+        if self.status != 'active':
+            raise ValueError("Дуэль не в состоянии active")
+
+        self.status   = 'completed'
+        self.end_time = timezone.now()
+        self.winner   = winner
+        self.save()
+
+        # переводим ставку победителю (две ставки: challenger + opponent)
+        if self.coins_stake > 0:
+            win_profile = winner.profile
+            win_profile.coins += self.coins_stake * 2
+            win_profile.save()
+
+        # даём опыт победителю
+        winner.profile.add_experience(50)
 
 class DuelProgress(models.Model):
-    duel = models.ForeignKey(Duel, on_delete=models.CASCADE, related_name='progress')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    completed = models.BooleanField(default=False)
+    duel            = models.ForeignKey(Duel, related_name='progress', on_delete=models.CASCADE)
+    user            = models.ForeignKey(User, on_delete=models.CASCADE)
+    completed       = models.BooleanField(default=False)
     completion_time = models.DateTimeField(null=True, blank=True)
-    
+
     def complete_task(self):
-        if not self.completed:
-            self.completed = True
-            self.completion_time = timezone.now()
-            self.save()
-            
-            # Check if this completes the duel
-            opponent_progress = self.duel.progress.exclude(id=self.id).first()
-            if opponent_progress and opponent_progress.completed:
-                # Determine winner based on completion time
-                if self.completion_time < opponent_progress.completion_time:
-                    self.duel.complete_duel(self.user)
-                else:
-                    self.duel.complete_duel(opponent_progress.user)
+        """
+        Пользователь помечает задачу выполненной.
+        Если оба отметились — завершаем дуэль по времени.
+        """
+        if self.completed:
+            return
+
+        self.completed = True
+        self.completion_time = timezone.now()
+        self.save()
+
+        other = self.duel.progress.exclude(pk=self.pk).first()
+        # оба отметились?
+        if other and other.completed:
+            # решаем, кто быстрее
+            if self.completion_time <= other.completion_time:
+                winner = self.user
+            else:
+                winner = other.user
+            self.duel.complete_duel(winner)

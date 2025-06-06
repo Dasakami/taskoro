@@ -18,9 +18,9 @@
           <div class="friend-header">
             <div class="friend-avatar">
                 {% if friend.profile.avatar %}
-                    <img src="{{ friend.profile.avatar.url }}" alt="Avatar">
+                    <img src="{{ friend.profile.avatar.url }}"  alt="Avatar">
                 {% else %}
-                    {{ friend.username|first|upper }}
+                    <span class="avatar-placeholder" style="display: flex;align-items: center;" >{{ friend.username|slice:":1" }}</span>
                 {% endif %}
             </div>
             <div class="friend-info">
@@ -81,7 +81,6 @@
   border-radius: 50%;
   background-color: rgba(102, 51, 255, 0.2);
   display: flex;
-  align-items: center;
   justify-content: center;
   font-size: 1.25rem;
   font-weight: 700;

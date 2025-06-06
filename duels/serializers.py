@@ -25,3 +25,16 @@ class DuelProgressSerializer(serializers.ModelSerializer):
     class Meta:
         model = DuelProgress
         fields = ['id', 'duel', 'user', 'completed', 'completion_time']
+
+class DuelHistorySerializer(serializers.ModelSerializer):
+    challenger = UserSerializer(read_only=True)
+    opponent = UserSerializer(read_only=True)
+    winner = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Duel
+        fields = [
+            'id', 'challenger', 'opponent', 'task', 'coins_stake',
+            'status', 'created_at', 'start_time', 'end_time', 'winner'
+        ]
+        read_only_fields = ['id', 'status', 'created_at', 'start_time', 'end_time']

@@ -31,11 +31,20 @@
                         </div>
                         <div class="user-info">
                             <h3 class="user-name">
-                                <span class="friend-status {% if friend.profile.is_online %}online{% else %}offline{% endif %}"></span>
                                 {{ friend.username }}
+                                <span class="friend-status {% if friend.profile.is_online %}online{% else %}offline{% endif %}">
+                                    {% if friend.profile.is_online %}
+                                        <span class="icon-circle"></span> Online
+                                    {% else %}
+                                        <span class="icon-circle-off"></span> Offline
+                                    {% endif %}
+                                </span>
+                                
                             </h3>
                             {% if friend.profile.title %}
                                 <div class="user-title">{{ friend.profile.title }}</div>
+                            {% else %}
+                                <div class="user-title">No Title</div>
                             {% endif %}
                             <div class="user-level">Level {{ friend.profile.level|default:"1" }}</div>
                         </div>

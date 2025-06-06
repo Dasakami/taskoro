@@ -43,3 +43,16 @@ class UserSearchSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(avatar_url)
             return avatar_url
         return None
+    
+
+class CompactUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
+
+class CompactProfileSerializer(serializers.ModelSerializer):
+    user = CompactUserSerializer(read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ['user', 'level']

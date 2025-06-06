@@ -22,6 +22,8 @@ class TournamentDetailAPI(generics.RetrieveAPIView):
 
 # 🧠 Лидерборд
 class TournamentLeaderboardAPI(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
     def get(self, request, id):
         tournament = get_object_or_404(Tournament, id=id)
         leaderboard = tournament.get_leaderboard()

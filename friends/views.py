@@ -4,29 +4,26 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q
 from .models import FriendRequest, Friendship, FriendActivity
+from users.models import Profile
 
 
 def friend_list(request):
     if not request.user.is_authenticated:
-        # Если не авторизован, можно показать пустой список или редиректить
         context = {
             'friends': [],
             'activities': [],
         }
         return render(request, 'friends/friend_list.html', context)
     
-    # Получаем все дружбы для текущего пользователя
     friendships = Friendship.objects.filter(
         Q(user1=request.user) | Q(user2=request.user)
     )
     
-    # Получаем список друзей
     friends = []
     for friendship in friendships:
         friend = friendship.user2 if friendship.user1 == request.user else friendship.user1
         friends.append(friend)
     
-    # Получаем активности друзей
     activities = FriendActivity.objects.filter(
         user__in=friends
     ).order_by('-created_at')[:10]
@@ -37,6 +34,7 @@ def friend_list(request):
     }
     
     return render(request, 'friends/friend_list.html', context)
+
 
 @login_required
 def search_users(request):
@@ -50,9 +48,11 @@ def search_users(request):
     else:
         users = []
     
-    # Get existing friendship statuses
+    # Получаем профиль пользователя, так как FriendRequest работает с Profile
+    user_profile = request.user.profile
+
     friend_requests = FriendRequest.objects.filter(
-        (Q(sender=request.user) | Q(receiver=request.user)) &
+        (Q(sender=user_profile) | Q(receiver=user_profile)) &
         Q(status='pending')
     )
     
@@ -64,15 +64,18 @@ def search_users(request):
     
     return render(request, 'friends/search_users.html', context)
 
+
 @login_required
 def friend_requests(request):
+    user_profile = request.user.profile
+
     received_requests = FriendRequest.objects.filter(
-        receiver=request.user,
+        receiver=user_profile,
         status='pending'
     )
     
     sent_requests = FriendRequest.objects.filter(
-        sender=request.user,
+        sender=user_profile,
         status='pending'
     )
     
@@ -83,47 +86,59 @@ def friend_requests(request):
     
     return render(request, 'friends/friend_requests.html', context)
 
+
 @login_required
 def send_friend_request(request, user_id):
-    receiver = get_object_or_404(User, id=user_id)
-    
-    # Check if already friends
-    if Friendship.are_friends(request.user, receiver):
+    receiver_user = get_object_or_404(User, id=user_id)
+    sender_user = request.user
+
+    # Проверяем, что у пользователя есть профиль
+    sender_profile = sender_user.profile
+    receiver_profile = receiver_user.profile
+
+    # Проверка дружбы по модели Friendship (через User)
+    if Friendship.are_friends(sender_user, receiver_user):
         messages.info(request, 'Вы уже являетесь друзьями.')
         return redirect('friends:friends')
     
-    # Check for existing requests
+    # Проверка, нет ли уже активных заявок между профилями
     if FriendRequest.objects.filter(
-        (Q(sender=request.user, receiver=receiver) |
-         Q(sender=receiver, receiver=request.user)),
+        (Q(sender=sender_profile, receiver=receiver_profile) | 
+         Q(sender=receiver_profile, receiver=sender_profile)),
         status='pending'
     ).exists():
         messages.info(request, 'Запрос в друзья уже отправлен.')
         return redirect('friends:friends')
     
-    FriendRequest.objects.create(sender=request.user, receiver=receiver)
-    messages.success(request, f'Запрос в друзья отправлен {receiver.username}!')
+    FriendRequest.objects.create(sender=sender_profile, receiver=receiver_profile)
+    messages.success(request, f'Запрос в друзья отправлен {receiver_user.username}!')
     return redirect('friends:search_users')
+
 
 @login_required
 def accept_friend_request(request, request_id):
+    user_profile = request.user.profile
+
     friend_request = get_object_or_404(
         FriendRequest,
         id=request_id,
-        receiver=request.user,
+        receiver=user_profile,
         status='pending'
     )
     
     friend_request.accept()
-    messages.success(request, f'{friend_request.sender.username} добавлен в друзья!')
+    messages.success(request, f'{friend_request.sender.user.username} добавлен в друзья!')
     return redirect('friends:friend_requests')
+
 
 @login_required
 def decline_friend_request(request, request_id):
+    user_profile = request.user.profile
+
     friend_request = get_object_or_404(
         FriendRequest,
         id=request_id,
-        receiver=request.user,
+        receiver=user_profile,
         status='pending'
     )
     
@@ -131,14 +146,15 @@ def decline_friend_request(request, request_id):
     messages.info(request, 'Запрос в друзья отклонен.')
     return redirect('friends:friend_requests')
 
+
 @login_required
 def remove_friend(request, friend_id):
-    friend = get_object_or_404(User, id=friend_id)
-    
+    friend_user = get_object_or_404(User, id=friend_id)
+
     Friendship.objects.filter(
-        (Q(user1=request.user, user2=friend) |
-         Q(user1=friend, user2=request.user))
+        (Q(user1=request.user, user2=friend_user) |
+         Q(user1=friend_user, user2=request.user))
     ).delete()
     
-    messages.info(request, f'{friend.username} удален из друзей.')
+    messages.info(request, f'{friend_user.username} удален из друзей.')
     return redirect('friends:friends')

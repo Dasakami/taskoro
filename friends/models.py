@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from users.models import Profile
 
 class FriendRequest(models.Model):
     STATUS_CHOICES = [
@@ -8,8 +9,8 @@ class FriendRequest(models.Model):
         ('declined', 'Отклонен'),
     ]
     
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friend_requests_sent')
-    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friend_requests_received')
+    sender = models.ForeignKey(Profile, related_name='sent_requests', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(Profile, related_name='received_requests', on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -17,12 +18,12 @@ class FriendRequest(models.Model):
         unique_together = ('sender', 'receiver')
     
     def __str__(self):
-        return f"{self.sender.username} -> {self.receiver.username}"
+        return f"{self.sender.user.username} -> {self.receiver.user.username}"
     
     def accept(self):
         if self.status == 'pending':
             self.status = 'accepted'
-            Friendship.objects.create(user1=self.sender, user2=self.receiver)
+            Friendship.create_friendship(self.sender.user, self.receiver.user)
             self.save()
     
     def decline(self):
@@ -47,6 +48,14 @@ class Friendship(models.Model):
             models.Q(user1=user1, user2=user2) | 
             models.Q(user1=user2, user2=user1)
         ).exists()
+
+    @classmethod
+    def create_friendship(cls, user1, user2):
+        if user1.id > user2.id:
+            user1, user2 = user2, user1  # Для уникальности (user1 < user2)
+        if not cls.are_friends(user1, user2):
+            cls.objects.create(user1=user1, user2=user2)
+
 
 class FriendActivity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activities')
