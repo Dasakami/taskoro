@@ -104,27 +104,27 @@ WSGI_APPLICATION = 'sim.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'simulator',  # Имя базы данных (Render)
-        'USER': 'postgres',  # Имя пользователя (Render)
-        'PASSWORD': '1908',  # Пароль (Render)
-        'HOST': 'localhost',  # Хост (Render)
-        'PORT': '5432',  # Порт (Render)
-    }
-}
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'taskoro',  # Имя базы данных (Render)
-#         'USER': 'dasakami',  # Имя пользователя (Render)
-#         'PASSWORD': 'ONgAG1OpNwB88Z9HKhN2YMc2oIPyFunq',  # Пароль (Render)
-#         'HOST': 'dpg-d0l9fmd6ubrc73bsu520-a',  # Хост (Render)
+#         'NAME': 'simulator',  # Имя базы данных (Render)
+#         'USER': 'postgres',  # Имя пользователя (Render)
+#         'PASSWORD': '1908',  # Пароль (Render)
+#         'HOST': 'localhost',  # Хост (Render)
 #         'PORT': '5432',  # Порт (Render)
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'taskoro',  # Имя базы данных (Render)
+        'USER': 'dasakami',  # Имя пользователя (Render)
+        'PASSWORD': 'ONgAG1OpNwB88Z9HKhN2YMc2oIPyFunq',  # Пароль (Render)
+        'HOST': 'dpg-d0l9fmd6ubrc73bsu520-a',  # Хост (Render)
+        'PORT': '5432',  # Порт (Render)
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -203,7 +203,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
@@ -231,7 +231,7 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
 
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=1),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=15),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=7),
 
     "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
