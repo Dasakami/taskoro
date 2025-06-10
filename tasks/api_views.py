@@ -25,13 +25,43 @@ class TaskViewSet(viewsets.ModelViewSet):
         else:
             return Response({'detail': 'Задача уже была выполнена ранее.'}, status=status.HTTP_400_BAD_REQUEST)
 
-class BaseTaskViewSet(viewsets.ReadOnlyModelViewSet):
+class BaseTaskViewSet(viewsets.ModelViewSet):
     serializer_class = BaseTaskSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user_classes = self.request.user.profile.character_classes.all()
         return BaseTask.objects.filter(character_class__in=user_classes)
+
+    @action(detail=True, methods=['post'])
+    def complete(self, request, pk=None):
+        base_task = self.get_object()
+
+        # Проверка доступа по классу
+        if not request.user.profile.character_classes.filter(id=base_task.character_class.id).exists():
+            return Response({'detail': 'Нет доступа к этому заданию'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Проверка, выполнена ли уже сегодня
+        today = timezone.now().date()
+        if BaseTaskCompletion.objects.filter(user=request.user, base_task=base_task, completed_at__date=today).exists():
+            return Response({'detail': 'Задача уже выполнена сегодня'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Запись выполнения
+        completion = BaseTaskCompletion.objects.create(
+            user=request.user,
+            base_task=base_task,
+            completed_at=timezone.now()
+        )
+
+        # Обновление опыта и валюты пользователя
+        profile = request.user.profile
+        experience = base_task.xp_reward
+        profile.add_experience(experience)
+        profile.coins += int(experience / 4)
+        profile.save()
+
+        return Response({'detail': f'Задача "{base_task.title}" выполнена! Получено {experience} XP.'})
+
 
 class BaseTaskCompletionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BaseTaskCompletionSerializer

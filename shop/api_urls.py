@@ -1,13 +1,18 @@
+# api_urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from shop.api_views import ShopItemViewSet, PurchaseViewSet, ChestViewSet, ChestOpeningViewSet, ActiveBoostViewSet
+from .api_views import (
+    ShopItemViewSet, PurchaseViewSet,
+    ActiveBoostViewSet, ChestViewSet,
+    ChestOpeningViewSet
+)
 
 router = DefaultRouter()
-router.register(r'shop-items', ShopItemViewSet)
-router.register(r'purchases', PurchaseViewSet)
-router.register(r'chests', ChestViewSet)
-router.register(r'chest-openings', ChestOpeningViewSet)
-router.register(r'active-boosts', ActiveBoostViewSet)
+router.register(r'items', ShopItemViewSet, basename='item')
+router.register(r'purchases', PurchaseViewSet, basename='purchase')
+router.register(r'boosts', ActiveBoostViewSet, basename='boost')
+router.register(r'chests', ChestViewSet, basename='chest')
+router.register(r'openings', ChestOpeningViewSet, basename='opening')
 
 urlpatterns = [
     path('', include(router.urls)),

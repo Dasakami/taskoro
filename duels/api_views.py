@@ -11,10 +11,13 @@ from django.utils import timezone
 
 
 class DuelViewSet(viewsets.ModelViewSet):
+    
     queryset         = Duel.objects.all()
     serializer_class = DuelSerializer
     permission_classes = [permissions.IsAuthenticated]
-
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
     @action(detail=True, methods=['post'])
     def accept(self, request, pk=None):
         duel = get_object_or_404(Duel, pk=pk)
