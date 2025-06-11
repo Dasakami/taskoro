@@ -24,37 +24,50 @@
         <div class="card-body">
             {% if received_requests %}
                 <div class="request-list">
-                    {% for request in received_requests %}
-                        <div class="request-card">
-                            <div class="request-content">
-                                <div class="user-avatar">
-                                    {% if request.sender.profile.avatar %}
-                                        <img src="{{ request.sender.profile.avatar.url }}" alt="{{ request.sender.username }}">
-                                    {% else %}
-                                        <img src="{% static 'images/default-avatar.png' %}" alt="{{ request.sender.username }}">
-                                    {% endif %}
-                                </div>
-                                <div class="user-info">
-                                    <h3 class="user-name">{{ request.sender.username }}</h3>
-                                    {% if request.sender.profile.title %}
-                                        <div class="user-title">{{ request.sender.profile.title }}</div>
-                                    {% endif %}
-                                    <div class="request-time">{{ request.created_at|timesince }} ago</div>
-                                </div>
-                            </div>
-                            <div class="request-actions">
-                                <a href="{% url 'users:profile:view_other_profile' username=user.username %}" class="btn btn-accent">
-                                    <span class="icon-user"></span> Profile
-                                </a>
-                                <a href="{% url 'friends:accept_friend_request' request.id %}" class="btn">
-                                    <span class="icon-check"></span> Accept
-                                </a>
-                                <a href="{% url 'friends:decline_friend_request' request.id %}" class="btn btn-secondary">
-                                    <span class="icon-x"></span> Decline
-                                </a>
-                            </div>
-                        </div>
-                    {% endfor %}
+{% for request in received_requests %}
+  <div class="request-card">
+
+    <div class="request-content">
+      <!-- АВАТАР -->
+      <div class="user-avatar">
+        {% if request.sender.avatar %}
+          <img src="{{ request.sender.avatar.url }}"
+               alt="{{ request.sender.user.username }}">
+        {% else %}
+          <img src="{% static 'images/default-avatar.png' %}"
+               alt="{{ request.sender.user.username }}">
+        {% endif %}
+      </div>
+
+      <!-- ИМЯ и ЗАГОЛОВОК -->
+      <div class="user-info">
+        <h3 class="user-name">{{ request.sender.user.username }}</h3>
+        {% if request.sender.title %}
+          <div class="user-title">{{ request.sender.title }}</div>
+        {% endif %}
+        <div class="request-time">
+          {{ request.created_at|timesince }} ago
+        </div>
+      </div>
+    </div>
+
+    <!-- КНОПКИ -->
+    <div class="request-actions">
+      <a href="{% url 'users:profile:view_other_profile' username=request.sender.user.username %}"
+         class="btn btn-accent">
+        <span class="icon-user"></span> Profile
+      </a>
+      <a href="{% url 'friends:accept_friend_request' request.id %}"
+         class="btn">
+        <span class="icon-check"></span> Accept
+      </a>
+      <a href="{% url 'friends:decline_friend_request' request.id %}"
+         class="btn btn-secondary">
+        <span class="icon-x"></span> Decline
+      </a>
+    </div>
+  </div>
+{% endfor %}
                 </div>
             {% else %}
                 <div class="empty-state text-center">
@@ -76,33 +89,39 @@
             {% if sent_requests %}
                 <div class="request-list">
                     {% for request in sent_requests %}
-                        <div class="request-card">
-                            <div class="request-content">
-                                <div class="user-avatar">
-                                    {% if request.receiver.profile.avatar %}
-                                        <img src="{{ request.receiver.profile.avatar.url }}" alt="{{ request.receiver.username }}">
-                                    {% else %}
-                                        <img src="{% static 'images/default-avatar.png' %}" alt="{{ request.receiver.username }}">
-                                    {% endif %}
-                                </div>
-                                <div class="user-info">
-                                    <h3 class="user-name">{{ request.receiver.username }}</h3>
-                                    {% if request.receiver.profile.title %}
-                                        <div class="user-title">{{ request.receiver.profile.title }}</div>
-                                    {% endif %}
-                                    <div class="request-time">Sent {{ request.created_at|timesince }} ago</div>
-                                </div>
-                            </div>
-                            <div class="request-actions">
-                                <a href="{% url 'users:profile:view_other_profile' username=user.username %}" class="btn btn-accent">
-                                    <span class="icon-user"></span> Profile
-                                </a>
-                                <button class="btn btn-secondary" disabled>
-                                    <span class="icon-clock"></span> Pending
-                                </button>
-                            </div>
-                        </div>
-                    {% endfor %}
+  <div class="request-card">
+    <div class="request-content">
+      <div class="user-avatar">
+        {% if request.receiver.avatar %}
+          <img src="{{ request.receiver.avatar.url }}"
+               alt="{{ request.receiver.user.username }}">
+        {% else %}
+          <img src="{% static 'images/default-avatar.png' %}"
+               alt="{{ request.receiver.user.username }}">
+        {% endif %}
+      </div>
+      <div class="user-info">
+        <h3 class="user-name">{{ request.receiver.user.username }}</h3>
+        {% if request.receiver.title %}
+          <div class="user-title">{{ request.receiver.title }}</div>
+        {% endif %}
+        <div class="request-time">
+          Sent {{ request.created_at|timesince }} ago
+        </div>
+      </div>
+    </div>
+    <div class="request-actions">
+      <a href="{% url 'users:profile:view_other_profile' username=request.receiver.user.username %}"
+         class="btn btn-accent">
+        <span class="icon-user"></span> Profile
+      </a>
+      <button class="btn btn-secondary" disabled>
+        <span class="icon-clock"></span> Pending
+      </button>
+    </div>
+  </div>
+{% endfor %}
+
                 </div>
             {% else %}
                 <div class="empty-state text-center">

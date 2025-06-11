@@ -50,7 +50,7 @@
                         </div>
                     </div>
                     <div class="friend-actions">
-                        <a href="{% url 'users:profile:view_other_profile' username=user.username %}" class="btn btn-accent">
+                        <a href="{% url 'users:profile:view_other_profile' username=friend.username %}" class="btn btn-accent">
                             <span class="icon-user"></span> Profile
                         </a>
                         <a href="{% url 'friends:remove_friend' friend.id %}" class="btn btn-secondary" 

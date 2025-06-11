@@ -74,14 +74,29 @@ def register(request):
 def profile_view(request):
     user_profile = request.user.profile
     medals = user_profile.medals.all()
-    
-    # Get equipped items
-    equipped_frame = user_profile.get_equipped_avatar_frame()
-    equipped_title = user_profile.get_equipped_title()
-    equipped_background = user_profile.get_equipped_background()
-    equipped_effect = user_profile.get_equipped_effect()
-    active_boosts = user_profile.get_active_boosts()
-    
+
+    # Get equipped items from purchases
+    equipped_purchases = Purchase.objects.filter(user=request.user, is_equipped=True).select_related('item')
+
+    equipped_frame = None
+    equipped_title = None
+    equipped_background = None
+    equipped_effect = None
+    active_boosts = []
+
+    for purchase in equipped_purchases:
+        item = purchase.item
+        if item.category == 'avatar_frame':
+            equipped_frame = item
+        elif item.category == 'title':
+            equipped_title = item
+        elif item.category == 'background':
+            equipped_background = item
+        elif item.category == 'effect':
+            equipped_effect = item
+        elif item.category == 'boost':
+            active_boosts.append(purchase)
+
     context = {
         'profile': user_profile,
         'medals': medals,
@@ -92,7 +107,7 @@ def profile_view(request):
         'active_boosts': active_boosts,
         'is_self': True,
     }
-    
+
     return render(request, 'users/profile.html', context)
 
 @login_required
@@ -122,13 +137,26 @@ def view_other_profile(request, username):
 
     user_profile = other_user.profile
     medals = user_profile.medals.all()
-    
-    # Get equipped items
-    equipped_frame = user_profile.get_equipped_avatar_frame()
-    equipped_title = user_profile.get_equipped_title()
-    equipped_background = user_profile.get_equipped_background()
-    equipped_effect = user_profile.get_equipped_effect()
-    
+
+    # Get equipped items from purchases
+    equipped_purchases = Purchase.objects.filter(user=other_user, is_equipped=True).select_related('item')
+
+    equipped_frame = None
+    equipped_title = None
+    equipped_background = None
+    equipped_effect = None
+
+    for purchase in equipped_purchases:
+        item = purchase.item
+        if item.category == 'avatar_frame':
+            equipped_frame = item
+        elif item.category == 'title':
+            equipped_title = item
+        elif item.category == 'background':
+            equipped_background = item
+        elif item.category == 'effect':
+            equipped_effect = item
+
     context = {
         'profile': user_profile,
         'medals': medals,
@@ -175,4 +203,3 @@ def create_superuser(request):
         return HttpResponse("Суперпользователь создан!")
     else:
         return HttpResponse("Суперпользователь уже существует.")
-    
