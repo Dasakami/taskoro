@@ -118,10 +118,10 @@ WSGI_APPLICATION = 'sim.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'taskoro',  # Имя базы данных (Render)
-        'USER': 'dasakami',  # Имя пользователя (Render)
-        'PASSWORD': 'ONgAG1OpNwB88Z9HKhN2YMc2oIPyFunq',  # Пароль (Render)
-        'HOST': 'dpg-d0l9fmd6ubrc73bsu520-a',  # Хост (Render)
+        'NAME': 'sanjar',  # Имя базы данных (Render)
+        'USER': 'sanjar',  # Имя пользователя (Render)
+        'PASSWORD': 'X0f4vm8RTLjvLmShBjcjZVqV3nn74CQs',  # Пароль (Render)
+        'HOST': 'dpg-d1amddmmcj7s73fn4d2g-a',  # Хост (Render)
         'PORT': '5432',  # Порт (Render)
     }
 }
