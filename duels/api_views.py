@@ -11,10 +11,15 @@ from django.utils import timezone
 
 
 class DuelViewSet(viewsets.ModelViewSet):
-    
-    queryset         = Duel.objects.all()
     serializer_class = DuelSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Duel.objects.filter(
+            Q(challenger=user) | Q(opponent=user)
+        ).order_by('-created_at')
+
     def get_serializer_context(self):
         return {'request': self.request}
     
@@ -35,6 +40,7 @@ class DuelViewSet(viewsets.ModelViewSet):
         except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': 'declined'})
+
 
 
 class DuelProgressViewSet(viewsets.ModelViewSet):
