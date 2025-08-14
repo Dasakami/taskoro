@@ -15,21 +15,22 @@ import os
 
 from django.urls import reverse_lazy
 from datetime import timedelta
-
+from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'secretik'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = ['*', 'https://taskoro.onrender.com']
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS").split(",")
 
 
 # Application definition
@@ -70,10 +71,10 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',\
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True 
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(',')
 
 ROOT_URLCONF = 'sim.urls'
 
@@ -114,36 +115,14 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'simulator',  # Имя базы данных (Render)
-        'USER': 'postgres',  # Имя пользователя (Render)
-        'PASSWORD': '1908',  # Пароль (Render)
-        'HOST': 'db',  # Хост (Render)
-        # 'HOST': 'localhost',  # Хост (Render)
-        'PORT': '5432',  # Порт (Render)
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'sanjar',  # Имя базы данных (Render)
-#         'USER': 'sanjar',  # Имя пользователя (Render)
-#         'PASSWORD': 'X0f4vm8RTLjvLmShBjcjZVqV3nn74CQs',  # Пароль (Render)
-#         'HOST': 'dpg-d1amddmmcj7s73fn4d2g-a',  # Хост (Render)
-#         'PORT': '5432',  # Порт (Render)
-#     }
-# }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'daskoro',  # Имя базы данных (Render)
-#         'USER': 'mishka',  # Имя пользователя (Render)
-#         'PASSWORD': 'AZd07NvK2ZPTwFvSce6JJjd8ahpyCv1w',  # Пароль (Render)
-#         'HOST': 'dpg-d2dmdnbipnbc73b0bpig-a',  # Хост (Render)
-#         'PORT': '5432',  # Порт (Render)
-#     }
-# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -167,9 +146,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Bishkek'
 
 USE_I18N = True
 
