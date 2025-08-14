@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['*', 'https://taskoro.onrender.com']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'main',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     'djoser',
     'corsheaders',
     'widget_tweaks',
+    'channels',
 
 ]
 
@@ -68,7 +70,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',\
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True 
@@ -91,7 +93,12 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'sim.wsgi.application'
+# WSGI_APPLICATION = 'sim.wsgi.application'
+ASGI_APPLICATION = 'sim.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+}
 
 
 # Database
@@ -104,27 +111,28 @@ WSGI_APPLICATION = 'sim.wsgi.application'
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'simulator',  # Имя базы данных (Render)
-#         'USER': 'postgres',  # Имя пользователя (Render)
-#         'PASSWORD': '1908',  # Пароль (Render)
-#         'HOST': 'localhost',  # Хост (Render)
-#         'PORT': '5432',  # Порт (Render)
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sanjar',  # Имя базы данных (Render)
-        'USER': 'sanjar',  # Имя пользователя (Render)
-        'PASSWORD': 'X0f4vm8RTLjvLmShBjcjZVqV3nn74CQs',  # Пароль (Render)
-        'HOST': 'dpg-d1amddmmcj7s73fn4d2g-a',  # Хост (Render)
+        'NAME': 'simulator',  # Имя базы данных (Render)
+        'USER': 'postgres',  # Имя пользователя (Render)
+        'PASSWORD': '1908',  # Пароль (Render)
+        # 'HOST': 'db',  # Хост (Render)
+        'HOST': 'localhost',  # Хост (Render)
         'PORT': '5432',  # Порт (Render)
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'sanjar',  # Имя базы данных (Render)
+#         'USER': 'sanjar',  # Имя пользователя (Render)
+#         'PASSWORD': 'X0f4vm8RTLjvLmShBjcjZVqV3nn74CQs',  # Пароль (Render)
+#         'HOST': 'dpg-d1amddmmcj7s73fn4d2g-a',  # Хост (Render)
+#         'PORT': '5432',  # Порт (Render)
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
