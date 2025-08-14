@@ -20,4 +20,4 @@ jobs:
 
     - name: Copy files to server
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd ~/myproject && git pull origin main && docker compose down && docker compose up -d --build"
+        ssh -o StrictHostKeyChecking=no root@195.133.194.45 "cd ~/myproject && git pull origin main && docker compose down && docker compose up -d --build"
