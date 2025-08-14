@@ -38,9 +38,9 @@
                                 <div class="player-info">
                                     <div class="player-avatar">
                                         {% if duel.challenger.profile.avatar %}
-                                        <img src="{{ duel.challenger.profile.avatar.url|default:'/static/images/default_avatar.png' }}" alt="Avatar">
+                                        <img src="{{ duel.challenger.profile.avatar.url|default:'/static/images/default-avatar.png' }}" alt="Avatar">
                                         {% else %}
-                                        <img src="/static/images/default_avatar.png" alt="Avatar">
+                                        <img src="/static/images/default-avatar.png" alt="Avatar">
                                         {% endif %}
                                     </div>
                                     <div class="player-name">{{ duel.challenger.username }}</div>
@@ -51,7 +51,7 @@
                                         {% if duel.opponent.profile.avatar %}
                                         <img src="{{ duel.opponent.profile.avatar.url|default:'/static/images/default_avatar.png' }}" alt="Avatar">
                                         {% else %}
-                                        <img src="/static/images/default_avatar.png" alt="Avatar">
+                                        <img src="/static/images/default-avatar.png" alt="Avatar">
                                         {% endif %}
                                     </div>
                                     <div class="player-name">{{ duel.opponent.username }}</div>

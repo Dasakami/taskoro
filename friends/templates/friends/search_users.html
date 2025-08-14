@@ -42,7 +42,7 @@
                                             <img src="{% static 'images/default-avatar.png' %}" alt="{{ user.username }}">
                                         {% endif %}
                                     </div>
-                                    <div class="user-info">
+                                    <div class="user-info" style="display: block !important; min-width: 100px;" >
                                         <h3 class="user-name">{{ user.username }}</h3>
                                         {% if user.profile.title %}
                                             <div class="user-title">{{ user.profile.title }}</div>

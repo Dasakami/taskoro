@@ -29,7 +29,7 @@
                                 {{ friend.username|first|upper }}
                             {% endif %}
                         </div>
-                        <div class="user-info">
+                        <div class="user-info" style="min-width: 100px; display: block !important; ">
                             <h3 class="user-name">
                                 {{ friend.username }}
                                 <span class="friend-status {% if friend.profile.is_online %}online{% else %}offline{% endif %}">
@@ -39,7 +39,6 @@
                                         <span class="icon-circle-off"></span> Offline
                                     {% endif %}
                                 </span>
-                                
                             </h3>
                             {% if friend.profile.title %}
                                 <div class="user-title">{{ friend.profile.title }}</div>

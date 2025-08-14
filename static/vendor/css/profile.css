@@ -726,11 +726,14 @@
 @media (max-width: 480px) {
     .profile-content-wrapper {
         padding: 1.5rem 1rem;
+        display: block;
     }
     
-    .username {
-        font-size: 1.8rem;
+    .username-profile {
+        font-size: 1.5rem;
     }
+
+
     
     .profile-avatar,
     .profile-avatar-placeholder {
@@ -750,7 +753,8 @@
     
     .btn {
         padding: 0.8rem 1.5rem;
-        font-size: 0.9rem;
+        font-size: 0.5rem;
+        gap: 0;
     }
 }
 
