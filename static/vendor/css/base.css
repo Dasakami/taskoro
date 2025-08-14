@@ -112,6 +112,7 @@ p {
 
 .user-avatar {
     position: relative;
+    display: block;
 }
 
 .avatar-frame {
