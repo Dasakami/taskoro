@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ro!p)+_6l32i%=4s3a+=!k6a&(k35bwu$0m6erwbjeod(maky8'
+SECRET_KEY = 'secretik'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -133,6 +133,17 @@ DATABASES = {
 #         'PORT': '5432',  # Порт (Render)
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'daskoro',  # Имя базы данных (Render)
+        'USER': 'mishka',  # Имя пользователя (Render)
+        'PASSWORD': 'AZd07NvK2ZPTwFvSce6JJjd8ahpyCv1w',  # Пароль (Render)
+        'HOST': 'dpg-d2dmdnbipnbc73b0bpig-a',  # Хост (Render)
+        'PORT': '5432',  # Порт (Render)
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
