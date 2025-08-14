@@ -117,8 +117,8 @@ DATABASES = {
         'NAME': 'simulator',  # Имя базы данных (Render)
         'USER': 'postgres',  # Имя пользователя (Render)
         'PASSWORD': '1908',  # Пароль (Render)
-        # 'HOST': 'db',  # Хост (Render)
-        'HOST': 'localhost',  # Хост (Render)
+        'HOST': 'db',  # Хост (Render)
+        # 'HOST': 'localhost',  # Хост (Render)
         'PORT': '5432',  # Порт (Render)
     }
 }
