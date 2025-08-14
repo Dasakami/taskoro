@@ -134,16 +134,16 @@ DATABASES = {
 #     }
 # }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'daskoro',  # Имя базы данных (Render)
-        'USER': 'mishka',  # Имя пользователя (Render)
-        'PASSWORD': 'AZd07NvK2ZPTwFvSce6JJjd8ahpyCv1w',  # Пароль (Render)
-        'HOST': 'dpg-d2dmdnbipnbc73b0bpig-a',  # Хост (Render)
-        'PORT': '5432',  # Порт (Render)
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'daskoro',  # Имя базы данных (Render)
+#         'USER': 'mishka',  # Имя пользователя (Render)
+#         'PASSWORD': 'AZd07NvK2ZPTwFvSce6JJjd8ahpyCv1w',  # Пароль (Render)
+#         'HOST': 'dpg-d2dmdnbipnbc73b0bpig-a',  # Хост (Render)
+#         'PORT': '5432',  # Порт (Render)
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
