@@ -14,7 +14,8 @@ class TaskCategory(models.Model):
         return self.name
     
     class Meta:
-        verbose_name_plural = "Task Categories"
+        verbose_name = 'Категория задачи'
+        verbose_name_plural = "Категория задач"
 
 class BaseTask(models.Model):
     """Pre-defined tasks based on character classes"""
@@ -38,6 +39,10 @@ class BaseTask(models.Model):
     task_type = models.CharField(max_length=15, choices=TASK_TYPE_CHOICES, default='one_time')
     estimated_minutes = models.IntegerField(default=30, help_text="Estimated time to complete in minutes")
     xp_reward = models.IntegerField(default=20, help_text="Base XP reward for completing this task")
+
+    class Meta:
+        verbose_name = 'Базовая задача'
+        verbose_name_plural = "Базовые задачи"
     
     def __str__(self):
         return f"{self.title} ({self.get_task_type_display()}, {self.character_class.name})"
@@ -49,6 +54,8 @@ class BaseTaskCompletion(models.Model):
     completed_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
+        verbose_name = 'Выпелнение базовой задачи'
+        verbose_name_plural = 'Выполнение базовых задач'
         unique_together = ['user', 'base_task', 'completed_at']
         ordering = ['-completed_at']
     
@@ -105,6 +112,8 @@ class Task(models.Model):
     target_date = models.DateField(null=True, blank=True, help_text="The date this task is targeted for")
     
     class Meta:
+        verbose_name = 'Задача'
+        verbose_name_plural = 'Задачи'
         ordering = ['-created_at']
     
     def __str__(self):

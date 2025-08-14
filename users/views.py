@@ -3,16 +3,14 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import CustomUserCreationForm, CustomAuthenticationForm, ProfileUpdateForm
-from .models import Profile
-from django.http import Http404
+from .forms import *
+from .models import *
+from django.http import Http404, HttpResponse
 from django.contrib.auth.models import User
 from django.db.models import Count, Max
 from django.db import models
-from .models import Medal
 from django.contrib.auth import logout as auth_logout
 from shop.models import Purchase
-from django.http import HttpResponse
 
 
 def login_view(request):
@@ -73,7 +71,7 @@ def register(request):
 @login_required
 def profile_view(request):
     user_profile = request.user.profile
-    medals = user_profile.medals.all()
+    medals = user_profile.medals.all()  
 
     # Get equipped items from purchases
     equipped_purchases = Purchase.objects.filter(user=request.user, is_equipped=True).select_related('item')

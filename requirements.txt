@@ -45,3 +45,6 @@ rest_framework_simplejwt
 django-cors-headers
 djoser
 django-widget-tweaks
+daphne
+channels
+drf_yasg

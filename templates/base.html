@@ -151,7 +151,7 @@
     <!-- Scripts -->
     <script src="/static/vendor/js/animations.js"></script>
     {% block extra_js %}{% endblock %}
-
+    {% if messages and request.resolver_match.url_name != 'chat_room' %}
     <div id="toast-container" class="toast-container">
     {% if messages %}
         {% for message in messages %}
@@ -159,6 +159,7 @@
                 {{ message }}
             </div>
         {% endfor %}
+    {% endif %}
     {% endif %}
 </div>
 

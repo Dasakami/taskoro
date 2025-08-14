@@ -4,10 +4,11 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
 
-class UserSerializer(serializers.ModelSerializer):
+class DuelUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username']
+        ref_name = 'DuelsUser'
 
 
         def create(self, validated_data):
@@ -18,8 +19,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class DuelSerializer(serializers.ModelSerializer):
-    challenger = UserSerializer(read_only=True)
-    opponent = UserSerializer(read_only=True)
+    challenger = DuelUserSerializer(read_only=True)
+    opponent = DuelUserSerializer(read_only=True)
 
     opponent_id = serializers.IntegerField(write_only=True)
     task = serializers.IntegerField(write_only=True)
@@ -50,16 +51,16 @@ class DuelSerializer(serializers.ModelSerializer):
         return duel
 
 class DuelProgressSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = DuelUserSerializer(read_only=True)
 
     class Meta:
         model = DuelProgress
         fields = ['id', 'duel', 'user', 'completed', 'completion_time']
 
 class DuelHistorySerializer(serializers.ModelSerializer):
-    challenger = UserSerializer(read_only=True)
-    opponent = UserSerializer(read_only=True)
-    winner = UserSerializer(read_only=True)
+    challenger = DuelUserSerializer(read_only=True)
+    opponent = DuelUserSerializer(read_only=True)
+    winner = DuelUserSerializer(read_only=True)
 
     class Meta:
         model = Duel

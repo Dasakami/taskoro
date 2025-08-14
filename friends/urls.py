@@ -10,4 +10,6 @@ urlpatterns = [
     path('accept_request/<int:request_id>/', views.accept_friend_request, name='accept_friend_request'),
     path('decline_request/<int:request_id>/', views.decline_friend_request, name='decline_friend_request'),
     path('remove/<int:friend_id>/', views.remove_friend, name='remove_friend'),
+    path('chat/open/<int:user_id>/', views.open_chat, name='open_chat'),
+    path('chat/room/<str:room_name>/', views.chat_room, name='chat_room'),
 ]

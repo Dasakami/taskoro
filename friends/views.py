@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q
-from .models import FriendRequest, Friendship, FriendActivity
+from .models import *
 from users.models import Profile
 
 
@@ -158,3 +158,34 @@ def remove_friend(request, friend_id):
     
     messages.info(request, f'{friend_user.username} удален из друзей.')
     return redirect('friends:friends')
+
+
+
+@login_required
+def open_chat(request, user_id):
+    current_user = request.user
+    other_user = get_object_or_404(User, id=user_id)
+
+    # Сортировка для уникальности (user1 < user2)
+    user1, user2 = (current_user, other_user) if current_user.id < other_user.id else (other_user, current_user)
+
+    chat_group, created = ChatGroup.objects.get_or_create(user1=user1, user2=user2)
+    chatroom_name = chat_group.get_group_name()
+
+    return redirect('friends:chat_room', room_name=chatroom_name)
+
+@login_required
+def chat_room(request, room_name):
+    # Извлекаем ID пользователей из room_name
+    user_id_1, user_id_2 = map(int, room_name.split('_')[-2:])
+    user1 = min(user_id_1, user_id_2)
+    user2 = max(user_id_1, user_id_2)
+
+    chat_group = ChatGroup.objects.get(user1_id=user1, user2_id=user2)
+    messages = chat_group.messages.order_by('timestamp')
+
+    return render(request, 'chat/room.html', {
+        'room_name': room_name,
+        'username': request.user.username,
+        'messages': messages
+    })

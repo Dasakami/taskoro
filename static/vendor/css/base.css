@@ -44,7 +44,7 @@ body {
         radial-gradient(circle at 90% 50%, rgba(51, 204, 255, 0.1) 0%, transparent 25%),
         radial-gradient(circle at 30% 80%, rgba(255, 51, 102, 0.1) 0%, transparent 20%);
     background-size: 100% 100%;
-    color: var(--color-text-primary);
+    color: var(--color-text-secondary);
     font-family: 'Rajdhani', sans-serif;
 }
 

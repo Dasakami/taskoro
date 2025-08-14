@@ -57,6 +57,7 @@
                            onclick="return confirm('Are you sure you want to remove {{ friend.username }} from your friends?');">
                             <span class="icon-user-minus"></span> Remove
                         </a>
+                        <a href="{% url 'friends:open_chat' friend.id %}" class="btn btn-chat" >Chat</a>
                     </div>
                 </div>
             {% endfor %}
