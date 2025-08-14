@@ -15,5 +15,5 @@ urlpatterns  = [
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     path('ckeditor/upload/', custom_upload_function , name='ckeditor_upload'),
     path('admin/', admin_rofl, name='admin_rofl'),
-    
+    path('yandex_9a99c4bc5ddefd70.html', TemplateView.as_view(template_name='yandex_9a99c4bc5ddefd70.html'))
 ]
