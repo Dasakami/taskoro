@@ -8,7 +8,7 @@
     <div class="page-header">
         <h1 class="main-title">Цели на день</h1>
         <div class="header-actions">
-            <a href="{% url 'tasks:task_create' %}" class="btn btn-primary">
+            <a href="{% url 'tasks:daily_create' %}?type=daily"" class="btn btn-primary">
                 Создать новую цель
             </a>
         </div>
@@ -106,7 +106,7 @@
             {% else %}
             <div class="empty-state">
                 <p>На этот день нет запланированных целей</p>
-                <a href="{% url 'tasks:daily_create' %}" class="btn btn-primary">Создать цель на день</a>
+                <a href="{% url 'tasks:daily_create' %}?type=daily" class="btn btn-primary">Создать цель на день</a>
             </div>
             {% endif %}
         </div>

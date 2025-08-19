@@ -3,8 +3,8 @@ from .models import Task, TaskCategory, BaseTask, BaseTaskCompletion
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'difficulty', 'status', 'user', 'created_at', 'is_completed')
-    list_filter = ('category', 'difficulty', 'status', 'is_completed', 'created_at')
+    list_display = ('title', 'category', 'difficulty', 'status', 'user', 'created_at', 'is_completed', 'task_type')
+    list_filter = ('category', 'difficulty', 'status', 'is_completed', 'created_at', 'task_type')
     search_fields = ('title', 'description')
 
 @admin.register(TaskCategory)

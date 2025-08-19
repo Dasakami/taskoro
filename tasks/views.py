@@ -486,7 +486,7 @@ def daily_create(request):
         form = DailyForm(request.POST)
         if form.is_valid():
             daily_goal = form.save(commit=False)
-            daily_goal.user = request.user  # Обязательно укажи текущего пользователя
+            daily_goal.user = request.user 
             daily_goal.save()
             return redirect('tasks:daily_goals')
     else:
@@ -498,7 +498,6 @@ def habit_create(request):
         form = HabitForm(request.POST)
         if form.is_valid():
             habit = form.save(commit=False)
-            # Нужно добавить user
             habit.user = request.user
             habit.save()
             return redirect('tasks:habits_list')

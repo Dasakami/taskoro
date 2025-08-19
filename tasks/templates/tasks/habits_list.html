@@ -117,7 +117,7 @@
     {% else %}
     <div class="empty-state">
         <p>У вас пока нет отслеживаемых привычек</p>
-        <a href="{% url 'tasks:task_create' %}?type=habit" class="btn btn-primary">Создать первую привычку</a>
+        <a href="{% url 'tasks:habit_create' %}?type=habit" class="btn btn-primary">Создать первую привычку</a>
     </div>
     {% endif %}
     
