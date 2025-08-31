@@ -25,4 +25,6 @@ urlpatterns  = [
     path('yandex_9a99c4bc5ddefd70.html', TemplateView.as_view(template_name='yandex_9a99c4bc5ddefd70.html')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
+    path('app/', TemplateView.as_view(template_name='main/app_daskoro.html'), name='app'),
+    path('privacy/', TemplateView.as_view(template_name='main/privacy.html'), name='privacy')
 ]

@@ -105,6 +105,10 @@
                     <span class="nav-icon">🧠</span>
                     <span class="nav-text">Заметки</span>
                 </a></li>
+                <li><a href="{% url 'app' %}" class="nav-link {% if request.resolver_match.url_name == 'notes' %}active{% endif %}">
+                    <span class="nav-icon">📲</span>
+                    <span class="nav-text">Приложение</span>
+                </a></li>
             </ul>
             <div class="sidebar-footer">
                 {% if user.is_authenticated %}

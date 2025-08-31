@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Скачать Daskoro App{% endblock %}
+
+{% block content %}
+<div class="content">
+
+    <!-- Hero Section -->
+    <section class="app-hero card" style="text-align:center; padding:100px 20px; position:relative; overflow:hidden;">
+        <h1>Daskoro App</h1>
+        <p>Все возможности сайта прямо на твоем телефоне! Быстро, удобно и красиво.</p>
+        <div class="download-buttons">
+            <a href="{% static 'downloads/daskoro-app.apk' %}" class="btn btn-accent btn-lg">Скачать APK</a>
+            <a href="https://daskoro.site" class="btn btn-secondary btn-lg">О сайте</a>
+        </div>
+        <!-- Magic particles overlay -->
+        <div class="magic-particles"></div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="feature-section" style="display:flex; flex-wrap:wrap; justify-content:center; gap:30px; margin-top:60px;">
+        <div class="feature-card card">
+            <h3>Следи за RPG</h3>
+            <p>Контролируй прогресс, уровни и достижения прямо с телефона.</p>
+        </div>
+        <div class="feature-card card">
+            <h3>Уведомления</h3>
+            <p>Не пропускай важные события, обновления и бонусы.</p>
+        </div>
+        <div class="feature-card card">
+            <h3>Эксклюзивные возможности</h3>
+            <p>Получай уникальный контент и бонусы только через приложение.</p>
+        </div>
+        <div class="feature-card card">
+            <h3>Безопасность</h3>
+            <p>Твои данные всегда защищены, никаких утечек и проблем.</p>
+        </div>
+        <div class="feature-card card">
+            <h3>Легко управлять</h3>
+            <p>Интерфейс продуман до мелочей для максимального удобства.</p>
+        </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section class="card screenshots-section" style="padding:50px 20px; text-align:center; margin-top:60px;">
+        <h2>Скриншоты приложения</h2>
+        <div class="screenshots" style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px; margin-top:30px;">
+            <img src="{% static 'images/screenshot1.png' %}" alt="Screenshot 1">
+            <img src="{% static 'images/screenshot2.png' %}" alt="Screenshot 2">
+            <img src="{% static 'images/screenshot3.png' %}" alt="Screenshot 3">
+        </div>
+    </section>
+
+    <!-- Video Preview Section -->
+    <section class="card video-section" style="margin-top:60px; text-align:center; padding:50px 20px;">
+        <h2>Видео-превью</h2>
+        <video width="320" height="600" controls style="border-radius:16px; box-shadow:var(--shadow-lg); margin-top:20px;">
+            <source src="{% static 'videos/app-preview.mp4' %}" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+        </video>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="card testimonials-section" style="padding:50px 20px; margin-top:60px;">
+        <h2 style="text-align:center; margin-bottom:40px;">Отзывы пользователей</h2>
+        <div class="testimonials" style="display:flex; flex-wrap:wrap; justify-content:center; gap:30px;">
+            <div class="testimonial-card card">
+                <p>"Приложение просто бомба! Очень удобно следить за RPG и бонусами."</p>
+                <strong>- Alex</strong>
+            </div>
+            <div class="testimonial-card card">
+                <p>"Красивый интерфейс и супер легкое управление. Рекомендую!"</p>
+                <strong>- Maria</strong>
+            </div>
+            <div class="testimonial-card card">
+                <p>"Все работает гладко, никаких багов. Отличная работа!"</p>
+                <strong>- Ivan</strong>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="card faq-section" style="padding:50px 20px; margin-top:60px;">
+        <h2 style="text-align:center; margin-bottom:40px;">FAQ</h2>
+        <div class="faq-item card" style="padding:20px; margin-bottom:20px;">
+            <strong>Можно ли использовать приложение без интернета?</strong>
+            <p>Часть функций доступна оффлайн, но для обновлений и уведомлений нужен интернет.</p>
+        </div>
+        <div class="faq-item card" style="padding:20px; margin-bottom:20px;">
+            <strong>Безопасно ли устанавливать APK?</strong>
+            <p>Да, APK подписан и проверен. Мы гарантируем защиту ваших данных.</p>
+        </div>
+        <div class="faq-item card" style="padding:20px; margin-bottom:20px;">
+            <strong>Как получать бонусы через приложение?</strong>
+            <p>Все бонусы активируются автоматически при входе через ваш аккаунт Daskoro.</p>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="card call-to-action" style="text-align:center; padding:80px 20px; margin-top:60px; background: linear-gradient(135deg, rgba(102,51,255,0.1), rgba(255,51,102,0.1));">
+        <h2>Готов попробовать?</h2>
+        <p>Скачай приложение прямо сейчас и окунись в мир Daskoro!</p>
+        <a href="{% static 'downloads/daskoro-app.apk' %}" class="btn btn-accent btn-lg" style="margin-top:20px;">Скачать APK</a>
+    </section>
+
+</div>
+
+<!-- Дополнительные стили для этой страницы -->
+<style>
+.app-hero h1 {
+    font-size:3rem;
+    color: var(--color-accent-primary);
+    text-shadow:0 0 25px rgba(102,51,255,0.7);
+    margin-bottom: var(--space-md);
+}
+
+.app-hero p {
+    font-size:1.2rem;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-lg);
+}
+
+.download-buttons .btn {
+    margin:10px;
+    padding:15px 40px;
+    font-size:1.1rem;
+    transition: all 0.3s ease;
+}
+
+.download-buttons .btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow:0 0 25px rgba(102,51,255,0.6);
+}
+
+.feature-card, .testimonial-card, .faq-item {
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover, .testimonial-card:hover, .faq-item:hover {
+    transform: translateY(-5px);
+    box-shadow:0 0 25px rgba(102,51,255,0.5);
+}
+
+/* Screenshots hover */
+.screenshots img {
+    width:200px;
+    border-radius:16px;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.screenshots img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(255,51,102,0.5);
+}
+
+/* Magic particles animation */
+.magic-particles {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0;
+    background-image: 
+        radial-gradient(circle at 10% 10%, rgba(102, 51, 255, 0.03) 0%, transparent 10%),
+        radial-gradient(circle at 90% 30%, rgba(255, 51, 102, 0.03) 0%, transparent 15%),
+        radial-gradient(circle at 50% 80%, rgba(51, 204, 255, 0.03) 0%, transparent 15%);
+    animation: moveParticles 15s linear infinite;
+}
+
+@keyframes moveParticles {
+    0% {background-position: 0 0, 100% 0, 50% 100%;}
+    50% {background-position: 100% 50%, 0 50%, 50% 0;}
+    100% {background-position: 0 0, 100% 0, 50% 100%;}
+}
+
+.call-to-action h2 {
+    font-size:2.5rem;
+    color: var(--color-accent-primary);
+    text-shadow:0 0 20px rgba(102,51,255,0.5);
+}
+
+.call-to-action p {
+    font-size:1.2rem;
+    color: var(--color-text-primary);
+}
+</style>
+
+{% endblock %}
