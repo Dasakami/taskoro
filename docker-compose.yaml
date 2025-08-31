@@ -29,7 +29,7 @@ services:
       retries: 5
       start_period: 30s
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - myproject_db-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
 
@@ -39,4 +39,5 @@ services:
       - "6379:6379"
 
 volumes:
-  db-data:
+  myproject_db-data:
+    external: true
