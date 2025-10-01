@@ -20,7 +20,6 @@ class CustomUserCreationForm(UserCreationForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Customize form labels and help text
         self.fields['username'].label = 'Имя охотника'
         self.fields['username'].help_text = 'Имя, которое будут видеть другие игроки.'
         self.fields['email'].label = 'Email'

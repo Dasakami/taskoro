@@ -7,26 +7,21 @@ from history.models import ActivityLog
 
 
 def tournament_list(request):
-    # Get current date
     now = timezone.now()
     
-    # Get active tournaments
     active_tournaments = Tournament.objects.filter(
         start_date__lte=now,
         end_date__gte=now
     ).order_by('end_date')
     
-    # Get upcoming tournaments
     upcoming_tournaments = Tournament.objects.filter(
         start_date__gt=now
     ).order_by('start_date')
     
-    # Get past tournaments
     past_tournaments = Tournament.objects.filter(
         end_date__lt=now
-    ).order_by('-end_date')[:5]  # Limit to recent tournaments
+    ).order_by('-end_date')[:5] 
     
-    # Get user participations
     if request.user.is_authenticated:
         user_participations = TournamentParticipant.objects.filter(
             user=request.user
@@ -76,16 +71,13 @@ def tournament_detail(request, tournament_id):
 def tournament_join(request, tournament_id):
     tournament = get_object_or_404(Tournament, id=tournament_id)
     
-    # Check if tournament is still active
     if not tournament.is_active():
         messages.error(request, 'Турнир уже завершен или еще не начался.')
         return redirect('tournaments:tournament_detail', tournament_id=tournament.id)
     
-    # Check if user is already participating
     if TournamentParticipant.objects.filter(tournament=tournament, user=request.user).exists():
         messages.info(request, 'Вы уже участвуете в этом турнире.')
     else:
-        # Join tournament
         TournamentParticipant.objects.create(
             tournament=tournament,
             user=request.user

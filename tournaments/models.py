@@ -8,13 +8,11 @@ class Tournament(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    # Rewards
+
     experience_reward = models.IntegerField(default=200)
     coins_reward = models.IntegerField(default=50)
     gems_reward = models.IntegerField(default=5)
     
-    # Conditions
     min_tasks_completed = models.IntegerField(default=5, help_text="Minimum number of tasks to complete")
     
     def __str__(self):
@@ -58,7 +56,7 @@ class TournamentParticipant(models.Model):
     
     def update_score(self, new_task_count=1):
         self.tasks_completed += new_task_count
-        self.score = self.tasks_completed * 10  # Simple scoring system
+        self.score = self.tasks_completed * 10  
         self.save()
     
     def get_rank(self):

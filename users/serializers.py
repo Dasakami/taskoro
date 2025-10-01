@@ -8,35 +8,25 @@ User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    # Добавляем своё write_only-поле
     class_id = serializers.IntegerField(write_only=True)
 
     class Meta(UserCreateSerializer.Meta):
         model = User
-        # Берём все стандартные поля Djoser + class_id
         fields = tuple(UserCreateSerializer.Meta.fields) + ('class_id',)
 
     def validate(self, attrs):
-        # Забираем class_id до передачи в super().validate
         self._class_id = attrs.pop('class_id', None)
         return super().validate(attrs)
 
     def create(self, validated_data):
-        # Создаём User через Djoser
         user = super().create(validated_data)
 
-        # Гарантируем, что профиль существует
         profile, _ = Profile.objects.get_or_create(user=user)
 
-        # Привязываем выбранный класс
         if getattr(self, '_class_id', None) is not None:
             try:
                 cls = CharacterClass.objects.get(pk=self._class_id)
-                # если у вас M2M
                 profile.character_classes.add(cls)
-                # если FK вместо M2M — 
-                # profile.character_class = cls
-                # profile.save()
             except CharacterClass.DoesNotExist:
                 pass
 

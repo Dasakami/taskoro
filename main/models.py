@@ -20,7 +20,6 @@ class DailyMission(models.Model):
             self.is_completed = True
             self.date_completed = date.today()
             
-            # Reward user with experience and coins
             profile = self.assigned_to.profile
             profile.add_experience(self.experience_reward)
             profile.coins += self.coins_reward
@@ -39,4 +38,4 @@ class DailyMotivation(models.Model):
         return self.text[:50] + ('...' if len(self.text) > 50 else '')
     
     class Meta:
-        ordering = ['?']  # Random order for easy selection
+        ordering = ['?'] 

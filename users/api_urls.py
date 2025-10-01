@@ -1,4 +1,3 @@
-# users/api_urls.py
 
 from django.urls import path
 from .api_views import RegisterAPIView, LoginAPIView, UserProfileAPIView, UpdateProfileAPIView, UserSearchAPIView, \

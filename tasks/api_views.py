@@ -37,23 +37,19 @@ class BaseTaskViewSet(viewsets.ModelViewSet):
     def complete(self, request, pk=None):
         base_task = self.get_object()
 
-        # Проверка доступа по классу
         if not request.user.profile.character_classes.filter(id=base_task.character_class.id).exists():
             return Response({'detail': 'Нет доступа к этому заданию'}, status=status.HTTP_403_FORBIDDEN)
 
-        # Проверка, выполнена ли уже сегодня
         today = timezone.now().date()
         if BaseTaskCompletion.objects.filter(user=request.user, base_task=base_task, completed_at__date=today).exists():
             return Response({'detail': 'Задача уже выполнена сегодня'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Запись выполнения
         completion = BaseTaskCompletion.objects.create(
             user=request.user,
             base_task=base_task,
             completed_at=timezone.now()
         )
 
-        # Обновление опыта и валюты пользователя
         profile = request.user.profile
         experience = base_task.xp_reward
         profile.add_experience(experience)
@@ -81,7 +77,6 @@ class BaseTaskCompletionViewSet(viewsets.ReadOnlyModelViewSet):
         except BaseTask.DoesNotExist:
             return Response({'detail': 'Base task not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        # Проверка доступа по классу
         if not request.user.profile.character_classes.filter(id=base_task.character_class.id).exists():
             return Response({'detail': 'Нет доступа к этому заданию'}, status=status.HTTP_403_FORBIDDEN)
 

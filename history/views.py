@@ -1,13 +1,12 @@
 
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import ActivityLog, Achievement, UserAchievement
 
 @login_required
 def activity_log(request):
     activities = ActivityLog.objects.filter(user=request.user)
-    
-    # Filter by type if specified
+
     activity_type = request.GET.get('type')
     if activity_type:
         activities = activities.filter(activity_type=activity_type)
@@ -21,7 +20,6 @@ def activity_log(request):
 
 @login_required
 def achievement_list(request):
-    # Get all achievements and mark which ones the user has
     achievements = Achievement.objects.all()
     user_achievements = UserAchievement.objects.filter(user=request.user)
     acquired_achievements = set(ua.achievement_id for ua in user_achievements)

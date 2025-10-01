@@ -16,12 +16,11 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'task_type', 'difficulty',
             'status', 'deadline', 'created_at', 'updated_at', 'category',
-            'coins'  # теперь работает корректно
+            'coins'  
         ]
         read_only_fields = ['created_at', 'updated_at']
 
     def get_coins(self, obj):
-        # Получаем coins из профиля пользователя, связанного с задачей
         return getattr(obj.user.profile, 'coins', 0)
     
 class BaseTaskSerializer(serializers.ModelSerializer):

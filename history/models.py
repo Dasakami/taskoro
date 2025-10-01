@@ -23,7 +23,6 @@ class ActivityLog(models.Model):
     gems_gained = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    # Optional relations
     task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True)
     tournament = models.ForeignKey(Tournament, on_delete=models.SET_NULL, null=True, blank=True)
     duel = models.ForeignKey(Duel, on_delete=models.SET_NULL, null=True, blank=True)
@@ -38,7 +37,7 @@ class ActivityLog(models.Model):
 class Achievement(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    icon = models.CharField(max_length=50)  # Emoji or icon class
+    icon = models.CharField(max_length=50)  
     experience_reward = models.IntegerField(default=0)
     coins_reward = models.IntegerField(default=0)
     gems_reward = models.IntegerField(default=0)

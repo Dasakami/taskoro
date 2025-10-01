@@ -5,12 +5,10 @@ from django.utils import timezone
 from .models import DailyMission, DailyMotivation
 from tasks.models import Task
 from tournaments.models import Tournament
-import random
 from users.models import Profile
 from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse
-from django.conf import settings
-
+import random
 
 def main(request):
     today = timezone.now().date()
@@ -21,13 +19,11 @@ def main(request):
     completed_tasks_today = 0
 
     if request.user.is_authenticated:
-        # Получаем профиль
         try:
             profile = request.user.profile
         except Profile.DoesNotExist:
             profile = None
 
-        # Получаем или создаём миссию
         daily_mission = DailyMission.objects.filter(
             assigned_to=request.user,
             date_created=today,
@@ -63,19 +59,16 @@ def main(request):
                 assigned_to=request.user
             )
 
-        # Последние задачи
         recent_tasks = Task.objects.filter(
             user=request.user
         ).order_by('-created_at')[:5]
 
-        # Статистика
         completed_tasks_today = Task.objects.filter(
             user=request.user,
             completed_at__date=today,
             is_completed=True
         ).count()
 
-    # Мотивация
     daily_motivation = DailyMotivation.objects.filter(is_active=True).order_by('?').first()
     if not daily_motivation:
         daily_motivation = {
@@ -83,7 +76,6 @@ def main(request):
             'author': "Древний манускрипт"
         }
 
-    # Турниры доступны всем
     active_tournaments = Tournament.objects.filter(
         end_date__gte=today
     ).order_by('end_date')[:3]
@@ -130,8 +122,8 @@ def custom_upload_function(request):
     if request.method == 'POST' and request.FILES.get('upload'):
         file = request.FILES['upload']
         fs = FileSystemStorage()
-        filename = fs.save(file.name, file)  # Сохраняем файл в заданном месте
-        file_url = fs.url(filename)  # Получаем URL для доступа к файлу
+        filename = fs.save(file.name, file) 
+        file_url = fs.url(filename) 
         return JsonResponse({
             'uploaded': 1,
             'fileName': filename,

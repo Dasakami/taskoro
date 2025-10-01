@@ -1,16 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .forms import *
-from .models import *
-from django.http import Http404, HttpResponse
 from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.auth import logout as auth_logout
+from django.http import Http404, HttpResponse
 from django.db.models import Count, Max
 from django.db import models
-from django.contrib.auth import logout as auth_logout
 from shop.models import Purchase
+from .forms import CustomAuthenticationForm, CustomUserCreationForm, ProfileUpdateForm
+from .models import Profile, CharacterClass
 
 
 def login_view(request):
@@ -31,7 +30,6 @@ def login_view(request):
     
     return render(request, 'users/login.html', {'form': form})
 
-from .models import CharacterClass
 
 def register(request):
     if request.user.is_authenticated:
@@ -42,7 +40,6 @@ def register(request):
         if form.is_valid():
             user = form.save()
 
-            # Получаем выбранный класс по ID из POST
             selected_class_id = request.POST.get('selected_class')
             try:
                 selected_class = CharacterClass.objects.get(id=selected_class_id)
@@ -53,7 +50,6 @@ def register(request):
                 messages.error(request, "Неверный выбор класса.")
                 return redirect('register')
 
-            # Авторизация после регистрации
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
@@ -63,7 +59,6 @@ def register(request):
     else:
         form = CustomUserCreationForm()
 
-    # Передаём классы в шаблон
     classes = CharacterClass.objects.all()
     return render(request, 'users/register.html', {'form': form, 'classes': classes})
 
@@ -73,7 +68,6 @@ def profile_view(request):
     user_profile = request.user.profile
     medals = user_profile.medals.all()  
 
-    # Get equipped items from purchases
     equipped_purchases = Purchase.objects.filter(user=request.user, is_equipped=True).select_related('item')
 
     equipped_frame = None
@@ -136,7 +130,6 @@ def view_other_profile(request, username):
     user_profile = other_user.profile
     medals = user_profile.medals.all()
 
-    # Get equipped items from purchases
     equipped_purchases = Purchase.objects.filter(user=other_user, is_equipped=True).select_related('item')
 
     equipped_frame = None
@@ -169,15 +162,12 @@ def view_other_profile(request, username):
 
 @login_required
 def leaderboard(request):
-    # Get top users by level
     top_by_level = Profile.objects.select_related('user').order_by('-level', '-experience')[:10]
     
-    # Get top users by completed tasks
     top_by_tasks = Profile.objects.select_related('user').annotate(
         completed_tasks=Count('user__tasks', filter=models.Q(user__tasks__is_completed=True))
     ).order_by('-completed_tasks')[:10]
     
-    # Get top users by habit streaks
     top_by_streaks = Profile.objects.select_related('user').annotate(
         max_streak=Max('user__tasks__streak', filter=models.Q(user__tasks__task_type='habit'))
     ).order_by('-max_streak')[:10]

@@ -1,42 +1,33 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils import timezone
 from .models import Task, TaskCategory, BaseTask, BaseTaskCompletion
-from users.models import CharacterClass
 from .forms import TaskForm, TaskCategoryForm, DailyForm, HabitForm
-from django.db.models import Count
 from history.models import ActivityLog
 from tournaments.models import TournamentParticipant
-from django.views.decorators.http import require_POST
 
 
 
 @login_required
 def task_list(request):
-    # Get filter parameters from request
     category_id = request.GET.get('category')
     difficulty = request.GET.get('difficulty')
     status = request.GET.get('status')
     task_type = request.GET.get('type', 'all')
     
-    # Get user's tasks
     user_tasks = Task.objects.filter(user=request.user).order_by('-created_at')
     
-    # Apply type filter if provided
     if task_type != 'all':
         user_tasks = user_tasks.filter(task_type=task_type)
     
-    # Apply category filter if provided
     if category_id:
         user_tasks = user_tasks.filter(category_id=category_id)
-    
-    # Apply difficulty filter if provided
+
     if difficulty:
         user_tasks = user_tasks.filter(difficulty=difficulty)
-    
-    # Apply status filter if provided
+
     if status:
         if status == 'overdue':
             user_tasks = user_tasks.filter(
@@ -46,7 +37,7 @@ def task_list(request):
         else:
             user_tasks = user_tasks.filter(status=status)
     
-    # Get all categories for filter dropdown
+
     categories = TaskCategory.objects.filter(user=request.user)
     
     context = {
@@ -65,18 +56,14 @@ def task_list(request):
 
 @login_required
 def class_tasks_list(request):
-    # Get user's character classes
     user_classes = request.user.profile.character_classes.all()
-    
-    # Get filter parameters
+
     task_type = request.GET.get('type', 'all')
     difficulty = request.GET.get('difficulty')
     character_class = request.GET.get('class')
     
-    # Get base tasks for user's classes
     base_tasks = BaseTask.objects.filter(character_class__in=user_classes)
     
-    # Apply filters
     if task_type != 'all':
         base_tasks = base_tasks.filter(task_type=task_type)
     
@@ -86,7 +73,6 @@ def class_tasks_list(request):
     if character_class:
         base_tasks = base_tasks.filter(character_class_id=character_class)
     
-    # Get completed tasks for today
     today = timezone.now().date()
     completed_tasks = request.user.completed_base_tasks.filter(
         completed_at__date=today
@@ -107,25 +93,20 @@ def class_tasks_list(request):
 
 @login_required
 def class_task_detail(request, task_id):
-    # Get the base task
     base_task = get_object_or_404(BaseTask, id=task_id)
     
-    # Check if user has the required character class
     if not request.user.profile.character_classes.filter(id=base_task.character_class.id).exists():
         messages.error(request, f'У вас нет доступа к заданиям класса "{base_task.character_class.name}"')
         return redirect('tasks:class_tasks')
     
-    # Get completion history for this task by current user
     completion_history = BaseTaskCompletion.objects.filter(
         user=request.user,
         base_task=base_task
     ).order_by('-completed_at')
-    
-    # Check if task was completed today
+
     today = timezone.now().date()
     completed_today = completion_history.filter(completed_at__date=today).exists()
     
-    # Calculate streak (consecutive days completed)
     streak = 0
     last_date = None
     
@@ -141,7 +122,6 @@ def class_task_detail(request, task_id):
             
         last_date = completion_date
     
-    # Calculate completion rate for the last 30 days
     thirty_days_ago = timezone.now().date() - timezone.timedelta(days=30)
     completions_last_30_days = completion_history.filter(
         completed_at__date__gte=thirty_days_ago
@@ -151,7 +131,7 @@ def class_task_detail(request, task_id):
     
     context = {
         'task': base_task,
-        'completion_history': completion_history[:10],  # Show only last 10 completions
+        'completion_history': completion_history[:10],  
         'completed_today': completed_today,
         'streak': streak,
         'completion_rate': completion_rate,
@@ -162,21 +142,17 @@ def class_task_detail(request, task_id):
 
 @login_required
 def class_task_completed(request):
-    # Get filter parameters
     character_class = request.GET.get('class')
     difficulty = request.GET.get('difficulty')
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
     
-    # Get user's character classes
     user_classes = request.user.profile.character_classes.all()
     
-    # Base query
     completions = BaseTaskCompletion.objects.filter(
         user=request.user
     ).select_related('base_task', 'base_task__character_class').order_by('-completed_at')
     
-    # Apply filters
     if character_class:
         completions = completions.filter(base_task__character_class_id=character_class)
     
@@ -197,7 +173,7 @@ def class_task_completed(request):
         except ValueError:
             pass
     
-    # Group completions by date
+
     completion_dates = {}
     for completion in completions:
         date = completion.completed_at.date()
@@ -222,12 +198,10 @@ def class_task_completed(request):
 def complete_class_task(request, task_id):
     base_task = get_object_or_404(BaseTask, id=task_id)
     
-    # Check if user has the required character class
     if not request.user.profile.character_classes.filter(id=base_task.character_class.id).exists():
         messages.error(request, f'У вас нет доступа к заданиям класса "{base_task.character_class.name}"')
         return redirect('tasks:class_tasks')
     
-    # Check if task was already completed today
     today = timezone.now().date()
     if request.user.completed_base_tasks.filter(
         base_task=base_task,
@@ -236,21 +210,20 @@ def complete_class_task(request, task_id):
         messages.info(request, 'Эта задача уже была выполнена сегодня.')
         return redirect('tasks:class_tasks')
     
-    # Create completion record
+
     completion = BaseTaskCompletion.objects.create(
         user=request.user,
         base_task=base_task,
         completed_at=timezone.now()
     )
     
-    # Award experience and coins
+
     profile = request.user.profile
     experience = base_task.xp_reward
     profile.add_experience(experience)
     profile.coins += int(experience / 4)
     profile.save()
     
-    # Create activity log
     ActivityLog.objects.create(
         user=request.user,
         activity_type='class_task_complete',
@@ -265,7 +238,6 @@ def complete_class_task(request, task_id):
         f'Задача "{base_task.title}" выполнена! Получено {experience} XP и {int(experience/4)} монет.'
     )
     
-    # Check for next URL parameter
     next_url = request.GET.get('next')
     if next_url:
         return redirect(next_url)
@@ -351,9 +323,9 @@ def task_complete(request, task_id):
     
     next_url = request.GET.get('next')
     if next_url:
-        return redirect(next_url)  # redirect to relative URL from next parameter
+        return redirect(next_url) 
     else:
-        return redirect('tasks:tasks')  # example: redirect to task list page
+        return redirect('tasks:tasks') 
 
 @login_required
 def daily_goals(request):
@@ -367,15 +339,13 @@ def daily_goals(request):
             selected_date = today
     else:
         selected_date = today
-    
-    # Get daily goals for the selected date
+
     daily_goals = Task.objects.filter(
         user=request.user,
         task_type='daily',
         target_date=selected_date
     )
     
-    # Get habits that should be tracked today
     habits = Task.objects.filter(
         user=request.user,
         task_type='habit'
@@ -443,7 +413,6 @@ def category_delete(request, category_id):
     category = get_object_or_404(TaskCategory, id=category_id, user=request.user)
     
     if request.method == 'POST':
-        # Check if category has tasks
         tasks_count = category.tasks.count()
         
         category.delete()
@@ -457,13 +426,11 @@ def category_delete(request, category_id):
 def habits_detail(request, habit_id):
     habit = get_object_or_404(Task, id=habit_id, user=request.user, task_type='habit')
     
-    # Calculate completion rate for the last 30 days
     thirty_days_ago = timezone.now().date() - timezone.timedelta(days=30)
     completion_history = habit.completions.filter(
         completed_at__date__gte=thirty_days_ago
     ).order_by('completed_at__date')
     
-    # Create a calendar of the last 30 days
     calendar_days = []
     current_date = thirty_days_ago
     while current_date <= timezone.now().date():

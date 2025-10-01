@@ -5,8 +5,6 @@ from .models import Duel, DuelProgress
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from .serializers import DuelSerializer, DuelProgressSerializer, DuelHistorySerializer
-from duels import serializers
-from django.utils import timezone
 
 
 

@@ -1,5 +1,3 @@
-# main/api_views.py
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -16,7 +14,6 @@ class MainPageAPIView(APIView):
         user = request.user
         today = timezone.now().date()
 
-        # Миссия
         mission, _ = DailyMission.objects.get_or_create(
             assigned_to=user,
             date_created=today,
@@ -32,7 +29,6 @@ class MainPageAPIView(APIView):
             }
         )
 
-        # Мотивация
         motivation = DailyMotivation.objects.filter(is_active=True).order_by('?').values('text', 'author').first()
         if not motivation:
             motivation = {
@@ -40,7 +36,6 @@ class MainPageAPIView(APIView):
                 'author': "Древний манускрипт"
             }
 
-        # Последние задачи
         recent_tasks_qs = Task.objects.filter(user=user).order_by('-created_at')[:5]
         recent_tasks = [
             {'id': t.id, 'title': t.title, 'is_completed': t.is_completed}
@@ -53,7 +48,6 @@ class MainPageAPIView(APIView):
             completed_at__date=today
         ).count()
 
-        # Турниры
         tournaments = Tournament.objects.filter(end_date__gte=today).order_by('end_date')[:3]
         tournaments_data = [
             {'id': t.id, 'title': t.title, 'end_date': t.end_date}

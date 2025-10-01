@@ -1,4 +1,3 @@
-# api_views.py
 from datetime import timedelta
 import random
 from django.utils import timezone
@@ -56,7 +55,6 @@ class PurchaseViewSet(viewsets.ModelViewSet):
         user = request.user
         profile = user.profile
 
-        # Unequip same category
         Purchase.objects.filter(
             user=user,
             item__category=item.category,
@@ -66,7 +64,6 @@ class PurchaseViewSet(viewsets.ModelViewSet):
         purchase.is_equipped = True
         purchase.save()
 
-        # Apply effects
         if item.category == 'title':
             profile.title = item.title_text
             profile.save()
@@ -133,18 +130,15 @@ class ChestViewSet(viewsets.ReadOnlyModelViewSet):
         user = request.user
         profile = user.profile
 
-        # affordability check
         if profile.coins < chest.price_coins or profile.gems < chest.price_gems:
             return Response(
                 {"detail": "Недостаточно средств."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # deduct
         profile.coins -= chest.price_coins
         profile.gems -= chest.price_gems
 
-        # reward
         coins_reward = random.randint(chest.min_coins_reward, chest.max_coins_reward)
         gems_reward = random.randint(chest.min_gems_reward, chest.max_gems_reward)
         profile.coins += coins_reward

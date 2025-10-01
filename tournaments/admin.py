@@ -7,8 +7,8 @@ class TournamentParticipantInline(admin.TabularInline):
 
 @admin.register(Tournament)
 class TournamentAdmin(admin.ModelAdmin):
-    list_display = ('title', 'start_date', 'end_date', 'is_active')  # ОК, можно тут использовать метод
-    list_filter = ('start_date', 'end_date')  # ❌ убрали is_active отсюда
+    list_display = ('title', 'start_date', 'end_date', 'is_active')  
+    list_filter = ('start_date', 'end_date') 
     search_fields = ('title', 'description')
     inlines = [TournamentParticipantInline]
 

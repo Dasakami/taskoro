@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from datetime import timedelta
 
 class ShopItem(models.Model):
     CURRENCY_CHOICES = [
@@ -27,7 +26,6 @@ class ShopItem(models.Model):
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    # Special fields for different item types
     title_text = models.CharField(max_length=100, blank=True, null=True, help_text="For title items")
     title_color = models.CharField(max_length=7, blank=True, null=True, help_text="Hex color for title")
     frame_style = models.CharField(max_length=100, blank=True, null=True, help_text="For avatar frames")

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Profile, CharacterClass
+from .models import  CharacterClass
 from .serializers import (
     CustomUserCreateSerializer,
     UserSearchSerializer,
@@ -22,12 +22,11 @@ class RegisterAPIView(CreateAPIView):
     POST /api/auth/users/
     принимает: username, password, re_password, email, class_id
     """
-    serializer_class = CustomUserCreateSerializer  # поменяли на наш
+    serializer_class = CustomUserCreateSerializer  
     queryset = User.objects.all()
     permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
-        # CustomUserCreateSerializer.create уже создаёт User + Profile + привязывает class
         response = super().create(request, *args, **kwargs)
         user = User.objects.get(username=response.data['username'])
         refresh = RefreshToken.for_user(user)
@@ -139,8 +138,7 @@ class CharacterClassListUpdateAPIView(APIView):
             )
 
         profile = request.user.profile
-        profile.character_classes.set(qs)   # для M2M
-        # profile.character_class = qs.first(); profile.save()  # если FK
+        profile.character_classes.set(qs)   
         profile.save()
 
         return Response({

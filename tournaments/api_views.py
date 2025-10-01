@@ -1,26 +1,22 @@
-from rest_framework import generics
+from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import permissions, status
 from django.shortcuts import get_object_or_404
 from .models import Tournament,TournamentParticipant
 from .serializers import TournamentSerializer, ParticipantSerializer
 from history.models import ActivityLog
 
-# 📄 Список турниров
 class TournamentListAPI(generics.ListAPIView):
     queryset = Tournament.objects.all().order_by('-start_date')
     serializer_class = TournamentSerializer
     permission_classes = [permissions.AllowAny]
 
-# 🕵️ Детали турнира
 class TournamentDetailAPI(generics.RetrieveAPIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
     lookup_field = 'id'
     permission_classes = [permissions.AllowAny]
 
-# 🧠 Лидерборд
 class TournamentLeaderboardAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
@@ -30,7 +26,6 @@ class TournamentLeaderboardAPI(APIView):
         serializer = ParticipantSerializer(leaderboard, many=True)
         return Response(serializer.data)
 
-# ✅ Присоединение к турниру
 class JoinTournamentAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

@@ -1,13 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
 from .models import ShopItem, Purchase, Chest, ChestOpening, ActiveBoost
-import random
 from history.models import ActivityLog
-
+import random
 
 def shop_home(request):
     featured_items = ShopItem.objects.filter(is_available=True).order_by('?')[:4]
@@ -43,10 +41,7 @@ def shop_category(request, category):
 def item_detail(request, item_id):
     item = get_object_or_404(ShopItem, id=item_id, is_available=True)
     
-    # Check if user already purchased this item
     already_purchased = Purchase.objects.filter(user=request.user, item=item).exists()
-    
-    # Check if item is currently equipped
     is_equipped = False
     if already_purchased:
         is_equipped = Purchase.objects.filter(user=request.user, item=item, is_equipped=True).exists()
@@ -63,12 +58,10 @@ def item_detail(request, item_id):
 def purchase_item(request, item_id):
     item = get_object_or_404(ShopItem, id=item_id, is_available=True)
     
-    # Check if already purchased
     if Purchase.objects.filter(user=request.user, item=item).exists():
         messages.info(request, f'Вы уже приобрели {item.name}.')
         return redirect('shop:item_detail', item_id=item.id)
-    
-    # Check if user can afford the item
+
     profile = request.user.profile
     if item.currency == 'coins' and profile.coins < item.price:
         messages.error(request, 'Недостаточно монет для покупки.')
@@ -77,21 +70,18 @@ def purchase_item(request, item_id):
         messages.error(request, 'Недостаточно кристаллов для покупки.')
         return redirect('shop:item_detail', item_id=item.id)
     
-    # Process purchase
     if item.currency == 'coins':
         profile.coins -= item.price
     else:
         profile.gems -= item.price
     profile.save()
     
-    # Create purchase record
     purchase = Purchase.objects.create(
         user=request.user,
         item=item,
         total_price=item.price
     )
     
-    # Automatically equip the item if it's a title or frame or background
     if item.category in ['title', 'avatar_frame', 'background']:
         equip_item(request, item.id)
     
@@ -102,21 +92,17 @@ def purchase_item(request, item_id):
 def equip_item(request, item_id):
     item = get_object_or_404(ShopItem, id=item_id)
     
-    # Check if user has purchased this item
     purchase = get_object_or_404(Purchase, user=request.user, item=item)
     
-    # Unequip any currently equipped items of the same category
     Purchase.objects.filter(
         user=request.user, 
         item__category=item.category,
         is_equipped=True
     ).update(is_equipped=False)
     
-    # Equip the selected item
     purchase.is_equipped = True
     purchase.save()
     
-    # Apply effects based on item category
     profile = request.user.profile
     
     if item.category == 'title':
@@ -124,7 +110,6 @@ def equip_item(request, item_id):
         profile.save()
         
     elif item.category == 'boost':
-        # Create active boost
         end_time = timezone.now() + timedelta(hours=item.boost_duration)
         
         ActiveBoost.objects.create(
@@ -144,14 +129,10 @@ def equip_item(request, item_id):
 def unequip_item(request, item_id):
     item = get_object_or_404(ShopItem, id=item_id)
     
-    # Check if user has purchased this item
     purchase = get_object_or_404(Purchase, user=request.user, item=item)
-    
-    # Unequip the item
     purchase.is_equipped = False
     purchase.save()
     
-    # Remove effects based on item category
     profile = request.user.profile
     
     if item.category == 'title':
@@ -180,25 +161,20 @@ def open_chest(request, chest_id):
     chest = get_object_or_404(Chest, id=chest_id)
     profile = request.user.profile
     
-    # Check if user can afford the chest
     if profile.coins < chest.price_coins or profile.gems < chest.price_gems:
         messages.error(request, 'Недостаточно средств для открытия сундука.')
         return redirect('shop:chest_list')
     
-    # Deduct cost
     profile.coins -= chest.price_coins
     profile.gems -= chest.price_gems
     
-    # Generate rewards
     coins_reward = random.randint(chest.min_coins_reward, chest.max_coins_reward)
     gems_reward = random.randint(chest.min_gems_reward, chest.max_gems_reward)
     
-    # Add rewards
     profile.coins += coins_reward
     profile.gems += gems_reward
     profile.save()
     
-    # Record opening
     opening = ChestOpening.objects.create(
         user=request.user,
         chest=chest,
@@ -222,19 +198,15 @@ def open_chest(request, chest_id):
 
 @login_required
 def user_inventory(request):
-    # Get all user purchases
     purchases = Purchase.objects.filter(user=request.user).order_by('-purchased_at')
     
-    # Get equipped items
     equipped_items = Purchase.objects.filter(
         user=request.user,
         is_equipped=True
     ).select_related('item')
     
-    # Create a dictionary to easily check if an item is equipped
     equipped_by_category = {purchase.item.category: purchase.item.id for purchase in equipped_items}
     
-    # Get active boosts
     active_boosts = ActiveBoost.objects.filter(
         user=request.user,
         expires_at__gt=timezone.now()

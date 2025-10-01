@@ -8,7 +8,6 @@ from .models import FriendRequest, Friendship
 from .serializers import FriendRequestSerializer, FriendshipSerializer
 from users.models import User
 
-# 2.1. Список друзей с профилями
 class FriendListAPIView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FriendshipSerializer
@@ -20,7 +19,6 @@ class FriendListAPIView(generics.ListAPIView):
     def get_serializer_context(self):
         return {'request': self.request}
 
-# 2.2. Список заявок
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def friend_requests_api(request):
@@ -33,7 +31,7 @@ def friend_requests_api(request):
         'sent_requests': FriendRequestSerializer(sent, many=True, context={'request': request}).data,
     }, status=status.HTTP_200_OK)
 
-# 2.3. Отправка заявки
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def send_friend_request_api(request, user_id):
@@ -47,11 +45,10 @@ def send_friend_request_api(request, user_id):
 
     receiver_profile = receiver_user.profile
 
-    # Проверка, не являются ли они уже друзьями
+
     if Friendship.are_friends(sender_user, receiver_user):
         return Response({'detail': 'Вы уже друзья'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Проверка, нет ли уже заявки между ними
     if FriendRequest.objects.filter(
         Q(sender=sender_profile, receiver=receiver_profile) | Q(sender=receiver_profile, receiver=sender_profile),
         status='pending'
@@ -61,7 +58,6 @@ def send_friend_request_api(request, user_id):
     FriendRequest.objects.create(sender=sender_profile, receiver=receiver_profile)
     return Response({'detail': 'Заявка отправлена'}, status=status.HTTP_201_CREATED)
 
-# 2.4. Принять заявку
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def accept_friend_request_api(request, request_id):
@@ -70,7 +66,7 @@ def accept_friend_request_api(request, request_id):
     fr.accept()
     return Response({'detail': 'Заявка принята'}, status=status.HTTP_200_OK)
 
-# 2.5. Отклонить заявку
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def decline_friend_request_api(request, request_id):
@@ -79,7 +75,7 @@ def decline_friend_request_api(request, request_id):
     fr.decline()
     return Response({'detail': 'Заявка отклонена'}, status=status.HTTP_200_OK)
 
-# 2.6. Отменить исходящую заявку
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def cancel_friend_request_api(request, request_id):
@@ -88,7 +84,6 @@ def cancel_friend_request_api(request, request_id):
     fr.delete()
     return Response({'detail': 'Заявка отменена'}, status=status.HTTP_204_NO_CONTENT)
 
-# 2.7. Удалить друга
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
 def remove_friend_api(request, user_id):

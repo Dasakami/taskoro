@@ -56,7 +56,7 @@ class Friendship(models.Model):
     @classmethod
     def create_friendship(cls, user1, user2):
         if user1.id > user2.id:
-            user1, user2 = user2, user1  # Для уникальности (user1 < user2)
+            user1, user2 = user2, user1 
         if not cls.are_friends(user1, user2):
             cls.objects.create(user1=user1, user2=user2)
 

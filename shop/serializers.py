@@ -1,10 +1,5 @@
-# serializers.py
-from datetime import timedelta
-import random
-from django.utils import timezone
 from rest_framework import serializers
 from .models import ShopItem, Purchase, ActiveBoost, Chest, ChestOpening
-from history.models import ActivityLog
 
 class ShopItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -47,14 +42,12 @@ class PurchaseSerializer(serializers.ModelSerializer):
         item = validated_data['item']
         profile = user.profile
 
-        # Deduct funds
         if item.currency == 'coins':
             profile.coins -= item.price
         else:
             profile.gems -= item.price
         profile.save()
 
-        # Record purchase
         purchase = Purchase.objects.create(
             user=user,
             item=item,
@@ -62,9 +55,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
             quantity=validated_data.get('quantity', 1)
         )
 
-        # Auto-equip certain categories
         if item.category in ['title', 'avatar_frame', 'background']:
-            # Unequip same-category
             Purchase.objects.filter(
                 user=user,
                 item__category=item.category,

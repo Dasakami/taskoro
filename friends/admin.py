@@ -1,9 +1,8 @@
 from django.contrib import admin
-from .models import *
+from .models import ChatGroup, Message, FriendActivity, FriendRequest, Friendship
 
 admin.site.register(ChatGroup)
 admin.site.register(Message)
-# Register your models here.
 admin.site.register(FriendRequest)
 admin.site.register(FriendActivity)
 admin.site.register(Friendship)

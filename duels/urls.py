@@ -10,5 +10,4 @@ urlpatterns = [
     path('<int:duel_id>/decline/', views.decline_duel, name='decline_duel'),
     path('<int:duel_id>/complete/', views.complete_duel_task, name='complete_duel_task'),
     path('create/', views.choose_opponent, name='choose_opponent'),
-
 ]

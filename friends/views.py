@@ -3,8 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q
-from .models import *
-from users.models import Profile
+from .models import Friendship, FriendRequest, FriendActivity, ChatGroup
 
 
 def friend_list(request):
@@ -48,7 +47,7 @@ def search_users(request):
     else:
         users = []
     
-    # Получаем профиль пользователя, так как FriendRequest работает с Profile
+
     user_profile = request.user.profile
 
     friend_requests = FriendRequest.objects.filter(
@@ -92,16 +91,13 @@ def send_friend_request(request, user_id):
     receiver_user = get_object_or_404(User, id=user_id)
     sender_user = request.user
 
-    # Проверяем, что у пользователя есть профиль
     sender_profile = sender_user.profile
     receiver_profile = receiver_user.profile
 
-    # Проверка дружбы по модели Friendship (через User)
     if Friendship.are_friends(sender_user, receiver_user):
         messages.info(request, 'Вы уже являетесь друзьями.')
         return redirect('friends:friends')
     
-    # Проверка, нет ли уже активных заявок между профилями
     if FriendRequest.objects.filter(
         (Q(sender=sender_profile, receiver=receiver_profile) | 
          Q(sender=receiver_profile, receiver=sender_profile)),
@@ -166,7 +162,6 @@ def open_chat(request, user_id):
     current_user = request.user
     other_user = get_object_or_404(User, id=user_id)
 
-    # Сортировка для уникальности (user1 < user2)
     user1, user2 = (current_user, other_user) if current_user.id < other_user.id else (other_user, current_user)
 
     chat_group, created = ChatGroup.objects.get_or_create(user1=user1, user2=user2)
@@ -176,7 +171,6 @@ def open_chat(request, user_id):
 
 @login_required
 def chat_room(request, room_name):
-    # Извлекаем ID пользователей из room_name
     user_id_1, user_id_2 = map(int, room_name.split('_')[-2:])
     user1 = min(user_id_1, user_id_2)
     user2 = max(user_id_1, user_id_2)

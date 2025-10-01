@@ -1,11 +1,10 @@
-
-# Create your views here.
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Note, NoteCategory
 from .forms import NoteForm, NoteCategoryForm
 from django.contrib import messages
 from django.db.models import Q
+from django.views.generic import UpdateView, DeleteView
 
 @login_required
 def notes_list(request):
@@ -24,6 +23,10 @@ def note_delete(request, pk):
     note.save()
     messages.info(request, 'Заметка перемещена в корзину.')
     return redirect('note:notes_list')
+
+class NoteDeleteView(DeleteView):
+    model = Note
+    success_url = 'note:notes_list'
 
 @login_required
 def note_restore(request, pk):
@@ -70,6 +73,13 @@ def note_edit(request, pk):
         form = NoteForm(instance=note)
     return render(request, 'note/note_form.html', {'form': form})
 
+
+class NoteUpdateView(UpdateView):
+    model = Note
+    template_name = 'note/note_form.html'
+    form_class = NoteForm
+    success_url = 'note:notes_list'
+
 @login_required
 def create_note_category(request):
     if request.method == 'POST':
@@ -78,7 +88,7 @@ def create_note_category(request):
             note_category = form.save(commit=False)
             note_category.user = request.user
             note_category.save()
-            return redirect('note:category_list')  # или куда надо после создания
+            return redirect('note:category_list')  
     else:
         form = NoteCategoryForm()
 

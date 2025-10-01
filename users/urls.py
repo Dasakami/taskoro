@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from django.urls import include
 from .views import create_superuser
+
 app_name = 'users'
 urlpatterns = [
     path('login/', views.login_view, name='login'),

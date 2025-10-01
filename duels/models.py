@@ -1,4 +1,3 @@
-# models.py
 from django.db import models
 from django.contrib.auth.models import User
 from tasks.models import Task
@@ -23,7 +22,7 @@ class Duel(models.Model):
     start_time   = models.DateTimeField(null=True, blank=True)
     end_time     = models.DateTimeField(null=True, blank=True)
     winner       = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='duels_won')
-    duration     = models.DurationField(default=timedelta(hours=24))  # время на выполнение
+    duration     = models.DurationField(default=timedelta(hours=24))  
 
     def __str__(self):
         return f"{self.challenger} vs {self.opponent} [{self.status}]"
@@ -44,18 +43,14 @@ class Duel(models.Model):
         profile = user.profile
         if profile.coins < self.coins_stake:
             raise ValueError("Недостаточно монет для принятия")
-        # списываем у оппонента
         profile.coins -= self.coins_stake
         profile.save()
-
-        # переводим дуэль в active
         now = timezone.now()
         self.status     = 'active'
         self.start_time = now
         self.end_time   = now + self.duration
         self.save()
 
-        # создаём прогресс для обоих
         DuelProgress.objects.bulk_create([
             DuelProgress(duel=self, user=self.challenger),
             DuelProgress(duel=self, user=self.opponent),
@@ -76,7 +71,6 @@ class Duel(models.Model):
         self.status = 'declined'
         self.save()
 
-        # возвращаем монеты инициатору
         if self.coins_stake > 0:
             init_profile = self.challenger.profile
             init_profile.coins += self.coins_stake
@@ -95,13 +89,11 @@ class Duel(models.Model):
         self.winner   = winner
         self.save()
 
-        # переводим ставку победителю (две ставки: challenger + opponent)
         if self.coins_stake > 0:
             win_profile = winner.profile
             win_profile.coins += self.coins_stake * 2
             win_profile.save()
 
-        # даём опыт победителю
         winner.profile.add_experience(50)
 
 class DuelProgress(models.Model):
@@ -123,9 +115,7 @@ class DuelProgress(models.Model):
         self.save()
 
         other = self.duel.progress.exclude(pk=self.pk).first()
-        # оба отметились?
         if other and other.completed:
-            # решаем, кто быстрее
             if self.completion_time <= other.completion_time:
                 winner = self.user
             else:
