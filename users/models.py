@@ -1,7 +1,16 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
+from django.conf import settings
+class User(AbstractUser):
+    phone_number = PhoneNumberField(
+        null=True,
+        blank=True,
+        unique=True
+    )
+
 
 class CharacterClass(models.Model):
     name = models.CharField(max_length=100)
@@ -24,7 +33,12 @@ class Profile(models.Model):
         ('neon_green', 'Neon Green'),
     ]
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     level = models.IntegerField(default=1)
     experience = models.IntegerField(default=0)

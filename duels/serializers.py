@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Duel, DuelProgress
-from django.contrib.auth.models import User
+from django.conf import settings
+User = settings.AUTH_USER_MODEL  
 from django.shortcuts import get_object_or_404
 
 

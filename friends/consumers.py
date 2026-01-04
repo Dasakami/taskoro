@@ -1,6 +1,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from channels.db import database_sync_to_async
+from django.conf import settings
 
 class ChatroomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -40,7 +41,8 @@ class ChatroomConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def save_message(self, sender_username, chatroom_name, message):
-        from django.contrib.auth.models import User
+        from django.conf import settings
+        User = settings.AUTH_USER_MODEL  
         from .models import ChatGroup, Message
 
         sender = User.objects.get(username=sender_username)

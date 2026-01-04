@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User
+from django.conf import settings
+User = settings.AUTH_USER_MODEL  
 from .models import Friendship
 from django.db.models import Q
 

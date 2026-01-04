@@ -3,9 +3,12 @@ from django.urls import path
 from .api_views import RegisterAPIView, LoginAPIView, UserProfileAPIView, UpdateProfileAPIView, UserSearchAPIView, \
     CharacterClassListUpdateAPIView
 
+
+app_name = 'users'
+
 urlpatterns = [
     path('register/', RegisterAPIView.as_view(), name='api_register'),
-    path('login/', LoginAPIView.as_view(), name='api_login'),
+    path('login/', LoginAPIView.as_view(), name='login'),
     path('me/', UserProfileAPIView.as_view(), name='api-profile'),
     path('me/edit/', UpdateProfileAPIView.as_view(), name='api-edit-profile'),
     path(

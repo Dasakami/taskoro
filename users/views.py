@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout
 from django.http import Http404, HttpResponse
@@ -10,6 +9,10 @@ from django.db import models
 from shop.models import Purchase
 from .forms import CustomAuthenticationForm, CustomUserCreationForm, ProfileUpdateForm
 from .models import Profile, CharacterClass
+from django.conf import settings
+User = settings.AUTH_USER_MODEL  
+
+
 
 
 def login_view(request):
