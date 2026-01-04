@@ -164,11 +164,31 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'users.User'
 
 
+# Simple JWT configuration: make lifetimes and rotation configurable via environment variables.
+# Environment variables supported (all optional):
+# - JWT_ACCESS_MINUTES (int, default 15)
+# - JWT_REFRESH_DAYS (int, default 30)
+# - JWT_ROTATE_REFRESH (bool, default True)
+# - JWT_BLACKLIST_AFTER_ROTATION (bool, default True)
+# - JWT_SLIDING_REFRESH_DAYS (int, default 7)
+
+def _env_bool(key, default=False):
+    val = os.getenv(key)
+    if val is None:
+        return default
+    return val.lower() in ("1", "true", "yes", "on")
+
+ACCESS_MINUTES = int(os.getenv('JWT_ACCESS_MINUTES', '15'))
+REFRESH_DAYS = int(os.getenv('JWT_REFRESH_DAYS', '30'))
+ROTATE_REFRESH = _env_bool('JWT_ROTATE_REFRESH', True)
+BLACKLIST_AFTER_ROTATION = _env_bool('JWT_BLACKLIST_AFTER_ROTATION', True)
+SLIDING_REFRESH_DAYS = int(os.getenv('JWT_SLIDING_REFRESH_DAYS', '7'))
+
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=ACCESS_MINUTES),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=REFRESH_DAYS),
+    "ROTATE_REFRESH_TOKENS": ROTATE_REFRESH,
+    "BLACKLIST_AFTER_ROTATION": BLACKLIST_AFTER_ROTATION,
     "UPDATE_LAST_LOGIN": False,
 
     "ALGORITHM": "HS256",
@@ -193,8 +213,8 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
 
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=15),
-    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=7),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=ACCESS_MINUTES),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=SLIDING_REFRESH_DAYS),
 
     "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
