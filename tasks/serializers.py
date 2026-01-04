@@ -11,12 +11,15 @@ class TaskCategorySerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     coins = serializers.SerializerMethodField()
 
+    is_completed = serializers.BooleanField(read_only=True)
+    completed_at = serializers.DateTimeField(read_only=True)
+
     class Meta:
         model = Task
         fields = [
             'id', 'title', 'description', 'task_type', 'difficulty',
             'status', 'deadline', 'created_at', 'updated_at', 'category',
-            'coins'  
+            'is_completed', 'completed_at', 'coins'
         ]
         read_only_fields = ['created_at', 'updated_at']
 

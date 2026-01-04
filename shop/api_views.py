@@ -55,31 +55,25 @@ class PurchaseViewSet(viewsets.ModelViewSet):
         user = request.user
         profile = user.profile
 
-        Purchase.objects.filter(
-            user=user,
-            item__category=item.category,
-            is_equipped=True
-        ).update(is_equipped=False)
-
-        purchase.is_equipped = True
-        purchase.save()
-
-        if item.category == 'title':
-            profile.title = item.title_text
-            profile.save()
-        elif item.category == 'boost':
-            expires = timezone.now() + timedelta(hours=item.boost_duration)
-            ActiveBoost.objects.create(
+        from django.db import transaction
+        with transaction.atomic():
+            Purchase.objects.filter(
                 user=user,
-                boost_item=item,
-                multiplier=item.boost_multiplier,
-                expires_at=expires
-            )
+                item__category=item.category,
+                is_equipped=True
+            ).update(is_equipped=False)
+
+            purchase.is_equipped = True
+            purchase.save()
+
+            if item.category == 'title':
+                profile.title = item.title_text
+                profile.save()
 
         return Response({
             'status': 'equipped',
-            'purchase': PurchaseSerializer(purchase).data
-        })
+            'purchase': PurchaseSerializer(purchase, context={'request': request}).data
+        }, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'])
     def unequip(self, request, pk=None):
@@ -97,8 +91,8 @@ class PurchaseViewSet(viewsets.ModelViewSet):
 
         return Response({
             'status': 'unequipped',
-            'purchase': PurchaseSerializer(purchase).data
-        })
+            'purchase': PurchaseSerializer(purchase, context={'request': request}).data
+        }, status=status.HTTP_200_OK)
 
 
 class ActiveBoostViewSet(viewsets.ReadOnlyModelViewSet):

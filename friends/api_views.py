@@ -58,6 +58,22 @@ def send_friend_request_api(request, user_id):
     FriendRequest.objects.create(sender=sender_profile, receiver=receiver_profile)
     return Response({'detail': 'Заявка отправлена'}, status=status.HTTP_201_CREATED)
 
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def send_friend_request_by_body(request):
+    """Accepts POST with JSON {'user_id': <id>} to be compatible with mobile client."""
+    user_id = request.data.get('user_id')
+    if not user_id:
+        return Response({'detail': 'user_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        return Response({'detail': 'user_id must be integer'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return send_friend_request_api(request, user_id)
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def accept_friend_request_api(request, request_id):

@@ -2,6 +2,7 @@
 from django.urls import path
 from .api_views import RegisterAPIView, LoginAPIView, UserProfileAPIView, UpdateProfileAPIView, UserSearchAPIView, \
     CharacterClassListUpdateAPIView
+from .api_views import UserProfileByIdAPIView
 
 
 app_name = 'users'
@@ -11,6 +12,9 @@ urlpatterns = [
     path('login/', LoginAPIView.as_view(), name='login'),
     path('me/', UserProfileAPIView.as_view(), name='api-profile'),
     path('me/edit/', UpdateProfileAPIView.as_view(), name='api-edit-profile'),
+    path('profiles/<int:user_id>/', UserProfileByIdAPIView.as_view(), name='api-profile-by-id'),
+    # alias to match Flutter client which calls /users/users/<id>/
+    path('users/<int:user_id>/', UserProfileByIdAPIView.as_view(), name='api-profile-by-id-alias'),
     path(
       'character-classes/',
       CharacterClassListUpdateAPIView.as_view(),

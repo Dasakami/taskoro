@@ -21,7 +21,12 @@ class TaskViewSet(viewsets.ModelViewSet):
         task = self.get_object()
         experience = task.complete_task()
         if experience > 0:
-            return Response({'detail': f'Задача "{task.title}" выполнена! Получено {experience} XP.'})
+            serializer = self.get_serializer(task)
+            return Response({
+                'detail': f'Задача "{task.title}" выполнена! Получено {experience} XP.',
+                'task': serializer.data,
+                'xp': experience
+            })
         else:
             return Response({'detail': 'Задача уже была выполнена ранее.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -41,14 +46,21 @@ class BaseTaskViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Нет доступа к этому заданию'}, status=status.HTTP_403_FORBIDDEN)
 
         today = timezone.now().date()
-        if BaseTaskCompletion.objects.filter(user=request.user, base_task=base_task, completed_at__date=today).exists():
-            return Response({'detail': 'Задача уже выполнена сегодня'}, status=status.HTTP_400_BAD_REQUEST)
-
-        completion = BaseTaskCompletion.objects.create(
+        # Use get_or_create to avoid race conditions / duplicate completions on the same day
+        completion, created = BaseTaskCompletion.objects.get_or_create(
             user=request.user,
             base_task=base_task,
-            completed_at=timezone.now()
+            defaults={'completed_at': timezone.now()}
         )
+
+        # If an entry exists but is from a previous day, allow creation for today
+        if not created:
+            if completion.completed_at.date() == today:
+                return Response({'detail': 'Задача уже выполнена сегодня'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                # update completion timestamp to today
+                completion.completed_at = timezone.now()
+                completion.save()
 
         profile = request.user.profile
         experience = base_task.xp_reward
@@ -81,14 +93,18 @@ class BaseTaskCompletionViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({'detail': 'Нет доступа к этому заданию'}, status=status.HTTP_403_FORBIDDEN)
 
         today = timezone.now().date()
-        if BaseTaskCompletion.objects.filter(user=request.user, base_task=base_task, completed_at__date=today).exists():
-            return Response({'detail': 'Задача уже выполнена сегодня'}, status=status.HTTP_400_BAD_REQUEST)
-
-        completion = BaseTaskCompletion.objects.create(
+        completion, created = BaseTaskCompletion.objects.get_or_create(
             user=request.user,
             base_task=base_task,
-            completed_at=timezone.now()
+            defaults={'completed_at': timezone.now()}
         )
+
+        if not created:
+            if completion.completed_at.date() == today:
+                return Response({'detail': 'Задача уже выполнена сегодня'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                completion.completed_at = timezone.now()
+                completion.save()
 
         profile = request.user.profile
         experience = base_task.xp_reward

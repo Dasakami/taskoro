@@ -28,13 +28,16 @@ class PurchaseSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         item = attrs['item']
         profile = user.profile
+        quantity = attrs.get('quantity', 1)
+        total_price = item.price * quantity
 
-        if Purchase.objects.filter(user=user, item=item).exists():
+        if Purchase.objects.filter(user=user, item=item).exists() and item.category not in ['chest', 'boost']:
             raise serializers.ValidationError("Вы уже приобрели этот предмет.")
-        if item.currency == 'coins' and profile.coins < item.price:
+        if item.currency == 'coins' and profile.coins < total_price:
             raise serializers.ValidationError("Недостаточно монет.")
-        if item.currency == 'gems' and profile.gems < item.price:
+        if item.currency == 'gems' and profile.gems < total_price:
             raise serializers.ValidationError("Недостаточно кристаллов.")
+        attrs['total_price'] = total_price
         return attrs
 
     def create(self, validated_data):
@@ -42,18 +45,24 @@ class PurchaseSerializer(serializers.ModelSerializer):
         item = validated_data['item']
         profile = user.profile
 
-        if item.currency == 'coins':
-            profile.coins -= item.price
-        else:
-            profile.gems -= item.price
-        profile.save()
+        from django.db import transaction
+        quantity = validated_data.get('quantity', 1)
+        total_price = validated_data.get('total_price', item.price * quantity)
 
-        purchase = Purchase.objects.create(
-            user=user,
-            item=item,
-            total_price=item.price,
-            quantity=validated_data.get('quantity', 1)
-        )
+        with transaction.atomic():
+            # Deduct funds
+            if item.currency == 'coins':
+                profile.coins -= total_price
+            else:
+                profile.gems -= total_price
+            profile.save()
+
+            purchase = Purchase.objects.create(
+                user=user,
+                item=item,
+                total_price=total_price,
+                quantity=quantity
+            )
 
         if item.category in ['title', 'avatar_frame', 'background']:
             Purchase.objects.filter(

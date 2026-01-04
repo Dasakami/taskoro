@@ -69,6 +69,20 @@ class UserProfileAPIView(RetrieveAPIView):
         return self.request.user.profile
 
 
+class UserProfileByIdAPIView(RetrieveAPIView):
+    """
+    GET /api/users/profiles/{user_id}/ — получить профиль пользователя по id (публично доступно)
+    """
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_object(self):
+        user_id = self.kwargs.get('user_id')
+        from django.shortcuts import get_object_or_404
+        user = get_object_or_404(User, pk=user_id)
+        return user.profile
+
+
 class UpdateProfileAPIView(UpdateAPIView):
     """
     PATCH /api/profile/update/ — обновить остальные поля профиля
