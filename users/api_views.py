@@ -96,6 +96,27 @@ class UpdateProfileAPIView(RetrieveUpdateAPIView):
         return self.request.user.profile
 
 
+class LogoutAPIView(APIView):
+    """Logout by blacklisting the provided refresh token.
+
+    POST /api/users/logout/  { "refresh": "<token>" }
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.data.get('refresh')
+        if not refresh_token:
+            return Response({'detail': 'Refresh token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            token = RefreshToken(refresh_token)
+            # blacklist the token (requires rest_framework_simplejwt.token_blacklist app)
+            token.blacklist()
+        except Exception:
+            return Response({'detail': 'Invalid refresh token.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class UserSearchAPIView(ListAPIView):
     """
     GET /api/users/search/?q=… — поиск по username/id
