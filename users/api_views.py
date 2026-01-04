@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import permissions, status
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
@@ -83,9 +83,10 @@ class UserProfileByIdAPIView(RetrieveAPIView):
         return user.profile
 
 
-class UpdateProfileAPIView(UpdateAPIView):
+class UpdateProfileAPIView(RetrieveUpdateAPIView):
     """
-    PATCH /api/profile/update/ — обновить остальные поля профиля
+    GET /api/users/me/edit/ — получить профиль для редактирования
+    PATCH /api/users/me/edit/ — обновить остальные поля профиля
     (но не классы, они через /character-classes/)
     """
     serializer_class = ProfileSerializer

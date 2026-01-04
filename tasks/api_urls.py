@@ -10,6 +10,6 @@ router.register(r'categories', TaskCategoryViewSet, basename='category')
 
 urlpatterns = [
 	path('', include(router.urls)),
-	# Alias to support legacy Flutter calls to /tasks/tasks/categories/
+	# Alias route for Flutter /tasks/tasks/categories/ call
 	path('tasks/categories/', TaskCategoryViewSet.as_view({'get': 'list'}), name='task-categories-list-alias'),
 ]
