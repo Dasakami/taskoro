@@ -13,8 +13,8 @@ from history.models import ActivityLog
 
 class ShopItemViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    list: GET /api/items/?category=<slug>
-    retrieve: GET /api/items/{id}/
+    list: GET /api/shop/items/?category=<slug>
+    retrieve: GET /api/shop/items/{id}/
     """
     queryset = ShopItem.objects.filter(is_available=True)
     serializer_class = ShopItemSerializer
@@ -30,11 +30,11 @@ class ShopItemViewSet(viewsets.ReadOnlyModelViewSet):
 
 class PurchaseViewSet(viewsets.ModelViewSet):
     """
-    list:   GET  /api/purchases/
-    create: POST /api/purchases/         (body: { "item_id": 5 })
+    list:   GET  /api/shop/purchases/
+    create: POST /api/shop/purchases/         (body: { "item_id": 5 })
     retrieve/partial_update/destroy: not exposed
-    equip:  POST /api/purchases/{id}/equip/
-    unequip:POST /api/purchases/{id}/unequip/
+    equip:  POST /api/shop/purchases/{id}/equip/
+    unequip:POST /api/shop/purchases/{id}/unequip/
     """
     serializer_class = PurchaseSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -97,7 +97,7 @@ class PurchaseViewSet(viewsets.ModelViewSet):
 
 class ActiveBoostViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    list: GET /api/boosts/   (only active)
+    list: GET /api/shop/boosts/   (only active)
     """
     serializer_class = ActiveBoostSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -111,8 +111,8 @@ class ActiveBoostViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ChestViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    list: GET /api/chests/
-    open: POST /api/chests/{id}/open/
+    list: GET /api/shop/chests/
+    open: POST /api/shop/chests/{id}/open/
     """
     queryset = Chest.objects.all()
     serializer_class = ChestSerializer
@@ -120,47 +120,64 @@ class ChestViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def open(self, request, pk=None):
+        """
+        Открыть сундук
+        POST /api/shop/chests/{chest_id}/open/
+        """
         chest = self.get_object()
         user = request.user
         profile = user.profile
 
+        # Проверка достаточности средств
         if profile.coins < chest.price_coins or profile.gems < chest.price_gems:
             return Response(
                 {"detail": "Недостаточно средств."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Списание стоимости
         profile.coins -= chest.price_coins
         profile.gems -= chest.price_gems
 
+        # Генерация наград
         coins_reward = random.randint(chest.min_coins_reward, chest.max_coins_reward)
         gems_reward = random.randint(chest.min_gems_reward, chest.max_gems_reward)
+        
+        # Начисление наград
         profile.coins += coins_reward
         profile.gems += gems_reward
         profile.save()
 
+        # Создание записи об открытии
         opening = ChestOpening.objects.create(
             user=user,
             chest=chest,
             coins_reward=coins_reward,
             gems_reward=gems_reward
         )
+        
+        # Запись в историю активности
         ActivityLog.objects.create(
             user=user,
             activity_type='chest_open',
-            description=f'Открыт сундук "{chest.name}"'
+            description=f'Открыт сундук "{chest.name}"',
+            coins_gained=coins_reward,
+            gems_gained=gems_reward
         )
 
         return Response({
+            "id": str(opening.id),
             "coins_reward": coins_reward,
             "gems_reward": gems_reward,
+            "chest": ChestSerializer(chest).data,
+            "opened_at": opening.opened_at.isoformat(),
             "opening": ChestOpeningSerializer(opening).data
-        })
+        }, status=status.HTTP_200_OK)
 
 
 class ChestOpeningViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    list: GET /api/openings/
+    list: GET /api/shop/openings/
     """
     serializer_class = ChestOpeningSerializer
     permission_classes = [permissions.IsAuthenticated]

@@ -6,6 +6,7 @@ from .models import Task, BaseTask, TaskCategory, BaseTaskCompletion
 from .serializers import TaskSerializer, BaseTaskSerializer, TaskCategorySerializer, BaseTaskCompletionSerializer
 from django.db.models import Count
 
+
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -18,17 +19,33 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
+        """
+        POST /api/tasks/tasks/{id}/complete/
+        Отметить задачу как выполненную
+        """
         task = self.get_object()
+        
+        if task.is_completed:
+            return Response({
+                'detail': 'Задача уже была выполнена ранее.',
+                'task': self.get_serializer(task).data
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
         experience = task.complete_task()
+        
         if experience > 0:
             serializer = self.get_serializer(task)
             return Response({
                 'detail': f'Задача "{task.title}" выполнена! Получено {experience} XP.',
                 'task': serializer.data,
-                'xp': experience
+                'xp': experience,
+                'coins': int(experience / 4)
             })
         else:
-            return Response({'detail': 'Задача уже была выполнена ранее.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'detail': 'Ошибка при выполнении задачи'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 
 class BaseTaskViewSet(viewsets.ModelViewSet):
     serializer_class = BaseTaskSerializer
@@ -40,35 +57,52 @@ class BaseTaskViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
+        """
+        POST /api/tasks/base-tasks/{id}/complete/
+        Выполнить базовую задачу
+        """
         base_task = self.get_object()
 
         if not request.user.profile.character_classes.filter(id=base_task.character_class.id).exists():
-            return Response({'detail': 'Нет доступа к этому заданию'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({
+                'detail': 'Нет доступа к этому заданию'
+            }, status=status.HTTP_403_FORBIDDEN)
 
         today = timezone.now().date()
-        # Use get_or_create to avoid race conditions / duplicate completions on the same day
-        completion, created = BaseTaskCompletion.objects.get_or_create(
+        
+        # Проверяем, не выполнена ли задача сегодня
+        existing_completion = BaseTaskCompletion.objects.filter(
             user=request.user,
             base_task=base_task,
-            defaults={'completed_at': timezone.now()}
+            completed_at__date=today
+        ).first()
+        
+        if existing_completion:
+            return Response({
+                'detail': 'Задача уже выполнена сегодня'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Создаем запись о выполнении
+        completion = BaseTaskCompletion.objects.create(
+            user=request.user,
+            base_task=base_task,
+            completed_at=timezone.now()
         )
 
-        # If an entry exists but is from a previous day, allow creation for today
-        if not created:
-            if completion.completed_at.date() == today:
-                return Response({'detail': 'Задача уже выполнена сегодня'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                # update completion timestamp to today
-                completion.completed_at = timezone.now()
-                completion.save()
-
+        # Начисляем награды
         profile = request.user.profile
         experience = base_task.xp_reward
+        coins = int(experience / 4)
+        
         profile.add_experience(experience)
-        profile.coins += int(experience / 4)
+        profile.coins += coins
         profile.save()
 
-        return Response({'detail': f'Задача "{base_task.title}" выполнена! Получено {experience} XP.'})
+        return Response({
+            'detail': f'Задача "{base_task.title}" выполнена! Получено {experience} XP и {coins} монет.',
+            'xp': experience,
+            'coins': coins
+        })
 
 
 class BaseTaskCompletionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -78,41 +112,6 @@ class BaseTaskCompletionViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return BaseTaskCompletion.objects.filter(user=self.request.user).order_by('-completed_at')
 
-    @action(detail=False, methods=['post'])
-    def complete_task(self, request):
-        base_task_id = request.data.get('base_task_id')
-        if not base_task_id:
-            return Response({'detail': 'base_task_id required'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            base_task = BaseTask.objects.get(id=base_task_id)
-        except BaseTask.DoesNotExist:
-            return Response({'detail': 'Base task not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        if not request.user.profile.character_classes.filter(id=base_task.character_class.id).exists():
-            return Response({'detail': 'Нет доступа к этому заданию'}, status=status.HTTP_403_FORBIDDEN)
-
-        today = timezone.now().date()
-        completion, created = BaseTaskCompletion.objects.get_or_create(
-            user=request.user,
-            base_task=base_task,
-            defaults={'completed_at': timezone.now()}
-        )
-
-        if not created:
-            if completion.completed_at.date() == today:
-                return Response({'detail': 'Задача уже выполнена сегодня'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                completion.completed_at = timezone.now()
-                completion.save()
-
-        profile = request.user.profile
-        experience = base_task.xp_reward
-        profile.add_experience(experience)
-        profile.coins += int(experience / 4)
-        profile.save()
-
-        return Response({'detail': f'Задача "{base_task.title}" выполнена! Получено {experience} XP.'})
 
 class TaskCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = TaskCategorySerializer

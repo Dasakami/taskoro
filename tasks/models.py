@@ -4,6 +4,7 @@ User = settings.AUTH_USER_MODEL
 from django.utils import timezone
 from users.models import CharacterClass
 
+
 class TaskCategory(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -16,7 +17,8 @@ class TaskCategory(models.Model):
     
     class Meta:
         verbose_name = 'Категория задачи'
-        verbose_name_plural = "Категория задач"
+        verbose_name_plural = "Категории задач"
+
 
 class BaseTask(models.Model):
     DIFFICULTY_CHOICES = [
@@ -47,20 +49,19 @@ class BaseTask(models.Model):
     def __str__(self):
         return f"{self.title} ({self.get_task_type_display()}, {self.character_class.name})"
 
+
 class BaseTaskCompletion(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='completed_base_tasks')
     base_task = models.ForeignKey(BaseTask, on_delete=models.CASCADE, related_name='completions')
     completed_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        verbose_name = 'Выпелнение базовой задачи'
+        verbose_name = 'Выполнение базовой задачи'
         verbose_name_plural = 'Выполнение базовых задач'
-        unique_together = ['user', 'base_task', 'completed_at']
         ordering = ['-completed_at']
     
     def __str__(self):
         return f"{self.user.username} completed {self.base_task.title} at {self.completed_at}"
-    
 
 
 class Task(models.Model):
@@ -100,11 +101,13 @@ class Task(models.Model):
     estimated_minutes = models.IntegerField(default=30, help_text="Estimated time to complete in minutes")
     actual_minutes = models.IntegerField(null=True, blank=True, help_text="Actual time taken to complete in minutes")
     
+    # Для привычек
     frequency = models.CharField(max_length=20, default='daily', 
                                 help_text="How often this habit should be performed")
     streak = models.IntegerField(default=0, help_text="Current streak for this habit")
     last_completed = models.DateField(null=True, blank=True)
     
+    # Для ежедневных целей
     target_date = models.DateField(null=True, blank=True, help_text="The date this task is targeted for")
     
     class Meta:
@@ -116,49 +119,61 @@ class Task(models.Model):
         return self.title
     
     def complete_task(self):
-        if not self.is_completed:
-            self.is_completed = True
-            self.status = 'completed'
-            self.completed_at = timezone.now()
-            exp_rewards = {
-                'easy': 20,
-                'medium': 40,
-                'hard': 80,
-                'epic': 150,
-            }
+        """
+        Отметить задачу как выполненную и начислить награды
+        Возвращает количество полученного опыта
+        """
+        if self.is_completed:
+            return 0
             
-            experience = exp_rewards.get(self.difficulty, 30)
+        self.is_completed = True
+        self.status = 'completed'
+        self.completed_at = timezone.now()
+        
+        # Награды в зависимости от сложности
+        exp_rewards = {
+            'easy': 20,
+            'medium': 40,
+            'hard': 80,
+            'epic': 150,
+        }
+        
+        experience = exp_rewards.get(self.difficulty, 30)
+        
+        # Бонус за выполнение до дедлайна
+        if self.deadline and timezone.now() < self.deadline:
+            experience += 15
+        
+        # Обработка привычек
+        if self.task_type == 'habit':
+            today = timezone.now().date()
             
-            if self.deadline and timezone.now() < self.deadline:
-                experience += 15
-            
-            if self.task_type == 'habit':
-                today = timezone.now().date()
-                
-                if self.last_completed:
-                    yesterday = today - timezone.timedelta(days=1)
-                    if self.last_completed == yesterday:
-                        self.streak += 1
-                    elif self.last_completed != today:  
-                        self.streak = 1
-                else:
+            if self.last_completed:
+                yesterday = today - timezone.timedelta(days=1)
+                if self.last_completed == yesterday:
+                    self.streak += 1
+                elif self.last_completed != today:
                     self.streak = 1
-                
-                self.last_completed = today
-
-                if self.streak >= 7:
-                    experience += 10
-                if self.streak >= 30:
-                    experience += 20
-
-            profile = self.user.profile
-            profile.add_experience(experience)
-            profile.coins += int(experience / 4)  
-            profile.save()
+            else:
+                self.streak = 1
             
-            self.save()
-            return experience
-        return 0
+            self.last_completed = today
+
+            # Бонус за серию
+            if self.streak >= 7:
+                experience += 10
+            if self.streak >= 30:
+                experience += 20
+
+        # Начисляем награды пользователю
+        profile = self.user.profile
+        profile.add_experience(experience)
+        coins = int(experience / 4)
+        profile.coins += coins
+        profile.save()
+        
+        self.save()
+        return experience
     
     def get_difficulty_color(self):
         colors = {

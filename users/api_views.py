@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import  CharacterClass
+from .models import CharacterClass
 from .serializers import (
     CustomUserCreateSerializer,
     UserSearchSerializer,
@@ -19,10 +19,10 @@ User = get_user_model()
 
 class RegisterAPIView(CreateAPIView):
     """
-    POST /api/auth/users/
-    принимает: username, password, re_password, email, class_id
+    POST /api/users/register/
+    Регистрация нового пользователя
     """
-    serializer_class = CustomUserCreateSerializer  
+    serializer_class = CustomUserCreateSerializer
     queryset = User.objects.all()
     permission_classes = [permissions.AllowAny]
 
@@ -31,16 +31,17 @@ class RegisterAPIView(CreateAPIView):
         user = User.objects.get(username=response.data['username'])
         refresh = RefreshToken.for_user(user)
         return Response({
-            'user':     response.data,
-            'access':   str(refresh.access_token),
-            'refresh':  str(refresh),
+            'user': response.data,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user_id': user.id,
         }, status=status.HTTP_201_CREATED)
 
 
 class LoginAPIView(APIView):
     """
-    POST /api/auth/jwt/create/
-    принимает username + password, возвращает access/refresh
+    POST /api/users/login/
+    Авторизация пользователя
     """
     permission_classes = [permissions.AllowAny]
 
@@ -55,45 +56,10 @@ class LoginAPIView(APIView):
         return Response({
             'access': str(refresh.access_token),
             'refresh': str(refresh),
+            'user_id': user.id,
         })
 
 
-class UserProfileAPIView(RetrieveAPIView):
-    """
-    GET /api/profile/  — данные профиля (включая character_classes)
-    """
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self):
-        return self.request.user.profile
-
-
-class UserProfileByIdAPIView(RetrieveAPIView):
-    """
-    GET /api/users/profiles/{user_id}/ — получить профиль пользователя по id (публично доступно)
-    """
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.AllowAny]
-
-    def get_object(self):
-        user_id = self.kwargs.get('user_id')
-        from django.shortcuts import get_object_or_404
-        user = get_object_or_404(User, pk=user_id)
-        return user.profile
-
-
-class UpdateProfileAPIView(RetrieveUpdateAPIView):
-    """
-    GET /api/users/me/edit/ — получить профиль для редактирования
-    PATCH /api/users/me/edit/ — обновить остальные поля профиля
-    (но не классы, они через /character-classes/)
-    """
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self):
-        return self.request.user.profile
 
 
 class LogoutAPIView(APIView):
@@ -117,9 +83,57 @@ class LogoutAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class UserProfileAPIView(RetrieveAPIView):
+    """
+    GET /api/users/me/
+    Получить полный профиль текущего пользователя
+    """
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.profile
+
+
+class UserProfileByIdAPIView(RetrieveAPIView):
+    """
+    GET /api/users/profiles/{user_id}/ или /api/users/users/{user_id}/
+    Получить профиль пользователя по ID (публичный доступ)
+    """
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_object(self):
+        user_id = self.kwargs.get('user_id')
+        from django.shortcuts import get_object_or_404
+        user = get_object_or_404(User, pk=user_id)
+        return user.profile
+
+
+class UpdateProfileAPIView(UpdateAPIView):
+    """
+    PATCH /api/users/me/edit/
+    Обновить профиль текущего пользователя
+    """
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.profile
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+
 class UserSearchAPIView(ListAPIView):
     """
-    GET /api/users/search/?q=… — поиск по username/id
+    GET /api/users/search/?q=…
+    Поиск пользователей по username или ID
     """
     serializer_class = UserSearchSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -135,8 +149,8 @@ class UserSearchAPIView(ListAPIView):
 
 class CharacterClassListUpdateAPIView(APIView):
     """
-    GET  /api/character-classes/  — вернуть все классы + выбранные текущим пользователем
-    PATCH /api/character-classes/ — обновить выбор классов у request.user.profile
+    GET  /api/users/character-classes/ — вернуть все классы + выбранные текущим пользователем
+    PATCH /api/users/character-classes/ — обновить выбор классов
     """
     def get_permissions(self):
         if self.request.method == 'PATCH':
@@ -174,7 +188,7 @@ class CharacterClassListUpdateAPIView(APIView):
             )
 
         profile = request.user.profile
-        profile.character_classes.set(qs)   
+        profile.character_classes.set(qs)
         profile.save()
 
         return Response({
