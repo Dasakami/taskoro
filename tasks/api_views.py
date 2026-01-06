@@ -54,6 +54,12 @@ class BaseTaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user_classes = self.request.user.profile.character_classes.all()
         return BaseTask.objects.filter(character_class__in=user_classes)
+    
+    def get_serializer_context(self):
+        """Добавляем request в контекст для проверки статуса выполнения"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
@@ -101,7 +107,8 @@ class BaseTaskViewSet(viewsets.ModelViewSet):
         return Response({
             'detail': f'Задача "{base_task.title}" выполнена! Получено {experience} XP и {coins} монет.',
             'xp': experience,
-            'coins': coins
+            'coins': coins,
+            'completed': True
         })
 
 

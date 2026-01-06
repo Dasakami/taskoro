@@ -32,6 +32,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
         return user
 
+
 class CharacterClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = CharacterClass
@@ -45,17 +46,35 @@ class MedalSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+    user = serializers.StringRelatedField(read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
     medals = MedalSerializer(many=True, read_only=True)
     character_classes = CharacterClassSerializer(many=True, read_only=True)
+    avatar = serializers.ImageField(required=False)
 
     class Meta:
         model = Profile
         fields = [
-            'user', 'avatar', 'level', 'experience', 'experience_needed', 'streak',
-            'coins', 'gems', 'bio', 'title', 'theme_preference', 'character_classes',
-            'created_at', 'updated_at', 'medals'
+            'user', 'username', 'avatar', 'level', 'experience', 'experience_needed', 
+            'streak', 'coins', 'gems', 'bio', 'title', 'theme_preference', 
+            'character_classes', 'created_at', 'updated_at', 'medals'
         ]
+        read_only_fields = [
+            'user', 'username', 'level', 'experience', 'experience_needed', 
+            'streak', 'coins', 'gems', 'created_at', 'updated_at', 'medals'
+        ]
+    
+    def update(self, instance, validated_data):
+        # Обновляем только разрешенные поля
+        instance.bio = validated_data.get('bio', instance.bio)
+        instance.theme_preference = validated_data.get('theme_preference', instance.theme_preference)
+        
+        # Обработка аватара
+        if 'avatar' in validated_data:
+            instance.avatar = validated_data['avatar']
+        
+        instance.save()
+        return instance
 
 
 class UserSearchSerializer(serializers.ModelSerializer):

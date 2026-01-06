@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from .models import CharacterClass
 from .serializers import (
@@ -60,8 +61,6 @@ class LoginAPIView(APIView):
         })
 
 
-
-
 class LogoutAPIView(APIView):
     """Logout by blacklisting the provided refresh token.
 
@@ -75,7 +74,6 @@ class LogoutAPIView(APIView):
             return Response({'detail': 'Refresh token is required.'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             token = RefreshToken(refresh_token)
-            # blacklist the token (requires rest_framework_simplejwt.token_blacklist app)
             token.blacklist()
         except Exception:
             return Response({'detail': 'Invalid refresh token.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -113,20 +111,38 @@ class UserProfileByIdAPIView(RetrieveAPIView):
 class UpdateProfileAPIView(UpdateAPIView):
     """
     PATCH /api/users/me/edit/
-    Обновить профиль текущего пользователя
+    Обновить профиль текущего пользователя (включая username и avatar)
     """
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_object(self):
         return self.request.user.profile
     
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', True)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        profile = self.get_object()
+        user = profile.user
+        
+        # Обновляем username если он передан
+        if 'username' in request.data:
+            username = request.data.get('username')
+            if username and username != user.username:
+                # Проверяем уникальность username
+                if User.objects.filter(username=username).exclude(id=user.id).exists():
+                    return Response(
+                        {'error': 'Пользователь с таким именем уже существует'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                user.username = username
+                user.save()
+        
+        # Обновляем профиль (bio, avatar и т.д.)
+        serializer = self.get_serializer(profile, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+        
         return Response(serializer.data)
 
 
