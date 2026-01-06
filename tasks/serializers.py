@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from .models import Task, BaseTask, TaskCategory, BaseTaskCompletion
+from django.utils import timezone
 
 
 class TaskCategorySerializer(serializers.ModelSerializer):
-    tasks_count = serializers.IntegerField(read_only=True)
+    tasks_count = serializers.IntegerField(read_only=True, required=False)
 
     class Meta:
         model = TaskCategory
@@ -59,18 +60,33 @@ class TaskSerializer(serializers.ModelSerializer):
 class BaseTaskSerializer(serializers.ModelSerializer):
     character_class_name = serializers.CharField(source='character_class.name', read_only=True)
     coins = serializers.SerializerMethodField(read_only=True)
+    # Добавляем поле completed для Flutter
+    completed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = BaseTask
         fields = [
             'id', 'title', 'description', 'task_type', 'difficulty',
             'character_class', 'character_class_name', 'xp_reward',
-            'estimated_minutes', 'coins'
+            'estimated_minutes', 'coins', 'completed'
         ]
 
     def get_coins(self, obj):
         """Монеты = опыт / 4"""
         return int(obj.xp_reward / 4)
+
+    def get_completed(self, obj):
+        """Проверяем, выполнена ли задача сегодня текущим пользователем"""
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return False
+        
+        today = timezone.now().date()
+        return BaseTaskCompletion.objects.filter(
+            user=request.user,
+            base_task=obj,
+            completed_at__date=today
+        ).exists()
 
 
 class BaseTaskCompletionSerializer(serializers.ModelSerializer):

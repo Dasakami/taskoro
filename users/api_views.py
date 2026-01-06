@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import permissions, status
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CharacterClass
@@ -60,12 +61,10 @@ class LoginAPIView(APIView):
         })
 
 
-
-
 class LogoutAPIView(APIView):
-    """Logout by blacklisting the provided refresh token.
-
-    POST /api/users/logout/  { "refresh": "<token>" }
+    """
+    POST /api/users/logout/
+    Выход с блэклистингом refresh token
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -75,7 +74,6 @@ class LogoutAPIView(APIView):
             return Response({'detail': 'Refresh token is required.'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             token = RefreshToken(refresh_token)
-            # blacklist the token (requires rest_framework_simplejwt.token_blacklist app)
             token.blacklist()
         except Exception:
             return Response({'detail': 'Invalid refresh token.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -94,6 +92,11 @@ class UserProfileAPIView(RetrieveAPIView):
     def get_object(self):
         return self.request.user.profile
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
 
 class UserProfileByIdAPIView(RetrieveAPIView):
     """
@@ -109,6 +112,11 @@ class UserProfileByIdAPIView(RetrieveAPIView):
         user = get_object_or_404(User, pk=user_id)
         return user.profile
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
 
 class UpdateProfileAPIView(UpdateAPIView):
     """
@@ -117,16 +125,29 @@ class UpdateProfileAPIView(UpdateAPIView):
     """
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_object(self):
         return self.request.user.profile
-    
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', True)
         instance = self.get_object()
+        
+        # Обрабатываем avatar отдельно, если он есть в файлах
+        if 'avatar' in request.FILES:
+            instance.avatar = request.FILES['avatar']
+            instance.save()
+        
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+
         return Response(serializer.data)
 
 
@@ -145,6 +166,11 @@ class UserSearchAPIView(ListAPIView):
         if query.isdigit():
             return User.objects.filter(id=int(query))
         return User.objects.filter(username__icontains=query)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 
 class CharacterClassListUpdateAPIView(APIView):

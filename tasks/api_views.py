@@ -14,6 +14,11 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user).order_by('-created_at')
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -53,7 +58,19 @@ class BaseTaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user_classes = self.request.user.profile.character_classes.all()
-        return BaseTask.objects.filter(character_class__in=user_classes)
+        queryset = BaseTask.objects.filter(character_class__in=user_classes)
+        
+        # Фильтрация по типу задачи если указан параметр
+        task_type = self.request.query_params.get('task_type')
+        if task_type:
+            queryset = queryset.filter(task_type=task_type)
+        
+        return queryset.order_by('task_type', 'difficulty', 'title')
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
@@ -98,8 +115,12 @@ class BaseTaskViewSet(viewsets.ModelViewSet):
         profile.coins += coins
         profile.save()
 
+        # Возвращаем обновленные данные задачи
+        serializer = self.get_serializer(base_task)
+
         return Response({
             'detail': f'Задача "{base_task.title}" выполнена! Получено {experience} XP и {coins} монет.',
+            'task': serializer.data,
             'xp': experience,
             'coins': coins
         })
