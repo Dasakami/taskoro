@@ -33,7 +33,6 @@ def login_view(request):
     
     return render(request, 'users/login.html', {'form': form})
 
-
 def register(request):
     if request.user.is_authenticated:
         return redirect('main')
