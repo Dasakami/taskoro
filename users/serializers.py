@@ -8,25 +8,43 @@ User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    class_id = serializers.IntegerField(write_only=True)
+    class_id = serializers.IntegerField(write_only=True, required=True)
 
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = tuple(UserCreateSerializer.Meta.fields) + ('class_id',)
 
+    def validate_class_id(self, value):
+        """Проверяем что класс существует"""
+        try:
+            CharacterClass.objects.get(pk=value)
+        except CharacterClass.DoesNotExist:
+            raise serializers.ValidationError('Класс персонажа не найден')
+        return value
+
     def validate(self, attrs):
+        # Сохраняем class_id перед вызовом родительского validate
         self._class_id = attrs.pop('class_id', None)
+        
+        # Проверяем что class_id передан
+        if self._class_id is None:
+            raise serializers.ValidationError({'class_id': 'Выберите класс персонажа'})
+        
         return super().validate(attrs)
 
     def create(self, validated_data):
+        # Создаем пользователя через родительский метод
         user = super().create(validated_data)
 
-        profile, _ = Profile.objects.get_or_create(user=user)
+        # Создаем или получаем профиль
+        profile, created = Profile.objects.get_or_create(user=user)
 
-        if getattr(self, '_class_id', None) is not None:
+        # Добавляем класс персонажа
+        if hasattr(self, '_class_id') and self._class_id is not None:
             try:
-                cls = CharacterClass.objects.get(pk=self._class_id)
-                profile.character_classes.add(cls)
+                character_class = CharacterClass.objects.get(pk=self._class_id)
+                profile.character_classes.add(character_class)
+                profile.save()
             except CharacterClass.DoesNotExist:
                 pass
 
@@ -50,19 +68,26 @@ class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     medals = MedalSerializer(many=True, read_only=True)
     character_classes = CharacterClassSerializer(many=True, read_only=True)
-    avatar = serializers.ImageField(required=False)
+    avatar = serializers.ImageField(required=False, allow_null=True)
+    
+    # Добавляем id в serializer
+    id = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Profile
         fields = [
-            'user', 'username', 'avatar', 'level', 'experience', 'experience_needed', 
+            'id', 'user', 'username', 'avatar', 'level', 'experience', 'experience_needed', 
             'streak', 'coins', 'gems', 'bio', 'title', 'theme_preference', 
             'character_classes', 'created_at', 'updated_at', 'medals'
         ]
         read_only_fields = [
-            'user', 'username', 'level', 'experience', 'experience_needed', 
+            'id', 'user', 'username', 'level', 'experience', 'experience_needed', 
             'streak', 'coins', 'gems', 'created_at', 'updated_at', 'medals'
         ]
+    
+    def get_id(self, obj):
+        """Возвращаем ID пользователя, а не профиля"""
+        return obj.user.id
     
     def update(self, instance, validated_data):
         # Обновляем только разрешенные поля

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Task, BaseTask, TaskCategory, BaseTaskCompletion
+from django.utils import timezone as tz
 
 
 class TaskCategorySerializer(serializers.ModelSerializer):
@@ -20,6 +21,15 @@ class TaskSerializer(serializers.ModelSerializer):
     completed_at = serializers.DateTimeField(read_only=True)
     streak = serializers.IntegerField(read_only=True)
     last_completed = serializers.DateField(read_only=True)
+    
+    # Делаем поля опциональными
+    deadline = serializers.DateTimeField(required=False, allow_null=True)
+    target_date = serializers.DateField(required=False, allow_null=True)
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=TaskCategory.objects.all(),
+        required=False,
+        allow_null=True
+    )
 
     class Meta:
         model = Task
@@ -57,17 +67,24 @@ class TaskSerializer(serializers.ModelSerializer):
     
     def validate(self, data):
         """Валидация данных перед сохранением"""
-        # Для одноразовых задач может быть deadline
-        if data.get('task_type') == 'one_time' and 'deadline' in data:
-            if data['deadline'] and data['deadline'].tzinfo is None:
-                # Добавляем timezone если отсутствует
-                from django.utils import timezone
-                data['deadline'] = timezone.make_aware(data['deadline'])
+        # Убедимся что обязательные поля присутствуют
+        if not data.get('title'):
+            raise serializers.ValidationError({'title': 'Название задачи обязательно'})
         
-        # Для ежедневных целей может быть target_date
-        if data.get('task_type') == 'daily' and 'target_date' in data:
-            # target_date это date, не datetime
-            pass
+        # Для deadline добавляем timezone если отсутствует
+        if 'deadline' in data and data['deadline']:
+            if data['deadline'].tzinfo is None:
+                data['deadline'] = tz.make_aware(data['deadline'])
+        
+        # Устанавливаем значения по умолчанию если не переданы
+        if 'description' not in data:
+            data['description'] = ''
+        
+        if 'status' not in data:
+            data['status'] = 'not_started'
+        
+        if 'estimated_minutes' not in data:
+            data['estimated_minutes'] = 30
         
         return data
 
@@ -94,8 +111,7 @@ class BaseTaskSerializer(serializers.ModelSerializer):
         """Проверяем, выполнена ли задача сегодня текущим пользователем"""
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            from django.utils import timezone
-            today = timezone.now().date()
+            today = tz.now().date()
             return BaseTaskCompletion.objects.filter(
                 user=request.user,
                 base_task=obj,
