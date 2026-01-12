@@ -25,4 +25,4 @@ django-widget-tweaks
 daphne
 channels
 drf_yasg
-phonenumbers=8.13.52
+phonenumbers==8.13.52
