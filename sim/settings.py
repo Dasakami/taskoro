@@ -8,12 +8,12 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = os.getenv("DEBUG") == "True"
+SECRET_KEY = os.getenv('SECRET_KEY', default='secretik')
+DEBUG = os.getenv("DEBUG", default=True) == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(',')
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "taskoro-hwx6.onrender.com").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "https://taskoro-hwx6.onrender.com").split(",")
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "https://taskoro-hwx6.onrender.com").split(',')
 
 ROOT_URLCONF = 'sim.urls'
 
