@@ -6,7 +6,6 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('auth', '0016_remove_user_phone_number'),
         ('users', '0001_initial'),
     ]
 

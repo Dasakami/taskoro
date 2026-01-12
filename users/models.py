@@ -12,8 +12,6 @@ class User(AbstractUser):
         blank=True,
         unique=True
     )
-
-    # ЯВНО переопределяем, чтобы Django не тупил на деплое
     groups = models.ManyToManyField(
         Group,
         related_name="custom_user_set",
