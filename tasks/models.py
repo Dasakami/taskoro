@@ -101,8 +101,8 @@ class Task(models.Model):
     estimated_minutes = models.IntegerField(default=30, help_text="Estimated time to complete in minutes")
     actual_minutes = models.IntegerField(null=True, blank=True, help_text="Actual time taken to complete in minutes")
     
-    # Для привычек
-    frequency = models.CharField(max_length=20, default='daily', 
+    # Для привычек - ИСПРАВЛЕНО: добавлено blank=True
+    frequency = models.CharField(max_length=20, default='daily', blank=True,
                                 help_text="How often this habit should be performed")
     streak = models.IntegerField(default=0, help_text="Current streak for this habit")
     last_completed = models.DateField(null=True, blank=True)

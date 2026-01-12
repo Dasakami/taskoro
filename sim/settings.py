@@ -59,6 +59,20 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Для Gmail
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'ddansakami@gmail.com'  # Ваш email
+EMAIL_HOST_PASSWORD = 'h72ivh-19'  
+DEFAULT_FROM_EMAIL = 'Daskoro <ddasakami@gmail.com>'
+
+# Для разработки можно использовать консольный бэкенд:
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Frontend URL для ссылок в письмах (для мобилки используйте deep link)
+FRONTEND_URL = 'https://daskoro.site' 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

@@ -25,6 +25,7 @@ class TaskSerializer(serializers.ModelSerializer):
     # Делаем поля опциональными
     deadline = serializers.DateTimeField(required=False, allow_null=True)
     target_date = serializers.DateField(required=False, allow_null=True)
+    frequency = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     category = serializers.PrimaryKeyRelatedField(
         queryset=TaskCategory.objects.all(),
         required=False,
@@ -67,17 +68,31 @@ class TaskSerializer(serializers.ModelSerializer):
     
     def validate(self, data):
         """Валидация данных перед сохранением"""
-        # Убедимся что обязательные поля присутствуют
+        # Проверяем обязательные поля
         if not data.get('title'):
-            raise serializers.ValidationError({'title': 'Название задачи обязательно'})
+            raise serializers.ValidationError({
+                'title': 'Название задачи обязательно для заполнения'
+            })
+        
+        if not data.get('task_type'):
+            raise serializers.ValidationError({
+                'task_type': 'Необходимо выбрать тип задачи'
+            })
+        
+        # Проверяем валидность типа задачи
+        valid_types = ['one_time', 'habit', 'daily']
+        if data.get('task_type') not in valid_types:
+            raise serializers.ValidationError({
+                'task_type': f'Неверный тип задачи. Доступны: {", ".join(valid_types)}'
+            })
         
         # Для deadline добавляем timezone если отсутствует
         if 'deadline' in data and data['deadline']:
             if data['deadline'].tzinfo is None:
                 data['deadline'] = tz.make_aware(data['deadline'])
         
-        # Устанавливаем значения по умолчанию если не переданы
-        if 'description' not in data:
+        # Устанавливаем значения по умолчанию
+        if 'description' not in data or data['description'] is None:
             data['description'] = ''
         
         if 'status' not in data:
@@ -86,13 +101,35 @@ class TaskSerializer(serializers.ModelSerializer):
         if 'estimated_minutes' not in data:
             data['estimated_minutes'] = 30
         
+        # Frequency только для привычек
+        task_type = data.get('task_type')
+        if task_type == 'habit':
+            if 'frequency' not in data or not data.get('frequency'):
+                data['frequency'] = 'daily'
+        else:
+            # Для остальных типов задач frequency не нужен
+            data['frequency'] = ''
+        
+        # Валидация deadline только для одноразовых задач
+        if task_type == 'one_time' and 'deadline' in data and data['deadline']:
+            if data['deadline'] < tz.now():
+                raise serializers.ValidationError({
+                    'deadline': 'Дедлайн не может быть в прошлом'
+                })
+        
+        # Валидация target_date только для целей на день
+        if task_type == 'daily' and 'target_date' in data and data['target_date']:
+            if data['target_date'] < tz.now().date():
+                raise serializers.ValidationError({
+                    'target_date': 'Целевая дата не может быть в прошлом'
+                })
+        
         return data
 
 
 class BaseTaskSerializer(serializers.ModelSerializer):
     character_class_name = serializers.CharField(source='character_class.name', read_only=True)
     coins = serializers.SerializerMethodField(read_only=True)
-    # Добавляем поле completed для frontend
     completed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:

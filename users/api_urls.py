@@ -2,8 +2,7 @@
 from django.urls import path
 from .api_views import RegisterAPIView, LoginAPIView, UserProfileAPIView, UpdateProfileAPIView, UserSearchAPIView, \
     CharacterClassListUpdateAPIView
-from .api_views import UserProfileByIdAPIView
-from .api_views import LogoutAPIView
+from .api_views import UserProfileByIdAPIView, LogoutAPIView
 
 
 app_name = 'users'

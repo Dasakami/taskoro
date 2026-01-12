@@ -11,10 +11,6 @@ from .forms import CustomAuthenticationForm, CustomUserCreationForm, ProfileUpda
 from .models import Profile, CharacterClass
 from django.conf import settings
 User = settings.AUTH_USER_MODEL  
-
-
-
-
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('main')
@@ -192,4 +188,4 @@ def create_superuser(request):
         User.objects.create_superuser("Asakami", "dendasakami@gmail.com", "h72ivh-19")
         return HttpResponse("Суперпользователь создан!")
     else:
-        return HttpResponse("Суперпользователь уже существует.")
+        return HttpResponse("Суперпользователь уже существует.") 

@@ -42,6 +42,8 @@ class Profile(models.Model):
 
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     level = models.IntegerField(default=1)
+    email_verified = models.BooleanField(default=False)
+    email_notifications = models.BooleanField(default=True)
     experience = models.IntegerField(default=0)
     experience_needed = models.IntegerField(default=100)
     streak = models.IntegerField(default=0)
