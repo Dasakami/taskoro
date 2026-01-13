@@ -11,9 +11,9 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.getenv('SECRET_KEY', default='secretik')
 DEBUG = os.getenv("DEBUG", default=True) == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "taskoro-hwx6.onrender.com").split(",")
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "https://taskoro-hwx6.onrender.com").split(",")
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "https://taskoro-hwx6.onrender.com").split(',')
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "taskoro-hwx6.onrender.com,daskoro.site,www.daskoro,site").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "https://taskoro-hwx6.onrender.com,https://daskoro.site").split(",")
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "https://taskoro-hwx6.onrender.com,https://daskoro.site").split(',')
 
 ROOT_URLCONF = 'sim.urls'
 

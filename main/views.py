@@ -142,5 +142,7 @@ def create_roles(request):
     from django.core.management import call_command
     call_command('create_initial_shop_items')
     call_command('create_base_tasks')
-
     return JsonResponse({'status': 'success'})
+
+def delete_acc_page(request):
+    return render(request, 'main/delete.html')

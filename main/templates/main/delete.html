@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Удаление аккаунта</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #e74c3c;
+        }
+        p {
+            margin: 20px 0;
+            line-height: 1.5;
+        }
+        .btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Удаление аккаунта</h1>
+        <p>
+            Хотите удалить свой аккаунт? В этом приложении удаление напрямую не выполняется. 
+            Вы можете сделать это через официальные настройки приложения:
+        </p>
+        <p>
+            Откройте <strong>Настройки → Аккаунт → Удалить аккаунт</strong> и подтвердите действие там.
+        </p>
+        <button class="btn" onclick="alert('Для удаления аккаунта следуйте инструкциям в приложении.')">
+            Понятно
+        </button>
+    </div>
+</body>
+</html>
