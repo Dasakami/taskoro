@@ -1,17 +1,63 @@
 from django.db import models
-
-from django.contrib.auth.models import AbstractUser, Permission, Group
-from django.db import models
-from phonenumber_field.modelfields import PhoneNumberField
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.conf import settings
 
 
+# Кастомные модели для Group и Permission
+class CustomGroup(models.Model):
+    """Кастомная модель группы вместо auth.Group"""
+    name = models.CharField(max_length=150, unique=True)
+    
+    class Meta:
+        verbose_name = 'Группа'
+        verbose_name_plural = 'Группы'
+    
+    def __str__(self):
+        return self.name
+
+
+class CustomPermission(models.Model):
+    """Кастомная модель разрешения вместо auth.Permission"""
+    name = models.CharField(max_length=255)
+    codename = models.CharField(max_length=100)
+    
+    class Meta:
+        verbose_name = 'Разрешение'
+        verbose_name_plural = 'Разрешения'
+        unique_together = [['codename']]
+    
+    def __str__(self):
+        return self.name
+
+
 class User(AbstractUser):
-    phone_number = PhoneNumberField(
-        null=True,
+    """Кастомная модель пользователя без phone_number"""
+    
+    # Переопределяем связи с группами и разрешениями
+    groups = models.ManyToManyField(
+        CustomGroup,
+        verbose_name='группы',
         blank=True,
-        unique=True
+        help_text='Группы, к которым принадлежит пользователь.',
+        related_name="user_set",
+        related_query_name="user",
     )
+    user_permissions = models.ManyToManyField(
+        CustomPermission,
+        verbose_name='права пользователя',
+        blank=True,
+        help_text='Специфичные права этого пользователя.',
+        related_name="user_set",
+        related_query_name="user",
+    )
+    
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+    
+    def __str__(self):
+        return self.username
+
 
 class CharacterClass(models.Model):
     name = models.CharField(max_length=100)
@@ -26,6 +72,7 @@ class CharacterClass(models.Model):
         verbose_name_plural = "Классы"
         verbose_name = "Класс"
 
+
 class Profile(models.Model):
     THEME_CHOICES = [
         ('dark_blue', 'Dark Blue'),
@@ -34,10 +81,10 @@ class Profile(models.Model):
         ('neon_green', 'Neon Green'),
     ]
     
-
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='profile'
     )
 
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
@@ -60,6 +107,8 @@ class Profile(models.Model):
         return f'{self.user.username} Profile'
     
     def get_experience_percentage(self):
+        if self.experience_needed == 0:
+            return 0
         return (self.experience / self.experience_needed) * 100
     
     def add_experience(self, amount):
@@ -75,11 +124,8 @@ class Profile(models.Model):
         self.gems += 5  
         self.save()
         self.check_and_award_medals()
-
     
     def check_and_award_medals(self):
-        from .models import Medal  
-        
         if self.level >= 10:
             Medal.objects.get_or_create(
                 profile=self,
@@ -109,7 +155,7 @@ class Profile(models.Model):
             )
 
     def get_equipped_avatar_frame(self):
-        from shop.models import Purchase, ShopItem
+        from shop.models import Purchase
         try:
             purchase = Purchase.objects.get(
                 user=self.user, 
@@ -121,7 +167,7 @@ class Profile(models.Model):
             return None
     
     def get_equipped_title(self):
-        from shop.models import Purchase, ShopItem
+        from shop.models import Purchase
         try:
             purchase = Purchase.objects.get(
                 user=self.user, 
@@ -133,7 +179,7 @@ class Profile(models.Model):
             return None
     
     def get_equipped_background(self):
-        from shop.models import Purchase, ShopItem
+        from shop.models import Purchase
         try:
             purchase = Purchase.objects.get(
                 user=self.user, 
@@ -145,7 +191,7 @@ class Profile(models.Model):
             return None
     
     def get_equipped_effect(self):
-        from shop.models import Purchase, ShopItem
+        from shop.models import Purchase
         try:
             purchase = Purchase.objects.get(
                 user=self.user, 
@@ -163,6 +209,7 @@ class Profile(models.Model):
             expires_at__gt=models.functions.Now()
         )
 
+
 class Medal(models.Model):
     MEDAL_TYPES = [
         ('bronze', 'Bronze'),
@@ -178,6 +225,9 @@ class Medal(models.Model):
     medal_type = models.CharField(max_length=20, choices=MEDAL_TYPES)
     acquired_date = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        verbose_name = 'Медаль'
+        verbose_name_plural = 'Медали'
+    
     def __str__(self):
         return f'{self.name} ({self.medal_type})'
-
