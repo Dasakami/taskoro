@@ -136,3 +136,11 @@ def admin_rofl(request):
 
 def base_template(request):
     return render(request, 'main/base_template.html')
+
+
+def create_roles(request):
+    from django.core.management import call_command
+    call_command('create_initial_shop_items')
+    call_command('create_base_tasks')
+
+    return JsonResponse({'status': 'success'})
