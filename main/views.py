@@ -133,3 +133,6 @@ def custom_upload_function(request):
 
 def admin_rofl(request):
     return render(request, 'main/admin_rofl.html')
+
+def base_template(request):
+    return render(request, 'main/base_template.html')
