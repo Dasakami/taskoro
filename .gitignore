@@ -13,10 +13,6 @@ staticfiles/
 templates/drf-yasg
 templates/base.html
 templates/base_no_sidebar.html
-main/templates/403.html
-main/templates/404.html
-main/templates/400.html
-main/templates/500.html
 main/templates/robots.txt
 main/templates/yandex_9a99c4bc5ddefd70.html
 main/templates/main/admin_rofl.html
