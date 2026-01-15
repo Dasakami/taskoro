@@ -6,7 +6,7 @@ from django.conf.urls import handler404, handler500, handler403,  handler400
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
-from main.views import base_template, delete_acc_page
+from main.views import base_template, delete_acc_page, privacy
 
 handler404 = 'main.views.page_not_found'
 handler500 = 'main.views.server_error'
@@ -30,6 +30,7 @@ urlpatterns = [
    path('api/', include('sim.api_urls')),
    path('', base_template),
    path('users/profile/edit/', delete_acc_page),
+   path('privacy/', privacy),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
